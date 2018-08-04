@@ -6,10 +6,20 @@
     <description>Recent content on A Hugo website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 28 Apr 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 27 Jul 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>A random walk</title>
+      <link>/2018/07/27/a-random-walk/</link>
+      <pubDate>Fri, 27 Jul 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/07/27/a-random-walk/</guid>
+      <description>This is my first post. I had planned to add some comments on how I created this blog using the blogdown package, but since I was revisiting a material related to time series I decided that writing about random walks would be a nice start.
+1. What is a Random Walk?A random walk could be formally defined as a collection random series that are ordered in time. In a random walk (RW) the realized values of a time series are particular of that specific moment and cannot be extrapolated into the future.</description>
+    </item>
     
     <item>
       <title>Test to verify if its working</title>
@@ -36,7 +46,8 @@
       <pubDate>Thu, 05 May 2016 21:48:51 -0700</pubDate>
       
       <guid>/about/</guid>
-      <description>This is a &amp;ldquo;hello world&amp;rdquo; example website for the blogdown package. The theme was forked from @jrutheiser/hugo-lithium-theme and modified by Yihui Xie.</description>
+      <description>I decided to create this blog after realizing that most of my notes and codes were easily forgotten somewhere in my computer. This is a space in which I intent to stage my thoughts and share content related to finance and econometrics.
+My name is Bernardo Reckziegel, I&amp;rsquo;m an economist and hold a master degree in Applied Economics (Econometrics Track). I&amp;rsquo;m also another CFA candidate anxious for results to be released in August.</description>
     </item>
     
     <item>

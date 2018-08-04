@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Finance on A Hugo website</title>
+    <link>/tags/finance/</link>
+    <description>Recent content in Finance on A Hugo website</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 27 Jul 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/finance/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>A random walk</title>
+      <link>/2018/07/27/a-random-walk/</link>
+      <pubDate>Fri, 27 Jul 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/07/27/a-random-walk/</guid>
+      <description>This is my first post. I had planned to add some comments on how I created this blog using the blogdown package, but since I was revisiting a material related to time series I decided that writing about random walks would be a nice start.
+1. What is a Random Walk?A random walk could be formally defined as a collection random series that are ordered in time. In a random walk (RW) the realized values of a time series are particular of that specific moment and cannot be extrapolated into the future.</description>
+    </item>
+    
+  </channel>
+</rss>

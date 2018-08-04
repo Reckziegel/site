@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.39" />
+
+
+<title>A random walk - A Hugo website</title>
+<meta property="og:title" content="A random walk - A Hugo website">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/eu.jpg"
+         width="100"
+         height="100"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="https://github.com/Reckziegel">GitHub</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">5 min read</span>
+    
+
+    <h1 class="article-title">A random walk</h1>
+
+    
+    <span class="article-date">2018/07/27</span>
+    
+
+    <div class="article-content">
+      <p>This is my first post. I had planned to add some comments on how I created this blog using the <code>blogdown</code> package, but since I was revisiting a material related to time series I decided that writing about random walks would be a nice start.</p>
+<hr />
+<div id="what-is-a-random-walk" class="section level3">
+<h3>1. What is a Random Walk?</h3>
+<p>A random walk could be formally defined as a collection random series that are ordered in time. In a random walk (RW) the realized values of a time series are particular of that specific moment and cannot be extrapolated into the future. Needless to say, this imposes a lot of constraints to most traditional econometric models.</p>
+<p>One immediate implication is that if a particular series follows a random walk, no additional information can be learned from the data besides that we already have. This idea rests on the heart of the Efficient Market Hypothesis (EMH).</p>
+<p>A general description of a random walk process could be given by</p>
+<p><code>$$ y_t = \mu + y_{t - 1} + \epsilon_t $$</code></p>
+<p>The key insight is to manipulate this equation using the subscript <code>$t$</code> recursively. For example, in <code>$t - 1$</code> the above equation is</p>
+<p><code>$$ y_{t - 1} = \mu + y_{t - 2} + \epsilon_{t - 1} $$</code></p>
+<p>For <code>$t - 2$</code></p>
+<p><code>$$ y_{t - 2} = \mu + y_{t - 3} + \epsilon_{t - 2} $$</code></p>
+<p>For <code>$t - 3$</code></p>
+<p><code>$$ y_{t - 3} = \mu + y_{t - 4} + \epsilon_{t - 3} $$</code></p>
+<p>… and so on.</p>
+<p>Doing some algebra and substituting the second equation into the first we get</p>
+<p><code>$$ y_t = \mu + \underbrace{\mu + y_{t - 2} + \epsilon_{t - 1}}_{\text{Second Equation}} + \epsilon_t $$</code></p>
+<p><code>$$ y_t = 2 \mu + y_{t - 2} + \epsilon_t + \epsilon_{t - 1} $$</code></p>
+<p>Doing the same thing for <code>$y_{t - 2}$</code> and <code>$y_{t - 3}$</code> (that is, putting <code>$y_{t - 2}$</code> inside <code>$y_{t - 1}$</code> and <code>$y_{t - 3}$</code> inside <code>$y_{t - 2}$</code>) we finally reach the result</p>
+<p><code>$$ y_t = 4 \mu +y_{t - 4} + \epsilon_t + \epsilon_{t - 1} + \epsilon_{t - 2} + \epsilon_{t - 3} $$</code></p>
+<p>Hopefully you can clearly see a pattern. The <code>$\mu$</code>’s increase with <code>$t$</code> and the impact of <code>$\epsilon_t$</code> accumulates indefinitely from it’s starting point: <em>infinit memory</em>!</p>
+<p>All the equations above can be divided in two different parts: deterministic and stochastic.</p>
+<p><code>$$ y_t =  \underbrace{\mu t + y_{t0}}_{\text{Deterministic}} + \underbrace{\sum{\epsilon_t}}_{\text{Stochastic}} $$</code></p>
+<p>The normal distribution is not a requirement for <code>$\epsilon$</code>, but is often used as a natural outcome of the Central Limit Theorem (CLT).</p>
+<p>From the empirical point of view this model imposes a challenge for those that aim to consistently beat the market: the value of <code>$y_{t}$</code> at <code>$y_{t + 1}$</code> is simply <code>$y_{t}$</code>.</p>
+</div>
+<div id="create-a-function-that-generates-a-single-random-walk" class="section level3">
+<h3>2. Create a function that generates a single random walk</h3>
+<p>The only parameters in the arithmetic random walk that need to be estimated are <code>$\mu$</code> and <code>$\sigma$</code>. The function bellow takes care of that thought the <code>mu</code> and <code>sd</code> arguments.</p>
+<pre class="r"><code>suppressPackageStartupMessages(library(tidyverse))
+
+arithmetic_random_walk &lt;- function(
+    
+    # function arguments
+    initial_price = 100, 
+    n             = 1000, 
+    mu            = 0.0005, 
+    sd            = 0.012, 
+    seed          = FALSE
+
+) {
+    
+    if (seed) set.seed(seed)
+    
+    random_walk &lt;- 
+        (initial_price + (mu * 100 * 1:n)) +    # deterministic
+        cumsum(rnorm(n = n, sd = 0.0127 * 100)) # stochastic 
+    
+    random_walk 
+    
+}</code></pre>
+<p>The value of <code>mu</code> and <code>sd</code> were carefully chosen to emulate the long-term returns and volatility of S&amp;P 500, around 12% and 20%, respectively.</p>
+<p>Fair enough. Now we have a formula to generate one process. The next step is generalize this procedure to as many replicates we want.</p>
+</div>
+<div id="many-paths" class="section level3">
+<h3>3. Many paths</h3>
+<p>First a digression: one of the most important features of the <code>R</code> Programming Language is that each object that you create is a function. That means that, if you can use the plus sign (a function) to do <code>2 + 2</code>, you can also use your custom functions inside other functions as well. This is the key to leverage your skills in this language.</p>
+<p>In the example bellow, the function <code>multivariate_arithmetic_random_walk()</code> contains the same arguments of <code>arithmetic_random_walk()</code> but it’s not constrained to execute only one path. The number of simulation can be controlled by the <code>n_simulations</code> argument.</p>
+<pre class="r"><code>many_arithmetic_random_walk &lt;- function(n_simulations = 10, ...) {
+    
+    # tidy eval 
+    dots_expr &lt;- dplyr::quos(...)
+    
+    n_simulations %&gt;%
+        rerun(arithmetic_random_walk(!!! dots_expr)) %&gt;% 
+        as_tibble(validate = FALSE) %&gt;% 
+        `colnames&lt;-`(., str_c(&#39;rw_&#39;, 1:n_simulations)) %&gt;% 
+        mutate(index = 1:nrow(.)) %&gt;%
+        select(index, everything()) %&gt;% 
+        gather(key, value, -index) %&gt;% 
+        mutate_if(is.character, as_factor)
+    
+}</code></pre>
+<p>Note how the <code>quos()</code> function (from the <code>dplyr</code> package) its used to do the tidy-eval <em>black-magic</em>: any arguments that you may want to change in <code>arithmetic_random_walk()</code> is passed to <code>...</code> and lazily evaluated through <code>!!!</code> (the <em>bang-bang-bang</em> operator).</p>
+<hr />
+<p>If you are curious about tidy-eval framework check this <a href="https://www.rstudio.com/resources/webinars/tidy-eval/">webinar</a>.</p>
+<hr />
+<p>An interesting function that was used is <code>rerun()</code> from <code>purrr</code>. Basically, this is a functional that runs a script as many times you want. It is a easy way to get your code vectorized and to avoid the complexity of <code>for</code> loops.</p>
+<p><code>mutate_if()</code> transforms the character variables in factors, so them can be easily used in conjunction with <code>ggplot2</code>. The output contains all the simulated paths in a nice tidy <code>tibble</code> format.</p>
+</div>
+<div id="plot-the-results" class="section level3">
+<h3>4. Plot the results</h3>
+<p>Now let’s plot the results. The first step is to generate the paths. In second place, let’s use <code>group_by()</code> to calculate the average simulated price at each point in time. The last step is just to modify the <code>ggplot2</code> layers according to our needs.</p>
+<pre class="r"><code># generate and calculate the mean price in each point in time
+mean_path &lt;- 
+    many_arithmetic_random_walk(n_simulations = 50) %&gt;% 
+    group_by(index) %&gt;%
+    mutate(mean = mean(value)) %&gt;% 
+    ungroup()
+
+# plot
+mean_path %&gt;% 
+    ggplot(aes(x = index, y = value, fill = key, alpha = 0.75)) + 
+    geom_line(show.legend = FALSE, color = &#39;grey&#39;) + 
+    labs(
+        title    = &#39;Arithmetic Random Walk&#39;, 
+        y        = &#39;Prices&#39;, 
+        x        = &#39;Time Index&#39;
+    ) + 
+    scale_y_continuous(labels = scales::dollar) +
+    geom_line(aes(y       = mean),
+              show.legend = FALSE,
+              color       = &#39;steelblue&#39;,
+              size        = 1
+    ) +
+    theme_classic()</code></pre>
+<p><img src="/post/2018-07-27-on-random-walks_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+
