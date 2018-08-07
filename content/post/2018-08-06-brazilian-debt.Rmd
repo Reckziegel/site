@@ -20,7 +20,7 @@ The IMF page on Quandl is https://www.quandl.com/data/ODA-IMF-Cross-Country-Macr
 
 But before doing that, let's first do a quick web scrapping on Wikipedia to extract the names of all Latin American countries.
 
-### Required Packages
+## Required Packages
 
 ```{r, message=FALSE, error=FALSE, warning=FALSE}
 
@@ -35,7 +35,7 @@ library(ggthemes)
 ```
 
 
-### Web Scrapping: Latin America countries.
+## Web Scrapping: Latin America countries.
 
 ```{r}
 
@@ -79,7 +79,7 @@ Much better this way!
 
 Now we are ready for the function `get_imf_from_quandl()` that uses the format `ODA/{COUNTRY}_{INDICATOR}` and ISO codes to match a desired combination of countries and indicators.
 
-### get_imf_from_quandl()
+## get_imf_from_quandl()
 
 
 ```{r}
@@ -157,7 +157,7 @@ It's possible to summarise it's main features in the following way:
 5. **Data wrangling**: This is divided in three. The first part tries to download data for all the countries we ask for (if no country is provided it will download the `indicator` for the whole data set). The second, excludes missing data, if there are any. The third, coerce the series in a time aware `tibble` in a nice tidy format.
 
 
-### Application
+## Application
 
 Now our custom function if ready, let's download some data to show the main point of the post: Brazilian debt is incredibly high!
 
