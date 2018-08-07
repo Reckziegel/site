@@ -25,7 +25,9 @@ But before doing that, let's first do a quick web scrapping on Wikipedia to extr
 ```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 library(tidyverse)
+library(tidyquant)
 library(tibbletime)
+library(timetk)
 library(Quandl)
 library(rvest)
 library(ggthemes)
@@ -84,12 +86,10 @@ Now we are ready for the function `get_imf_from_quandl()` that uses the format `
 
 get_imf_from_quandl <- function(countries, indicator, ...) {
     
-    
     # 1. tidy eval 
     countries_expr <- quos(countries)
     indicator_expr <- enquo(indicator)
     dots_expr      <- quos(...)
-    
     
     # 2. list of countries covered by IMF 
     iso_codes_by_country <- 
@@ -105,7 +105,6 @@ get_imf_from_quandl <- function(countries, indicator, ...) {
         ) %>% 
         mutate(code = str_c('ODA/', iso, '_', !! indicator_expr))
     
-    
     # 3. Must the data be filtered by country? If yes, do this:
     if (!is_null(countries)) {
         
@@ -115,10 +114,8 @@ get_imf_from_quandl <- function(countries, indicator, ...) {
         
     }
     
-    
     # 4. error handler
     possible_quandl <- possibly(Quandl, NA)
-    
     
     # 5. data wrangling
     iso_codes_by_country %>% 
@@ -147,7 +144,7 @@ get_imf_from_quandl <- function(countries, indicator, ...) {
 ```
 
 
-It's possible to summaries it's main features in the following way:
+It's possible to summarise it's main features in the following way:
 
 1. **Tidy evaluation**: the function accepts any arguments that can be used in the `Quandl()` function. This includes the arguments `type`, `transform`, `collapse`, `order`, `start_date`, ...
 
@@ -164,41 +161,41 @@ It's possible to summaries it's main features in the following way:
 
 Now our custom function if ready, let's download some data to show the main point of the post: Brazilian debt is incredibly high!
 
-
-
-```{r eval=FALSE}
-
+```{r, cache=TRUE} 
+ 
 start_time <- Sys.time()
 
 debt <- get_imf_from_quandl(
-    indicator  = 'GGXWDG_NGDP',
-    countries  = latin_america,
-    order      = 'asc', 
-    start_date = '2000-01-01', 
-    collapse   = 'annual'
-    )
+     indicator  = 'GGXWDG_NGDP',
+     countries  = latin_america,
+     order      = 'asc',
+     start_date = '2000-01-01',
+     collapse   = 'annual'
+     )
 
-# for latter plot
-debt_brazil <- 
-    debt %>% 
-    filter(country == 'Brazil')
+ # for latter plot
+debt_brazil <- debt %>%
+     filter(country == 'Brazil')
 
 end_time <- Sys.time()
-(end_time - start_time)
-
-```
-
-```{r}
 
 (end_time - start_time)
 
 ```
 
+Not too slow. The output already classify the `country` column as a `factor` so can fit more easily with `ggplot2`. 
 
-Once that is done 
+```{r cache=TRUE}
+
+debt
+
+```
 
 
-```{r, message=FALSE, warning=FALSE}
+Once the hard part is done, let's finish with a nice The Economist theme.
+
+
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
 
 debt %>% 
     ggplot(aes(x = date, y = value, fill = country)) + 
@@ -211,7 +208,7 @@ debt %>%
         geom  = "text",
         x     = ymd("2021-05-01"),
         y     = 95,
-        color = palette_light()[[1]],
+        color = '#2c3e50',
         label = "Forecasts") +
     geom_line(show.legend = FALSE, alpha = 1/10) +
     geom_line(
