@@ -166,7 +166,7 @@ Now our custom function if ready, let's download some data to show the main poin
 
 
 
-```{r}
+```{r eval=FALSE}
 
 start_time <- Sys.time()
 
@@ -188,10 +188,17 @@ end_time <- Sys.time()
 
 ```
 
+```{r}
+
+(end_time - start_time)
+
+```
+
 
 Once that is done 
 
-```{r}
+
+```{r, message=FALSE, warning=FALSE}
 
 debt %>% 
     ggplot(aes(x = date, y = value, fill = country)) + 
