@@ -6,18 +6,19 @@
     <description>Recent content in R on A Hugo website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 28 Apr 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 06 Aug 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>Test to verify if its working</title>
-      <link>/2018/04/28/test-to-verify-if-its-working/</link>
-      <pubDate>Sat, 28 Apr 2018 00:00:00 +0000</pubDate>
+      <title>The Brazilian Debt</title>
+      <link>/2018/08/06/brazilian-debt/</link>
+      <pubDate>Mon, 06 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/04/28/test-to-verify-if-its-working/</guid>
-      <description>This is just a test.</description>
+      <guid>/2018/08/06/brazilian-debt/</guid>
+      <description>In this post I will show how you can recursevly download macroeconomic data covered by the IMF using the Quandl package. To motivate the application, the Brazilian public debt will be used as a variable of interest.
+If you are familiar with Quandl you probably heard about the Quandl.search() function. What it does is try to look for dataset that matches a specific pattern that you have interest for, like “oil”, or “gdp”, for example.</description>
     </item>
     
     <item>

@@ -1,0 +1,229 @@
+---
+title: The Brazilian Debt
+author: Bernardo Reckziegel
+date: '2018-08-06'
+slug: brazilian-debt
+categories:
+  - R
+tags:
+  - time series
+  - public sector
+---
+
+In this post I will show how you can recursively download macroeconomic data covered by the IMF using the `Quandl` package. To motivate the application, the Brazilian public debt will be used as a variable of interest. 
+
+***
+
+If you are familiar with `Quandl` you probably heard about the `Quandl.search()` function. What it does is try to look for database that matches a specific pattern that you may have interest in, like "oil", or "GDP", for example. Personally, I don't like it, because the R console  it's not suitable for printing the description of large amounts of data. Hence, I've been working on a group of functions that can be used more easily if the intention is to consistently download large chunks of data, for latter manipulation. 
+
+The IMF page on Quandl is https://www.quandl.com/data/ODA-IMF-Cross-Country-Macroeconomic-Statistics. According to the information provided, any data that you may want to download has to obey the following format `ODA/{COUNTRY}_{INDICATOR}`. At the same page, they provide a list of countries covered and their respective ISO codes (see [here](https://s3.amazonaws.com/quandl-production-static/API+Descriptions/WHO/ccodes.txt)). Once we have mapped the country ISO code and the respective indicator, the whole data set can be downloaded using the technique described in "Many Models" of [R for Data Science](http://r4ds.had.co.nz/many-models.html).
+
+But before doing that, let's first do a quick web scrapping on Wikipedia to extract the names of all Latin American countries.
+
+### Required Packages
+
+```{r, message=FALSE, error=FALSE, warning=FALSE}
+
+library(tidyverse)
+library(tibbletime)
+library(Quandl)
+library(rvest)
+library(ggthemes)
+
+```
+
+
+### Web Scrapping: Latin America countries.
+
+```{r}
+
+latin_america <- 
+    read_html(
+    "https://en.wikipedia.org/wiki/List_of_Latin_American_countries_by_population"
+    ) %>%
+    html_node("table") %>%
+    html_table(fill = TRUE)
+
+latin_america %>% glimpse()
+
+```
+
+
+As a rule of thumb, Wikipedia is a very easy website to extract data of. Not always, but most of the time, the *"table"* argument (on `html_node`) will take care of the hard work for us. When it's not the case, you will have to continue working to clean the data. Fortunately, the `latin_america` table is well behaved as can be seen above. But there are too many features, and some have awkward names. 
+
+The code bellow takes care of that by selecting only the country names, which is what we will need afterwards.
+
+
+```{r warning=FALSE}
+
+latin_america <- latin_america %>% 
+    select(2) %>% 
+    `colnames<-`('LATAM') %>% 
+    filter(LATAM != 'Total') %>%
+    separate(
+        col  = LATAM, 
+        sep  = '[(.)]', 
+        into = c('LATAM', 'will_be_deleted')
+    ) %>% 
+    select(LATAM) %>%
+    flatten_chr() %>% 
+    str_trim(side = 'both')
+
+latin_america
+
+```
+
+Much better this way! 
+
+Now we are ready for the function `get_imf_from_quandl()` that uses the format `ODA/{COUNTRY}_{INDICATOR}` and ISO codes to match a desired combination of countries and indicators.
+
+### get_imf_from_quandl()
+
+
+```{r}
+
+get_imf_from_quandl <- function(countries, indicator, ...) {
+    
+    
+    # 1. tidy eval 
+    countries_expr <- quos(countries)
+    indicator_expr <- enquo(indicator)
+    dots_expr      <- quos(...)
+    
+    
+    # 2. list of countries covered by IMF 
+    iso_codes_by_country <- 
+        read_delim(
+            'https://s3.amazonaws.com/quandl-production-static/API+Descriptions/WHO/ccodes.txt',
+            delim         = "|", 
+            escape_double = FALSE, 
+            col_names     = c('iso', 'country'),
+            col_types     = list(
+                col_factor(levels = NULL), 
+                col_factor(levels = NULL)),
+            trim_ws       = TRUE
+        ) %>% 
+        mutate(code = str_c('ODA/', iso, '_', !! indicator_expr))
+    
+    
+    # 3. Must the data be filtered by country? If yes, do this:
+    if (!is_null(countries)) {
+        
+        iso_codes_by_country <- 
+            iso_codes_by_country %>%  
+            filter(country %in% (!!! countries_expr))
+        
+    }
+    
+    
+    # 4. error handler
+    possible_quandl <- possibly(Quandl, NA)
+    
+    
+    # 5. data wrangling
+    iso_codes_by_country %>% 
+        nest(code) %>%  
+        
+        # 5.1. map the selected code thought the selected countries
+        mutate(download = map(
+            .x = data, 
+            .f = ~ possible_quandl(.$code, !!! dots_expr))) %>% 
+        
+        # 5.2. exclude the countries in which the indicator is not avaiable 
+        mutate(verify_download = map(
+            .x = .$download, 
+            .f = ~ !is.logical(.))) %>% 
+        filter(verify_download == TRUE) %>% 
+        
+        # 5.3. unnest and tidy
+        unnest(.$download) %>% 
+        as_tbl_time(index = Date) %>% 
+        rename(date = Date, value = Value) %>% 
+        select(date, value, country)
+    
+}
+
+
+```
+
+
+It's possible to summaries it's main features in the following way:
+
+1. **Tidy evaluation**: the function accepts any arguments that can be used in the `Quandl()` function. This includes the arguments `type`, `transform`, `collapse`, `order`, `start_date`, ...
+
+2. **List of countries covered by IMF**: this part of the code contains the countries provided by the IMF. The `mutate()` function in simply expand the ``ODA/{COUNTRY}_{INDICATOR}` for each country in the data set.
+
+3. **Must the data be filtered by country?**: If you supply a vector of countries as an argument for `countries` the function takes that into consideration and will download only the data you supply. 
+
+4. **Error handler**: the `purrr` package, part of the `tidyverse`, offers interesting functions for manipulating data more safely. One of those function is `possibly()`, that always execute the function we ask for. If an error occurs, a custom message is printed. I chose `NA`.
+
+5. **Data wrangling**: This is divided in three. The first part tries to download data for all the countries we ask for (if no country is provided it will download the `indicator` for the whole data set). The second, excludes missing data, if there are any. The third, coerce the series in a time aware `tibble` in a nice tidy format.
+
+
+### Application
+
+Now our custom function if ready, let's download some data to show the main point of the post: Brazilian debt is incredibly high!
+
+
+
+```{r}
+
+start_time <- Sys.time()
+
+debt <- get_imf_from_quandl(
+    indicator  = 'GGXWDG_NGDP',
+    countries  = latin_america,
+    order      = 'asc', 
+    start_date = '2000-01-01', 
+    collapse   = 'annual'
+    )
+
+# for latter plot
+debt_brazil <- 
+    debt %>% 
+    filter(country == 'Brazil')
+
+end_time <- Sys.time()
+(end_time - start_time)
+
+```
+
+
+Once that is done 
+
+```{r}
+
+debt %>% 
+    ggplot(aes(x = date, y = value, fill = country)) + 
+    geom_rect(
+        xmin = as.numeric(ymd("2018-08-01")),
+        xmax = as.numeric(ymd("2025-01-01")),
+        ymin = 0, ymax = 100,
+        fill = 'grey', alpha = 0.05) + 
+    annotate(
+        geom  = "text",
+        x     = ymd("2021-05-01"),
+        y     = 95,
+        color = palette_light()[[1]],
+        label = "Forecasts") +
+    geom_line(show.legend = FALSE, alpha = 1/10) +
+    geom_line(
+        data        = debt_brazil, 
+        mapping     =  aes(x = date, y = value),
+        color       = 'royalblue4',
+        size        = 1,
+        linetype    = 1,
+        show.legend = FALSE) +
+    labs(
+        title    = "General Government Gross Debt", 
+        subtitle = "Latin American Countries in the IMF Database",
+        y        = "% of GDP", 
+        x        = "") + 
+    ylim(0, 100) + 
+    ggthemes::theme_economist()
+
+```
+
+Can you guess which is country is highlighted?
+
+

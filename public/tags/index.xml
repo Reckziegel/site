@@ -30,9 +30,18 @@
     </item>
     
     <item>
+      <title>Public Sector</title>
+      <link>/tags/public-sector/</link>
+      <pubDate>Mon, 06 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/public-sector/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>R Markdown</title>
       <link>/tags/r-markdown/</link>
-      <pubDate>Sat, 28 Apr 2018 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 23 Jul 2015 21:13:14 -0500</pubDate>
       
       <guid>/tags/r-markdown/</guid>
       <description></description>
@@ -59,7 +68,7 @@
     <item>
       <title>Time Series</title>
       <link>/tags/time-series/</link>
-      <pubDate>Fri, 27 Jul 2018 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 06 Aug 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/time-series/</guid>
       <description></description>

@@ -6,10 +6,20 @@
     <description>Recent content on A Hugo website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 27 Jul 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 06 Aug 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>The Brazilian Debt</title>
+      <link>/2018/08/06/brazilian-debt/</link>
+      <pubDate>Mon, 06 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/08/06/brazilian-debt/</guid>
+      <description>In this post I will show how you can recursevly download macroeconomic data covered by the IMF using the Quandl package. To motivate the application, the Brazilian public debt will be used as a variable of interest.
+If you are familiar with Quandl you probably heard about the Quandl.search() function. What it does is try to look for dataset that matches a specific pattern that you have interest for, like “oil”, or “gdp”, for example.</description>
+    </item>
     
     <item>
       <title>A random walk</title>
@@ -19,15 +29,6 @@
       <guid>/2018/07/27/a-random-walk/</guid>
       <description>This is my first post. I had planned to add some comments on how I created this blog using the blogdown package, but since I was revisiting a material related to time series I decided that writing about random walks would be a nice start.
 1. What is a Random Walk?A random walk could be formally defined as a collection random series that are ordered in time. In a random walk (RW) the realized values of a time series are particular of that specific moment and cannot be extrapolated into the future.</description>
-    </item>
-    
-    <item>
-      <title>Test to verify if its working</title>
-      <link>/2018/04/28/test-to-verify-if-its-working/</link>
-      <pubDate>Sat, 28 Apr 2018 00:00:00 +0000</pubDate>
-      
-      <guid>/2018/04/28/test-to-verify-if-its-working/</guid>
-      <description>This is just a test.</description>
     </item>
     
     <item>
