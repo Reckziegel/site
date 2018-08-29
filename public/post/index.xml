@@ -6,10 +6,19 @@
     <description>Recent content in Posts on A Hugo website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 06 Aug 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 27 Aug 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>How many stocks in the S&amp;P 500 do follow a random-walk?</title>
+      <link>/2018/08/27/how-many-stocks-in-the-s-p-500-do-follow-a-random-walk/</link>
+      <pubDate>Mon, 27 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/08/27/how-many-stocks-in-the-s-p-500-do-follow-a-random-walk/</guid>
+      <description>There has been a huge growth of machine learning models’ in finance. The underlying idea behind those models is that a if the data is identically and independent distributed (i.i.d.) the statistician can use the law of large numbers (LLN) and the Glivenko-Canteli theorem to uncover the asymptotic behavior of the “true” distribution, which is, in fact, unknown. As the number of observations increase, closer and closer we get to the true values.</description>
+    </item>
     
     <item>
       <title>The Brazilian Debt</title>

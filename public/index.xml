@@ -6,10 +6,19 @@
     <description>Recent content on A Hugo website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 06 Aug 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 27 Aug 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>How many stocks in the S&amp;P 500 do follow a random-walk?</title>
+      <link>/2018/08/27/how-many-stocks-in-the-s-p-500-do-follow-a-random-walk/</link>
+      <pubDate>Mon, 27 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/08/27/how-many-stocks-in-the-s-p-500-do-follow-a-random-walk/</guid>
+      <description>There has been a huge growth of machine learning models’ in finance. The underlying idea behind those models is that a if the data is identically and independent distributed (i.i.d.) the statistician can use the law of large numbers (LLN) and the Glivenko-Canteli theorem to uncover the asymptotic behavior of the “true” distribution, which is, in fact, unknown. As the number of observations increase, closer and closer we get to the true values.</description>
+    </item>
     
     <item>
       <title>The Brazilian Debt</title>
@@ -47,8 +56,9 @@ If you are familiar with Quandl you probably heard about the Quandl.search() fun
       <pubDate>Thu, 05 May 2016 21:48:51 -0700</pubDate>
       
       <guid>/about/</guid>
-      <description>I decided to create this blog after realizing that most of my notes and codes were easily forgotten somewhere in my computer. This is a space in which I intent to stage my thoughts and share content related to finance and econometrics.
-My name is Bernardo Reckziegel, I&amp;rsquo;m an economist and hold a master degree in Applied Economics (Econometrics Track). I&amp;rsquo;m also another CFA candidate anxious for results to be released in August.</description>
+      <description>I&amp;rsquo;m an economist and I hold a master degree in Applied Economics (Econometrics Track). I&amp;rsquo;m also a candidate for the level III CFA exam on jun/2019.
+I decided to create this blog after realizing that most of my notes and codes were easily forgotten somewhere in my computer. This is a space in which I intent to stage my thoughts and share content related to finance and econometrics.
+If you would like to see me commenting on a specific subject, please send an email to bernardo_cse@hotmail.</description>
     </item>
     
     <item>

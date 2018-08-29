@@ -1,0 +1,360 @@
+---
+title: How many stocks in the S&P 500 do follow a random-walk?
+author: Bernardo Reckziegel
+date: '2018-08-27'
+slug: how-many-stocks-in-the-s-p-500-do-follow-a-random-walk
+categories:
+  - R
+  - finance
+tags:
+  - manymodels
+---
+
+
+
+<p>There has been a huge growth of machine learning models’ in finance. The underlying idea behind those models is that a if the data is identically and independent distributed (i.i.d.) the statistician can use the law of large numbers (LLN) and the <a href="https://en.wikipedia.org/wiki/Glivenko–Cantelli_theorem">Glivenko-Canteli theorem</a> to uncover the asymptotic behavior of the “true” distribution, which is, in fact, unknown. As the number of observations increase, closer and closer we get to the true values.</p>
+<p>At the same time, forecasters have been spending, during the last 30 years, a huge amount of time trying to detect hidden patterns in the stock market, most often than not, with a questionable rate of success. As the <a href="https://www.nobelprize.org/prizes/economics/2003/granger/facts/">Nobel Prize Winner</a>, Clive Granger <a href="http://www.forecastingprinciples.com/paperpdf/Granger-stockmarket.pdf">states</a>, at some sense, the market must follow a random walk, otherwise the it would be an unlimited source of money machine. So, two questions emerge: how many stocks of the S&amp;P 500 show any evidence of following a random-walk? And what implications the results impose for machine learning models in finance?</p>
+<p>Those are the issues I will try to address in this post.</p>
+<div id="load-libraries" class="section level2">
+<h2>Load Libraries</h2>
+<pre class="r"><code>library(tidyquant)
+library(sweep)
+library(timetk)
+library(tibbletime)
+library(forecast)
+library(rvest)
+library(Quandl)</code></pre>
+</div>
+<div id="download-the-sp-500-tickers" class="section level2">
+<h2>Download the S&amp;P 500 tickers</h2>
+<p>After loading the required packages, it’s necessary to download the tickers for all the S&amp;P 500 stocks. These can easily be done by web-scraping the Wikipedia <a href="https://en.wikipedia.org/wiki/List_of_S%26P_500_companies">webpage</a>.</p>
+<pre class="r"><code>get_sp500_tickers &lt;- function() {
+    
+    raw_get &lt;- function() {
+        
+        xml2::read_html(&#39;https://en.wikipedia.org/wiki/List_of_S%26P_500_companies&#39;) %&gt;% 
+            rvest::html_node(&#39;table.wikitable&#39;) %&gt;% 
+            rvest::html_table() %&gt;% 
+            dplyr::as_tibble()
+        
+    }
+    
+    possible_get &lt;- purrr::possibly(
+        .f        = raw_get, 
+        otherwise = NA
+    )
+    
+    possible_get() %&gt;% 
+        dplyr::rename(
+            ticker_symbol     = &#39;Ticker symbol&#39;, 
+            security          = &#39;Security&#39;,
+            sec_filings       = &#39;SEC filings&#39;, 
+            gics_sector       = &#39;GICS Sector&#39;,
+            gics_sub_industry = &#39;GICS Sub Industry&#39;
+        )
+    
+}</code></pre>
+<p>I’ve used a function inside another function because I believe that this is one of the biggest assets of working with <code>R</code>: great chunks of code can be decomposed in small pieces and then grouped together latter on to solve the bigger picture. Specially important is the use of <code>possibly()</code> that “guarantees” that the main script will run. If any error occurs, we get <code>NA</code> as an answer, but the code still runs.</p>
+<pre class="r"><code>tickers &lt;- get_sp500_tickers()
+
+tickers</code></pre>
+<pre class="r"><code>load(&quot;C:/Users/Berna/Desktop/R Programming/site/rw_script_dataset.Rdata&quot;)
+
+tickers</code></pre>
+<pre><code>## # A tibble: 505 x 9
+##    ticker_symbol security sec_filings gics_sector gics_sub_indust~ Location
+##    &lt;chr&gt;         &lt;chr&gt;    &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt;            &lt;chr&gt;   
+##  1 MMM           3M Comp~ reports     Industrials Industrial Cong~ St. Pau~
+##  2 ABT           Abbott ~ reports     Health Care Health Care Equ~ North C~
+##  3 ABBV          AbbVie ~ reports     Health Care Pharmaceuticals  North C~
+##  4 ABMD          ABIOMED~ reports     Health Care Health Care Equ~ Danvers~
+##  5 ACN           Accentu~ reports     Informatio~ IT Consulting &amp;~ Dublin,~
+##  6 ATVI          Activis~ reports     Informatio~ Home Entertainm~ Santa M~
+##  7 ADBE          Adobe S~ reports     Informatio~ Application Sof~ San Jos~
+##  8 AMD           Advance~ reports     Informatio~ Semiconductors   Sunnyva~
+##  9 AAP           Advance~ reports     Consumer D~ Automotive Reta~ Roanoke~
+## 10 AES           AES Corp reports     Utilities   Independent Pow~ Arlingt~
+## # ... with 495 more rows, and 3 more variables: `Date first
+## #   added[3][4]` &lt;chr&gt;, CIK &lt;int&gt;, Founded &lt;chr&gt;</code></pre>
+</div>
+<div id="from-tickers-to-stocks" class="section level2">
+<h2>From tickers to stocks</h2>
+<p>The next step is to construct a robust function that will allow us to use all the tickers above to download the S&amp;P 500 stocks. The function <code>download_stocks_from_tickers()</code> is designed to do exactly that and will be used inside the <code>map()</code> function from the <code>purrr</code> <a href="https://purrr.tidyverse.org/">package</a>.</p>
+<pre class="r"><code>download_stocks_from_tickers &lt;- function(data, ...) {
+    
+    # tidy eval
+    dots_expr &lt;- dplyr::quos(...)
+    
+    # defensive programming
+    possible_quandl &lt;- purrr::possibly(Quandl::Quandl, NA)
+    
+    # data manipulation
+    data %&gt;% 
+        dplyr::mutate(possible_download = purrr::map(
+            .x = ., 
+            .f = ~ possible_quandl(., !!! dots_expr)
+        )
+    )
+        
+}</code></pre>
+<pre class="r"><code>stocks &lt;- tickers %&gt;% 
+    
+    # create the list columns to map over
+    dplyr::mutate(wiki_tickers = str_c(&#39;WIKI/&#39;, ticker_symbol, &#39;.11&#39;)) %&gt;% 
+    tidyr::nest(wiki_tickers) %&gt;%
+    
+    # download data from 2009 onwards
+    dplyr::mutate(download_tickers = map(
+        .x           = data, 
+        .f           = download_stocks_from_tickers, # the custom function is here!
+        order        = &#39;asc&#39;, 
+        collapse     = &#39;monthly&#39;, 
+        type         = &#39;raw&#39;, 
+        start_date   = &#39;2009-01-01&#39;, 
+        column_index = 11) # column 11 = adjusted close price
+        ) %&gt;% 
+    
+    # reorganize the data in a clean tibble format
+    dplyr::select(ticker_symbol, 
+                  security, 
+                  gics_sector, 
+                  gics_sub_industry, 
+                  download_tickers
+                  ) %&gt;% 
+    tidyr::unnest(download_tickers) %&gt;% 
+    
+    # exclude all the column-lists with NA 
+    dplyr::filter(!is.na(possible_download)) %&gt;% 
+    
+    # cleaning 
+    tidyr::unnest(possible_download) %&gt;% 
+    dplyr::rename(prices = `Adj. Close`) %&gt;% 
+    dplyr::select(Date, 
+                  ticker_symbol:gics_sub_industry, 
+                  prices
+                  ) %&gt;% 
+    
+    # calculate returns
+    dplyr::group_by(ticker_symbol) %&gt;% 
+    tidyquant::tq_mutate(
+        select     = prices, 
+        mutate_fun = periodReturn,
+        col_rename = &#39;returns&#39;,
+        period     = &#39;monthly&#39;,
+        type       = &#39;log&#39;
+        ) %&gt;% 
+    dplyr::ungroup()
+
+stocks</code></pre>
+<pre><code>## # A tibble: 52,185 x 7
+##    ticker_symbol Date       security gics_sector gics_sub_indust~ prices
+##    &lt;chr&gt;         &lt;date&gt;     &lt;chr&gt;    &lt;chr&gt;       &lt;chr&gt;             &lt;dbl&gt;
+##  1 MMM           2009-01-31 3M Comp~ Industrials Industrial Cong~   42.8
+##  2 MMM           2009-02-28 3M Comp~ Industrials Industrial Cong~   36.6
+##  3 MMM           2009-03-31 3M Comp~ Industrials Industrial Cong~   40.0
+##  4 MMM           2009-04-30 3M Comp~ Industrials Industrial Cong~   46.4
+##  5 MMM           2009-05-31 3M Comp~ Industrials Industrial Cong~   46.4
+##  6 MMM           2009-06-30 3M Comp~ Industrials Industrial Cong~   48.8
+##  7 MMM           2009-07-31 3M Comp~ Industrials Industrial Cong~   57.3
+##  8 MMM           2009-08-31 3M Comp~ Industrials Industrial Cong~   59.0
+##  9 MMM           2009-09-30 3M Comp~ Industrials Industrial Cong~   60.4
+## 10 MMM           2009-10-31 3M Comp~ Industrials Industrial Cong~   60.2
+## # ... with 52,175 more rows, and 1 more variable: returns &lt;dbl&gt;</code></pre>
+<p>To avoid downloading unnecessary data the argument <code>column_index = 11</code>, which only contains the adjusted prices, was used in conjunction with <code>download_stocks_from_tickers()</code>. The data was downloaded from the free <a href="https://www.quandl.com/databases/WIKIP/documentation/about">WIKI database</a> in Quandl.</p>
+<p>In some cases, may be that we cannot get the data through the provided API. In this occurs, <code>possibly()</code> will return a <code>NA</code> and the command <code>filter(!is.na(possible_download))</code> will wipe out those rows from the dataset. Finally, using the known fact that stock prices are not stationary, the returns were calculated and included for future modeling.</p>
+</div>
+<div id="from-tibble-to-ts" class="section level2">
+<h2>From <code>tibble()</code> to <code>ts()</code></h2>
+<p>At this point, we have almost everything is needed to estimate the data generating process (DGP) of S&amp;P 500 stock returns. The next step is to <code>group_by()</code> each one of the stocks and coerce them to the <code>ts</code> class (remember that the <code>forecast</code> <a href="http://pkg.robjhyndman.com/forecast/">package</a> is built upon the <code>ts</code> class).</p>
+<pre class="r"><code>stocks_to_ts &lt;- stocks %&gt;% 
+    dplyr::group_by(ticker_symbol, 
+                    security, 
+                    gics_sector, 
+                    gics_sub_industry
+                    ) %&gt;% 
+    tidyr::nest(Date, returns) %&gt;% 
+    dplyr::mutate(ts = map(
+        .x        = data, 
+        .f        = timetk::tk_ts,
+        start     = 2009,
+        frequency = 12)) %&gt;% 
+    dplyr::ungroup()</code></pre>
+<pre><code>## # A tibble: 501 x 6
+##    ticker_symbol security   gics_sector   gics_sub_industry   data   ts   
+##    &lt;chr&gt;         &lt;chr&gt;      &lt;chr&gt;         &lt;chr&gt;               &lt;list&gt; &lt;lis&gt;
+##  1 MMM           3M Company Industrials   Industrial Conglom~ &lt;tibb~ &lt;S3:~
+##  2 ABT           Abbott La~ Health Care   Health Care Equipm~ &lt;tibb~ &lt;S3:~
+##  3 ABBV          AbbVie In~ Health Care   Pharmaceuticals     &lt;tibb~ &lt;S3:~
+##  4 ABMD          ABIOMED I~ Health Care   Health Care Equipm~ &lt;tibb~ &lt;S3:~
+##  5 ACN           Accenture~ Information ~ IT Consulting &amp; Ot~ &lt;tibb~ &lt;S3:~
+##  6 ATVI          Activisio~ Information ~ Home Entertainment~ &lt;tibb~ &lt;S3:~
+##  7 ADBE          Adobe Sys~ Information ~ Application Softwa~ &lt;tibb~ &lt;S3:~
+##  8 AMD           Advanced ~ Information ~ Semiconductors      &lt;tibb~ &lt;S3:~
+##  9 AAP           Advance A~ Consumer Dis~ Automotive Retail   &lt;tibb~ &lt;S3:~
+## 10 AES           AES Corp   Utilities     Independent Power ~ &lt;tibb~ &lt;S3:~
+## # ... with 491 more rows</code></pre>
+</div>
+<div id="map-over-list-columns" class="section level2">
+<h2>Map over list columns</h2>
+<p>Now the setup is complete and we are able to use the framework presented in the <a href="http://r4ds.had.co.nz/many-models.html">chapter 25</a> of <strong>R for data Science</strong>. The <code>map()</code> function recursively estimates which ARMA model fits better in which one of the stocks according to <a href="https://en.wikipedia.org/wiki/Akaike_information_criterion">Akaike</a> selection criterion. The AIC formula is</p>
+<p><code>$$ AIC = 2k - 2ln(\hat{L}) $$</code></p>
+<p>in which <code>$k$</code>is the number of parameters in the model. The higher the <code>$k$</code>, higher the penalization and smaller the change of an overparametrized model being chose.</p>
+<p>I also limited the number of lags in the p and q factor to be no more than 2. Since the data is organized on a monthly period, I’m also assuming that today’s random shocks are not capable of disturb stock returns by more than two months ahead (at least, from a statistical significant point of view).</p>
+<pre class="r"><code>stocks_to_ts_modeling &lt;- stocks_to_ts %&gt;%
+    dplyr::group_by(ticker_symbol) %&gt;% 
+    dplyr::mutate(model   = map(
+        .x         = ts, 
+        .f         = forecast::auto.arima, 
+        seasonal   = FALSE, 
+        stationary = TRUE, 
+        max.p      = 2,
+        max.q      = 2
+    )) %&gt;%
+    dplyr::mutate(glance_model = map(
+        .x = model, 
+        .f = sweep::sw_glance
+    )) %&gt;% 
+    tidyr::unnest(glance_model) %&gt;% 
+    dplyr::ungroup() 
+
+stocks_to_ts_modeling</code></pre>
+<p>In the last two lines of the printed tibble we see that the <code>stocks_to_ts_modeling</code> object now has all the standard evaluation metrics, like AIC, BIC, ME, RMSE, MAE, MAPE, MASE, ACF1. Not for one stock, but for all of them. The <a href="https://www.tidyverse.org/">tidyverse</a> is power!</p>
+<pre><code>## # A tibble: 501 x 19
+##    ticker_symbol security gics_sector gics_sub_indust~ data  ts    model
+##    &lt;chr&gt;         &lt;chr&gt;    &lt;chr&gt;       &lt;chr&gt;            &lt;lis&gt; &lt;lis&gt; &lt;lis&gt;
+##  1 MMM           3M Comp~ Industrials Industrial Cong~ &lt;tib~ &lt;S3:~ &lt;S3:~
+##  2 ABT           Abbott ~ Health Care Health Care Equ~ &lt;tib~ &lt;S3:~ &lt;S3:~
+##  3 ABBV          AbbVie ~ Health Care Pharmaceuticals  &lt;tib~ &lt;S3:~ &lt;S3:~
+##  4 ABMD          ABIOMED~ Health Care Health Care Equ~ &lt;tib~ &lt;S3:~ &lt;S3:~
+##  5 ACN           Accentu~ Informatio~ IT Consulting &amp;~ &lt;tib~ &lt;S3:~ &lt;S3:~
+##  6 ATVI          Activis~ Informatio~ Home Entertainm~ &lt;tib~ &lt;S3:~ &lt;S3:~
+##  7 ADBE          Adobe S~ Informatio~ Application Sof~ &lt;tib~ &lt;S3:~ &lt;S3:~
+##  8 AMD           Advance~ Informatio~ Semiconductors   &lt;tib~ &lt;S3:~ &lt;S3:~
+##  9 AAP           Advance~ Consumer D~ Automotive Reta~ &lt;tib~ &lt;S3:~ &lt;S3:~
+## 10 AES           AES Corp Utilities   Independent Pow~ &lt;tib~ &lt;S3:~ &lt;S3:~
+## # ... with 491 more rows, and 12 more variables: model.desc &lt;chr&gt;,
+## #   sigma &lt;dbl&gt;, logLik &lt;dbl&gt;, AIC &lt;dbl&gt;, BIC &lt;dbl&gt;, ME &lt;dbl&gt;, RMSE &lt;dbl&gt;,
+## #   MAE &lt;dbl&gt;, MPE &lt;dbl&gt;, MAPE &lt;dbl&gt;, MASE &lt;dbl&gt;, ACF1 &lt;dbl&gt;</code></pre>
+</div>
+<div id="final-manipulation-and-addicional-toughts" class="section level2">
+<h2>Final Manipulation and addicional toughts</h2>
+<p>After some extra manipulation we get to the following result</p>
+<pre class="r"><code>stocks_to_ts_modeling %&gt;% 
+    dplyr::mutate_if(is.character, as_factor) %&gt;% 
+    dplyr::count(model.desc, sort = TRUE) %&gt;% 
+    tidyr::separate(
+        data = ., 
+        col  = model.desc, 
+        into = c(&#39;ARMA&#39;, &#39;drift&#39;), 
+        sep  = &#39; &#39;) %&gt;% 
+    dplyr::select(ARMA, n) %&gt;% 
+    dplyr::mutate_if(is.character, as_factor) %&gt;% 
+    dplyr::mutate(
+        ARMA = fct_reorder(ARMA, n), 
+        n    = if_else(ARMA == lag(ARMA), n + lag(n), n)
+        ) %&gt;% 
+    dplyr::filter(!is.na(n)) %&gt;% 
+    dplyr::mutate(percent = n / sum(n)) %&gt;% 
+    dplyr::mutate(ARMA = fct_reorder(ARMA, percent)) %&gt;%
+    knitr::kable(
+        digits  = 2,
+        caption = &#39;ARMA models fitted according to AIC Criterion&#39;, 
+        align   = &#39;c&#39;
+    )</code></pre>
+<table>
+<caption><span id="tab:unnamed-chunk-13">Table 1: </span>ARMA models fitted according to AIC Criterion</caption>
+<thead>
+<tr class="header">
+<th align="center">ARMA</th>
+<th align="center">n</th>
+<th align="center">percent</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">ARIMA(0,0,0)</td>
+<td align="center">349</td>
+<td align="center">0.70</td>
+</tr>
+<tr class="even">
+<td align="center">ARIMA(0,0,1)</td>
+<td align="center">48</td>
+<td align="center">0.10</td>
+</tr>
+<tr class="odd">
+<td align="center">ARIMA(2,0,2)</td>
+<td align="center">28</td>
+<td align="center">0.06</td>
+</tr>
+<tr class="even">
+<td align="center">ARIMA(1,0,1)</td>
+<td align="center">19</td>
+<td align="center">0.04</td>
+</tr>
+<tr class="odd">
+<td align="center">ARIMA(1,0,0)</td>
+<td align="center">17</td>
+<td align="center">0.03</td>
+</tr>
+<tr class="even">
+<td align="center">ARIMA(0,0,2)</td>
+<td align="center">8</td>
+<td align="center">0.02</td>
+</tr>
+<tr class="odd">
+<td align="center">ARIMA(1,0,2)</td>
+<td align="center">7</td>
+<td align="center">0.01</td>
+</tr>
+<tr class="even">
+<td align="center">ARIMA(2,0,2)</td>
+<td align="center">5</td>
+<td align="center">0.01</td>
+</tr>
+<tr class="odd">
+<td align="center">ARIMA(0,0,1)</td>
+<td align="center">4</td>
+<td align="center">0.01</td>
+</tr>
+<tr class="even">
+<td align="center">ARIMA(0,0,2)</td>
+<td align="center">4</td>
+<td align="center">0.01</td>
+</tr>
+<tr class="odd">
+<td align="center">ARIMA(2,0,1)</td>
+<td align="center">3</td>
+<td align="center">0.01</td>
+</tr>
+<tr class="even">
+<td align="center">ARIMA(2,0,0)</td>
+<td align="center">3</td>
+<td align="center">0.01</td>
+</tr>
+<tr class="odd">
+<td align="center">ARIMA(1,0,1)</td>
+<td align="center">2</td>
+<td align="center">0.00</td>
+</tr>
+<tr class="even">
+<td align="center">ARIMA(1,0,2)</td>
+<td align="center">2</td>
+<td align="center">0.00</td>
+</tr>
+<tr class="odd">
+<td align="center">ARIMA(1,0,0)</td>
+<td align="center">1</td>
+<td align="center">0.00</td>
+</tr>
+<tr class="even">
+<td align="center">ARIMA(2,0,1)</td>
+<td align="center">1</td>
+<td align="center">0.00</td>
+</tr>
+</tbody>
+</table>
+<p>It’s incredible that 70% of the S&amp;P 500 stocks do not present any sign of predictability (they are represented by the ARIMA(0, 0, 0) model, which is a random-walk). On top of that, an additional 10% of the stocks are composed by the ARIMA(0, 0, 1), which also follows the <span class="math inline">\(E_t(y_t) = E_t(y_{t-1})\)</span> rule.</p>
+<p>Specially interesting is the fact we have used the AIC criterion for selecting the models, which is known for having a lighter penalization than the <a href="https://en.wikipedia.org/wiki/Bayesian_information_criterion">Bayesian Information Criterion (BIC)</a>. That is, if we had used the BIC criterion as a cutoff, we would probably increase the number of models resembling a random walk, because a fewer parameters would be estimated.</p>
+<p>But… What Machine Learning has to do with all of these? What the data is telling us, is that we should be very careful before blindly using ML techniques, specially if we care about over-fitting. If you keep continually digging into the surface (using parallel computing, non-linear models, etc.) at some point you will face <em>modeling risk</em>. In simple terms, model risk means that we are never certain that the selected model is, indeed, a representation of “true” data generating process.</p>
+<p>In the end of the day, we all have to face the fact that financial time series are fabulously noisy, up to a point of being almost completely random. This is the market efficiency in which Granger was <a href="http://www.forecastingprinciples.com/paperpdf/Granger-stockmarket.pdf">talking about</a>, and there is not much Machine Learning models can do to change that. They can calibrate hyper-parameters, but cannot change the state of the world!</p>
+</div>

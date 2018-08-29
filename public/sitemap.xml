@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/2018/08/27/how-many-stocks-in-the-s-p-500-do-follow-a-random-walk/</loc>
+    <lastmod>2018-08-27T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/2018/08/06/brazilian-debt/</loc>
     <lastmod>2018-08-06T00:00:00+00:00</lastmod>
   </url>
@@ -34,7 +39,7 @@
   
   <url>
     <loc>/</loc>
-    <lastmod>2018-08-06T00:00:00+00:00</lastmod>
+    <lastmod>2018-08-27T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -50,6 +55,18 @@
   </url>
   
   <url>
+    <loc>/categories/finance/</loc>
+    <lastmod>2018-08-27T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/manymodels/</loc>
+    <lastmod>2018-08-27T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/tags/plot/</loc>
     <lastmod>2015-07-23T21:13:14-05:00</lastmod>
     <priority>0</priority>
@@ -57,7 +74,7 @@
   
   <url>
     <loc>/post/</loc>
-    <lastmod>2018-08-06T00:00:00+00:00</lastmod>
+    <lastmod>2018-08-27T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -69,7 +86,7 @@
   
   <url>
     <loc>/categories/r/</loc>
-    <lastmod>2018-08-06T00:00:00+00:00</lastmod>
+    <lastmod>2018-08-27T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

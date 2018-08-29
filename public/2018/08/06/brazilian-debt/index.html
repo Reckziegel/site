@@ -72,8 +72,8 @@
 <p>If you are familiar with <code>Quandl</code> you probably heard about the <code>Quandl.search()</code> function. What it does is try to look for database that matches a specific pattern that you may have interest in, like “oil”, or “GDP”, for example. Personally, I don’t like it, because the R console it’s not suitable for printing the description of large amounts of data. Hence, I’ve been working on a group of functions that can be used more easily if the intention is to consistently download large chunks of data, for latter manipulation.</p>
 <p>The IMF page on Quandl is <a href="https://www.quandl.com/data/ODA-IMF-Cross-Country-Macroeconomic-Statistics" class="uri">https://www.quandl.com/data/ODA-IMF-Cross-Country-Macroeconomic-Statistics</a>. According to the information provided, any data that you may want to download has to obey the following format <code>ODA/{COUNTRY}_{INDICATOR}</code>. At the same page, they provide a list of countries covered and their respective ISO codes (see <a href="https://s3.amazonaws.com/quandl-production-static/API+Descriptions/WHO/ccodes.txt">here</a>). Once we have mapped the country ISO code and the respective indicator, the whole data set can be downloaded using the technique described in “Many Models” of <a href="http://r4ds.had.co.nz/many-models.html">R for Data Science</a>.</p>
 <p>But before doing that, let’s first do a quick web scrapping on Wikipedia to extract the names of all Latin American countries.</p>
-<div id="required-packages" class="section level3">
-<h3>Required Packages</h3>
+<div id="required-packages" class="section level2">
+<h2>Required Packages</h2>
 <pre class="r"><code>library(tidyverse)
 library(tidyquant)
 library(tibbletime)
@@ -82,8 +82,8 @@ library(Quandl)
 library(rvest)
 library(ggthemes)</code></pre>
 </div>
-<div id="web-scrapping-latin-america-countries." class="section level3">
-<h3>Web Scrapping: Latin America countries.</h3>
+<div id="web-scrapping-latin-america-countries." class="section level2">
+<h2>Web Scrapping: Latin America countries.</h2>
 <pre class="r"><code>latin_america &lt;- 
     read_html(
     &quot;https://en.wikipedia.org/wiki/List_of_Latin_American_countries_by_population&quot;
@@ -101,8 +101,8 @@ latin_america %&gt;% glimpse()</code></pre>
 ## $ `Averagerelativeannualgrowth(%)[2]` &lt;dbl&gt; 0.86, 1.08, 1.16, 1.09, 1....
 ## $ `Averageabsoluteannualgrowth[3]`    &lt;chr&gt; &quot;1,750,000&quot;, &quot;1,293,000&quot;, ...
 ## $ `Estimateddoublingtime(Years)[4]`   &lt;chr&gt; &quot;81&quot;, &quot;65&quot;, &quot;60&quot;, &quot;64&quot;, &quot;6...
-## $ `Officialfigure(whereavailable)`    &lt;chr&gt; &quot;209,612,000&quot;, &quot;122,273,47...
-## $ `Date oflast figure`                &lt;chr&gt; &quot;August 7, 2018&quot;, &quot;July 1,...
+## $ `Officialfigure(whereavailable)`    &lt;chr&gt; &quot;209,690,000&quot;, &quot;122,273,47...
+## $ `Date oflast figure`                &lt;chr&gt; &quot;August 24, 2018&quot;, &quot;July 1...
 ## $ Source                              &lt;chr&gt; &quot;Official population clock...</code></pre>
 <p>As a rule of thumb, Wikipedia is a very easy website to extract data of. Not always, but most of the time, the <em>“table”</em> argument (on <code>html_node</code>) will take care of the hard work for us. When it’s not the case, you will have to continue working to clean the data. Fortunately, the <code>latin_america</code> table is well behaved as can be seen above. But there are too many features, and some have awkward names.</p>
 <p>The code bellow takes care of that by selecting only the country names, which is what we will need afterwards.</p>
@@ -132,8 +132,8 @@ latin_america</code></pre>
 <p>Much better this way!</p>
 <p>Now we are ready for the function <code>get_imf_from_quandl()</code> that uses the format <code>ODA/{COUNTRY}_{INDICATOR}</code> and ISO codes to match a desired combination of countries and indicators.</p>
 </div>
-<div id="get_imf_from_quandl" class="section level3">
-<h3>get_imf_from_quandl()</h3>
+<div id="get_imf_from_quandl" class="section level2">
+<h2>get_imf_from_quandl()</h2>
 <pre class="r"><code>get_imf_from_quandl &lt;- function(countries, indicator, ...) {
     
     # 1. tidy eval 
@@ -198,8 +198,8 @@ latin_america</code></pre>
 <li><p><strong>Data wrangling</strong>: This is divided in three. The first part tries to download data for all the countries we ask for (if no country is provided it will download the <code>indicator</code> for the whole data set). The second, excludes missing data, if there are any. The third, coerce the series in a time aware <code>tibble</code> in a nice tidy format.</p></li>
 </ol>
 </div>
-<div id="application" class="section level3">
-<h3>Application</h3>
+<div id="application" class="section level2">
+<h2>Application</h2>
 <p>Now our custom function if ready, let’s download some data to show the main point of the post: Brazilian debt is incredibly high!</p>
 <pre class="r"><code>start_time &lt;- Sys.time()
 
