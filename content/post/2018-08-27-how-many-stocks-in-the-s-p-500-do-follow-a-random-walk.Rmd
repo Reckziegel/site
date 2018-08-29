@@ -96,7 +96,7 @@ tickers
 ```
 
 
-```{r, eval=TRUE}
+```{r, eval=TRUE, echo=FALSE}
 
 load("C:/Users/Berna/Desktop/R Programming/site/rw_script_dataset.Rdata")
 
