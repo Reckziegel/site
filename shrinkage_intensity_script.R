@@ -123,13 +123,13 @@ stocks
 # Some assets have only a small number for n() ----------------------------
 
 stocks %>%
-    select(Date, ticker_symbol, returns) %>% 
-    group_by(ticker_symbol) %>% 
-    summarise(
-        n          = n(), 
+    dplyr::select(Date, ticker_symbol, returns) %>% 
+    dplyr::group_by(ticker_symbol) %>% 
+    dplyr::summarise(
+        n          = dplyr::n(), 
         first_date = min(Date)
     ) %>% 
-    arrange(desc(first_date))
+    dplyr::arrange(dplyr::desc(first_date))
 
 
 # A simple way to solve this problem is to filter stocks under a prespecified level
@@ -137,7 +137,7 @@ stocks %>%
 stocks_filtered <- stocks %>% 
     dplyr::select(Date, ticker_symbol, returns) %>%
     dplyr::group_by(ticker_symbol) %>% 
-    dplyr::mutate(n = n()) %>% 
+    dplyr::mutate(n = dplyr::n()) %>% 
     dplyr::filter(n > 4000) %>% 
     dplyr::select(-n) %>% 
     dplyr::ungroup() %>% 
@@ -161,39 +161,39 @@ honey_shrunk <- function(R, shrink = NULL) {
     R  <- R - matrix(rep(mu, times = n), ncol = p, byrow = TRUE)
     
     # Covariancia amostral usando  (R - mean)
-    sample <- (1 / n) * (t(R) %*% R)
+    sample  <- (1 / n) * (t(R) %*% R)
     
     # Prior
-    var <- matrix(diag(sample), ncol = 1)
+    var     <- matrix(diag(sample), ncol = 1)
     sqrtvar <- sqrt(var)
-    tmpMat <- matrix(rep(sqrtvar, times = p), nrow = p)
-    rBar <- (sum(sum(sample / (tmpMat * t(tmpMat)))) - p) / (p * (p - 1))
-    prior <- rBar * tmpMat * t(tmpMat)
+    tmpMat  <- matrix(rep(sqrtvar, times = p), nrow = p)
+    rBar    <- (sum(sum(sample / (tmpMat * t(tmpMat)))) - p) / (p * (p - 1))
+    prior   <- rBar * tmpMat * t(tmpMat)
     diag(prior) <- var
     
     if (is.null(shrink)) {
         
         # pi-hat
-        y <- R ^ 2
+        y      <- R ^ 2
         phiMat <- t(y) %*% y / n - 2 * (t(R) %*% R) * sample / n + sample ^ 2
-        phi <- sum(phiMat)
+        phi    <- sum(phiMat)
         
         # Wrho-hat
-        aux1 <- (t(R ^ 3) %*% R) / n
-        help <- t(R) %*% R / n
+        aux1     <- (t(R ^ 3) %*% R) / n
+        help     <- t(R) %*% R / n
         helpDiag <- matrix(diag(help), ncol = 1)
-        aux2 <- matrix(rep(helpDiag, times = p), ncol = p) * sample
-        aux3 <- help * matrix(rep(var, times = p), ncol = p)
-        aux4 <- matrix(rep(var, times = p), ncol = p) * sample
+        aux2     <- matrix(rep(helpDiag, times = p), ncol = p) * sample
+        aux3     <- help * matrix(rep(var, times = p), ncol = p)
+        aux4     <- matrix(rep(var, times = p), ncol = p) * sample
         thetaMat <- aux1 - aux2 - aux3 + aux4
         diag(thetaMat) <- 0
-        rho <- sum(diag(phiMat)) + rBar * sum(sum(((1 / sqrtvar) %*% t(sqrtvar)) * thetaMat))
+        rho      <- sum(diag(phiMat)) + rBar * sum(sum(((1 / sqrtvar) %*% t(sqrtvar)) * thetaMat))
         
         # gamma-hat
         gamma <- norm(sample - prior, "F")^2
         
         # Shrinkage constant
-        kappa <- (phi - rho) / gamma
+        kappa     <- (phi - rho) / gamma
         shrinkage <- max(0, min(1, kappa / n))
         
     } else {
@@ -204,7 +204,7 @@ honey_shrunk <- function(R, shrink = NULL) {
     
     # Estimador
     sigma <- shrinkage * prior + (1 - shrinkage) * sample
-    out <- list(cov = sigma, prior = prior, shrinkage = shrinkage)
+    out   <- list(cov = sigma, prior = prior, shrinkage = shrinkage)
     
     return(out)
     
@@ -233,40 +233,40 @@ for (i in seq_along(rolling_windows)) {
 # data wrangling and the 'intensity' plot ---------------------------------
 
 rollapply_list[[1]] %>% 
-    left_join(rollapply_list[[2]], by = 'Date') %>% 
-    left_join(rollapply_list[[3]], by = 'Date') %>% 
-    left_join(rollapply_list[[4]], by = 'Date') %>% 
-    rename(
+    dplyr::left_join(rollapply_list[[2]], by = 'Date') %>% 
+    dplyr::left_join(rollapply_list[[3]], by = 'Date') %>% 
+    dplyr::left_join(rollapply_list[[4]], by = 'Date') %>% 
+    dplyr::rename(
         `90`   = 'shrinkage_intensity_1', 
         `252`  = 'shrinkage_intensity_2', 
         `756`  = 'shrinkage_intensity_3', 
         `1260` = 'shrinkage_intensity_4') %>% 
-    gather(Intensity, values, -Date) %>% 
-    mutate_if(is_character, as_factor) %>% 
-    ggplot(aes(x = Date, y = values, color = intensity)) + 
-    geom_line() +
-    theme_classic() + 
-    scale_color_tq()
+    tidyr::gather(Intensity, values, -Date) %>% 
+    dplyr::mutate_if(purrr::is_character, forcats::as_factor) %>% 
+    ggplot2::ggplot(aes(x = Date, y = values, color = intensity)) + 
+    ggplot2::geom_line() +
+    ggplot2::theme_classic() + 
+    tidyquant::scale_color_tq()
 
 
 # data wrangling and the 'amount of error' plot ---------------------------
 
 rollapply_list[[1]] %>% 
-    left_join(rollapply_list[[2]], by = 'Date') %>% 
-    left_join(rollapply_list[[3]], by = 'Date') %>% 
-    left_join(rollapply_list[[4]], by = 'Date') %>% 
-    rename(
+    dplyr::left_join(rollapply_list[[2]], by = 'Date') %>% 
+    dplyr::left_join(rollapply_list[[3]], by = 'Date') %>% 
+    dplyr::left_join(rollapply_list[[4]], by = 'Date') %>% 
+    dplyr::rename(
         `90`   = 'shrinkage_intensity_1', 
         `252`  = 'shrinkage_intensity_2', 
         `756`  = 'shrinkage_intensity_3', 
         `1260` = 'shrinkage_intensity_4'
         ) %>% 
-    gather(Intensity, values, -Date) %>% 
-    mutate_if(is_character, as_factor) %>% 
-    group_by(Intensity) %>% 
-    mutate(Error = values / (1 - values)) %>% 
-    ggplot(aes(x = Date, y = Error, color = Intensity)) + 
-    facet_wrap(~ Intensity, scales = 'free_y') + 
-    geom_line(show.legend = FALSE) +
-    theme_classic() + 
-    scale_color_tq()
+    tidyr::gather(Intensity, values, -Date) %>% 
+    dplyr::mutate_if(purrr::is_character, forcats::as_factor) %>% 
+    dplyr::group_by(Intensity) %>% 
+    dplyr::mutate(Error = values / (1 - values)) %>% 
+    ggplot2::ggplot(aes(x = Date, y = Error, color = Intensity)) + 
+    ggplot2::facet_wrap(~ Intensity, scales = 'free_y') + 
+    ggplot2::geom_line(show.legend = FALSE) +
+    ggplot2::theme_classic() + 
+    tidyquant::scale_color_tq()
