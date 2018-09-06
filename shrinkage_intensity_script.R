@@ -282,3 +282,22 @@ rollapply_list[[1]] %>%
     ) + 
     ggplot2::theme_classic() + 
     tidyquant::scale_color_tq()
+
+
+# Median values for the Estimation Error ----------------------------------
+
+rollapply_list[[1]] %>% 
+    dplyr::left_join(rollapply_list[[2]], by = 'Date') %>% 
+    dplyr::left_join(rollapply_list[[3]], by = 'Date') %>% 
+    dplyr::left_join(rollapply_list[[4]], by = 'Date') %>% 
+    dplyr::rename(
+        `90 days`   = 'shrinkage_intensity_1', 
+        `252 days`  = 'shrinkage_intensity_2', 
+        `756 days`  = 'shrinkage_intensity_3', 
+        `1260 days` = 'shrinkage_intensity_4'
+    ) %>% 
+    tidyr::gather(Intensity, values, -Date) %>% 
+    dplyr::mutate_if(purrr::is_character, forcats::as_factor) %>% 
+    dplyr::group_by(Intensity) %>% 
+    dplyr::mutate(Error = values / (1 - values)) %>% 
+    dplyr::summarise(Median_Error = median(Error, na.rm = TRUE))
