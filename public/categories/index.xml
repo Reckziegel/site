@@ -11,9 +11,18 @@
     
     
     <item>
+      <title>Estimation</title>
+      <link>/categories/estimation/</link>
+      <pubDate>Wed, 05 Sep 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/estimation/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Finance</title>
       <link>/categories/finance/</link>
-      <pubDate>Mon, 27 Aug 2018 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 05 Sep 2018 00:00:00 +0000</pubDate>
       
       <guid>/categories/finance/</guid>
       <description></description>
@@ -22,7 +31,7 @@
     <item>
       <title>R</title>
       <link>/categories/r/</link>
-      <pubDate>Mon, 27 Aug 2018 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 05 Sep 2018 00:00:00 +0000</pubDate>
       
       <guid>/categories/r/</guid>
       <description></description>

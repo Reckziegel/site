@@ -1,0 +1,528 @@
+---
+title: How much shrinkage does the stock market requires?
+author: Bernardo Reckziegel
+date: '2018-09-05'
+slug: how-much-shrinkage-does-the-stock-market-requires
+categories:
+  - finance
+  - R
+  - estimation
+tags:
+  - finance
+  - robust statistics
+  - shrinkage
+---
+
+
+```{r setup, include = FALSE}
+
+knitr::opts_chunk$set(echo = FALSE, eval = FALSE, message = FALSE, warning = FALSE)
+
+```
+
+
+Shrinkage is hardly new in finance. In 1956, Charles Stein published a famous paper called [*Inadmissibility of the usual estimator for the mean of a multivariate normal distribution*](https://projecteuclid.org/euclid.bsmsp/1200501656). He shows that, if the sum of the squares of the errors is used as a loss function, then, for `$ n \geq 2 $`, the sample mean can be improved by exploring the trade-off among bias and variance. This improvement is due to shrinkage!
+
+Simply put, shrinkage is a form of averaging different estimators, and its composed of three parts:
+
+1. An estimator of little or no structure (the sample mean and the sample covariance are often good candidates in this case)
+2. An estimator with a lot of structure (a single value for the mean or a diagonal matrix for the variance would be acceptable examples)
+3. The shrinkage target (goes from 0 to 1 allowing for convex combinations between the structurerd and the non-structured estimators).
+
+To the best of my knowledge, [Jorrion (1986)](https://www.researchgate.net/publication/227357373_Bayes-Stein_Estimation_For_Portfolio_Analysis) was the first to apply this concept in the financial industry and portfolio optimization problems. Almost 20 years later, Ledoit&Wolf published a paper called [*Honey, I Shrunk the Sample Covariance Matrix*](http://www.ledoit.net/honey.pdf) in which the authors strongly claim:
+
+*"The central message of this paper is that nobody should be using the sample covariance matrix for the purpose of portfolio optimization. It contains estimation error of the kind most likely to perturb a mean-variance optimizer. In its place, we suggest using the matrix obtained from the sample covariance matrix through a transformation called shrinkage. This tends to pull the most extreme coefficients towards more central values, thereby systematically reducing estimation error where it matters most. Statistically, the challenge is to know the optimal shrinkage intensity, and we give the formula for that. Without changing any other step in the portfolio optimization process, we show on actual stock market data that shrinkage reduces tracking error relative to a benchmark index, and substantially increases the realized information ratio of the active portfolio manager".*
+
+In this post we are going to implement the equation (2) of their original paper
+
+`$$ \hat{\Sigma}_{Shrink} = \hat{\delta} F + (1 - \hat{\delta}) S $$`
+
+to estimate the optimal shrinkage intensity for the S&P 500 stocks using a daily database (from 2000-01-01 up to 2018-09-04). In second place, we will verify if these "optimal" values are stable across time by using different rolling windows to estimate `$ \hat{\delta} $`. Lastly, we are going to extract the amount of error embedded in the estimation process to verify if they are increasing or decreasing over time. 
+
+Let’s get started!
+
+
+## Required Libraries
+
+```{r, eval=TRUE, echo=TRUE}
+
+library(tidyverse)
+library(tidyquant)
+library(rvest)
+library(Quandl)
+
+```
+
+
+If you still don't have an account at [Quandl](https://www.quandl.com/), I will highly recommend you to do a free registration. This will enable you to download an unlimited amount of times series every day, in contrast to only 50 per day without being registered. 
+
+
+## Download the S&P 500 stocks
+
+
+```{r echo=TRUE}
+
+# function to get sp500 tickers -------------------------------------------
+
+get_sp500_tickers <- function() {
+    
+    raw_get <- function() {
+        
+        xml2::read_html('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies') %>% 
+            rvest::html_node('table.wikitable') %>% 
+            rvest::html_table() %>% 
+            dplyr::as_tibble()
+        
+    }
+    
+    possible_get <- purrr::possibly(
+        .f        = raw_get, 
+        otherwise = NA
+    )
+    
+    possible_get() %>% 
+        dplyr::rename(
+            ticker_symbol     = 'Ticker symbol', 
+            security          = 'Security',
+            sec_filings       = 'SEC filings', 
+            gics_sector       = 'GICS Sector',
+            gics_sub_industry = 'GICS Sub Industry'
+        )
+    
+}
+
+
+# download the tickers ----------------------------------------------------
+
+tickers <- get_sp500_tickers()
+
+
+# function to download the sp500 stocks from tickers ----------------------
+
+download_stocks_from_tickers <- function(data, ...) {
+    
+    # tidy eval
+    dots_expr <- dplyr::quos(...)
+    
+    # defensive programming
+    possible_quandl <- purrr::possibly(Quandl::Quandl, NA)
+    
+    # data manipulation
+    data %>% 
+        dplyr::mutate(possible_download = purrr::map(
+            .x = ., 
+            .f = ~ possible_quandl(., !!! dots_expr)
+        )
+    )
+    
+}
+
+
+# download the sp500 stocks -----------------------------------------------
+
+stocks <- tickers %>% 
+    
+    # create the list columns to map over
+    dplyr::mutate(wiki_tickers = str_c('WIKI/', ticker_symbol, '.11')) %>% 
+    tidyr::nest(wiki_tickers) %>%
+    
+    # download data from 2009 onwards
+    dplyr::mutate(download_tickers = map(
+        .x           = data, 
+        .f           = download_stocks_from_tickers, # the custom function is here!
+        order        = 'asc', 
+        collapse     = 'daily', 
+        type         = 'raw', 
+        start_date   = '2000-01-01', 
+        column_index = 11) # column 11 = adjusted close price
+    ) %>% 
+    
+    # reorganize the data in a clean tibble format
+    dplyr::select(ticker_symbol, 
+                  security, 
+                  gics_sector, 
+                  gics_sub_industry, 
+                  download_tickers
+    ) %>% 
+    tidyr::unnest(download_tickers) %>% 
+    
+    # exclude all the column-lists with NA 
+    dplyr::filter(!is.na(possible_download)) %>% 
+    
+    # cleaning 
+    tidyr::unnest(possible_download) %>% 
+    dplyr::rename(prices = `Adj. Close`) %>% 
+    dplyr::select(Date, 
+                  ticker_symbol, 
+                  prices
+    ) %>% 
+    
+    # calculate returns
+    dplyr::group_by(ticker_symbol) %>% 
+    tidyquant::tq_mutate(
+        select     = prices, 
+        mutate_fun = periodReturn,
+        col_rename = 'returns',
+        period     = 'daily',
+        type       = 'log'
+    ) %>% 
+    dplyr::ungroup()
+
+stocks
+
+```
+
+
+```{r, eval=TRUE, echo=FALSE}
+
+load('C:/Users/Berna/Desktop/R Programming/site/shrinkage_intensity.RData')
+
+stocks
+
+```
+
+
+This code is almost identical to the one I had used in my previous post. If you want to have a detailed explanation on how it works, please, feel free to so by clicking [here](http://www.bernardo.codes/2018/08/27/how-many-stocks-in-the-s-p-500-do-follow-a-random-walk/). 
+
+The `stocks` tibble is composed of a daily database from 2000 onwards. Note, however, that many of the stocks have only a few number of observations.
+
+```{r, echo=TRUE}
+
+stocks %>%
+    dplyr::select(Date, ticker_symbol, returns) %>% 
+    dplyr::group_by(ticker_symbol) %>% 
+    dplyr::summarise(
+        n          = dplyr::n(), 
+        first_date = min(Date)
+    ) %>% 
+    dplyr::arrange(dplyr::desc(first_date))
+
+```
+
+
+```{r, eval=TRUE, echo=FALSE}
+
+load('C:/Users/Berna/Desktop/R Programming/site/shrinkage_intensity.RData')
+
+stocks %>%
+    dplyr::select(Date, ticker_symbol, returns) %>% 
+    dplyr::group_by(ticker_symbol) %>% 
+    dplyr::summarise(
+        n          = dplyr::n(), 
+        first_date = min(Date)
+    ) %>% 
+    dplyr::arrange(dplyr::desc(first_date))
+
+```
+
+
+Working with unbalanced data challenges the estimation process. Let's add simple filter to exclude all the stock with less than `$ 4000 $` trading days (~ 15 years).
+
+
+```{r echo=TRUE}
+
+stocks_filtered <- stocks %>% 
+    dplyr::select(Date, ticker_symbol, returns) %>%
+    
+    # manipulate
+    dplyr::group_by(ticker_symbol) %>% 
+    dplyr::mutate(n = dplyr::n()) %>% 
+    dplyr::filter(n > 4000) %>% 
+    dplyr::select(-n) %>% 
+    dplyr::ungroup() %>% 
+    
+    # spread the data
+    tidyr::spread(ticker_symbol, returns) %>% 
+    tidyr::drop_na()
+
+stocks_filtered
+
+```
+
+
+```{r, eval=TRUE, echo=FALSE}
+
+load('C:/Users/Berna/Desktop/R Programming/site/shrinkage_intensity.RData')
+
+stocks_filtered
+
+```
+
+
+## Honey, I translated a MATLAB function to R
+
+In his page, Michael Wolf provides the MATLAB [code](https://www.econ.uzh.ch/en/people/faculty/wolf/publications.html) for most of it's publications. I translated the function associated with the paper *Honey, I Shrunk the Sample Covariance Matrix*. See bellow:
+
+```{r, echo=TRUE}
+
+honey_shrunk <- function(R, shrink = NULL) {
+    
+    # "Honey, I Shrunk the Sample Covariance Matrix"
+    # http://www.ledoit.net/honey.pdf
+    # https://www.econ.uzh.ch/en/people/faculty/wolf/publications.html
+    
+    n  <- nrow(R)
+    p  <- ncol(R)
+    mu <- apply(R, 2, mean)
+    R  <- R - matrix(rep(mu, times = n), ncol = p, byrow = TRUE)
+    
+    # Covariancia amostral usando  (R - mean)
+    sample  <- (1 / n) * (t(R) %*% R)
+    
+    # Prior
+    var     <- matrix(diag(sample), ncol = 1)
+    sqrtvar <- sqrt(var)
+    tmpMat  <- matrix(rep(sqrtvar, times = p), nrow = p)
+    rBar    <- (sum(sum(sample / (tmpMat * t(tmpMat)))) - p) / (p * (p - 1))
+    prior   <- rBar * tmpMat * t(tmpMat)
+    diag(prior) <- var
+    
+    if (is.null(shrink)) {
+        
+        # pi-hat
+        y      <- R ^ 2
+        phiMat <- t(y) %*% y / n - 2 * (t(R) %*% R) * sample / n + sample ^ 2
+        phi    <- sum(phiMat)
+        
+        # Wrho-hat
+        aux1     <- (t(R ^ 3) %*% R) / n
+        help     <- t(R) %*% R / n
+        helpDiag <- matrix(diag(help), ncol = 1)
+        aux2     <- matrix(rep(helpDiag, times = p), ncol = p) * sample
+        aux3     <- help * matrix(rep(var, times = p), ncol = p)
+        aux4     <- matrix(rep(var, times = p), ncol = p) * sample
+        thetaMat <- aux1 - aux2 - aux3 + aux4
+        diag(thetaMat) <- 0
+        rho      <- sum(diag(phiMat)) + rBar * sum(sum(((1 / sqrtvar) %*% t(sqrtvar)) * thetaMat))
+        
+        # gamma-hat
+        gamma <- norm(sample - prior, "F") ^ 2
+        
+        # Shrinkage constant
+        kappa     <- (phi - rho) / gamma
+        shrinkage <- max(0, min(1, kappa / n))
+        
+    } else {
+        
+        shrinkage <- shrink
+        
+    }
+    
+    # Estimador
+    sigma <- shrinkage * prior + (1 - shrinkage) * sample
+    out   <- list(cov = sigma, prior = prior, shrinkage = shrinkage)
+    
+    return(out)
+    
+}
+
+```
+
+
+The final output contains three lists: 
+
+ - **cov**: this is equivalent to `$ \hat{\Sigma}_{Shrink} $` or, if you prefer, the equation (2) in their original paper;
+ - **prior**: this is the `$ F $` matrix or the equation (3), as they present in the appendix A;
+ - **shrinkage**: this is the optimal `$ \hat{\delta} $` that appears in equation (2).
+ 
+ 
+## Rolling Windows
+ 
+To answer our initial question *How much shrinkage does the stock market requires?* we wil need to use the `honey_shrunk()` function on a rolling window to measure how the shrinkage intensity envolves across time.
+
+There are many ways in which we could do that, but I chose the simplest one, which is using nothing more than a `for` loop. The `tq_transmute()` function from the `tidyquant` package fits nicely to this tasks, simplifing a lot of data manipulation for us.   
+
+For sake of simplicity, I've also chose 3 months, 1 year, 3 years and 5 years as estimation windows to map over. That is no specific reason to keep them fixed and you can experiment different windows if you like to. But before using the following script, be aware that its probably going to take one or two hours to run. 
+
+```{r echo=TRUE}
+
+rolling_windows <- c(90, 252, 756, 1260)
+rollapply_list <- vector('list', length(rolling_windows))
+
+for (i in seq_along(rolling_windows)) {
+    
+    rollapply_list[[i]] <- stocks_filtered %>% 
+        tidyquant::tq_transmute(
+            mutate_fun = rollapply, 
+            width      = rolling_windows[[i]], 
+            FUN        = function(x) honey_shrunk(x[ , -1])$shrinkage, 
+            by.column  = FALSE, 
+            col_rename = stringr::str_c('shrinkage_intensity_', rolling_windows[[i]])
+        )    
+    
+}
+
+```
+
+
+As expected, as we increase the numbers of observations from 90, to 252, ... up to 1260 days the shrinkage intensity diminishes signifcantly. For 90 days, the amout of shrinkage required is almost the double of the one required for 252 days, which is more than double demanded for 3 years, and so on so forth. This is in accordance to the [assimptotic theory](https://en.wikipedia.org/wiki/Asymptotic_analysis) that states that the sample covariance matrix is an unbiased estimator for the "true" covariance matrix as `$ n $`, the number of observations, increase indefinetly.
+
+```{r}
+
+rollapply_list[[1]] %>% 
+    dplyr::left_join(rollapply_list[[2]], by = 'Date') %>% 
+    dplyr::left_join(rollapply_list[[3]], by = 'Date') %>% 
+    dplyr::left_join(rollapply_list[[4]], by = 'Date') %>% 
+    dplyr::rename(
+        `90 days`   = 'shrinkage_intensity_1', 
+        `252 days`  = 'shrinkage_intensity_2', 
+        `756 days`  = 'shrinkage_intensity_3', 
+        `1260 days` = 'shrinkage_intensity_4') %>% 
+    tidyr::gather(Intensity, values, -Date) %>% 
+    dplyr::mutate_if(purrr::is_character, forcats::as_factor) %>% 
+    ggplot2::ggplot(aes(x = Date, y = values, color = Intensity)) + 
+    ggplot2::geom_line(size = 1) +
+    ggplot2::labs(
+        title    = 'Shrinkage Intensity',
+        subtitle = 'Rolling Windows: 3 months, 1 year, 3 years and 5 years',
+        y        = '', 
+        x        = ''
+    ) + 
+    ggplot2::theme_classic() + 
+    tidyquant::scale_color_tq()
+
+```
+
+
+```{r, echo=FALSE, eval=TRUE}
+
+load('C:/Users/Berna/Desktop/R Programming/site/shrinkage_intensity.RData')
+
+rollapply_list[[1]] %>% 
+    dplyr::left_join(rollapply_list[[2]], by = 'Date') %>% 
+    dplyr::left_join(rollapply_list[[3]], by = 'Date') %>% 
+    dplyr::left_join(rollapply_list[[4]], by = 'Date') %>% 
+    dplyr::rename(
+        `90 days`   = 'shrinkage_intensity_1', 
+        `252 days`  = 'shrinkage_intensity_2', 
+        `756 days`  = 'shrinkage_intensity_3', 
+        `1260 days` = 'shrinkage_intensity_4') %>% 
+    tidyr::gather(Intensity, values, -Date) %>% 
+    dplyr::mutate_if(purrr::is_character, forcats::as_factor) %>% 
+    ggplot2::ggplot(aes(x = Date, y = values, color = Intensity)) + 
+    ggplot2::geom_line(size = 1) +
+    ggplot2::labs(
+        title    = 'Shrinkage Intensity',
+        subtitle = 'Rolling Windows: 3 months, 1 year, 3 years and 5 years',
+        y        = '', 
+        x        = ''
+    ) + 
+    ggplot2::theme_classic() + 
+    tidyquant::scale_color_tq()
+
+```
+
+
+Furthermore, we can explore the equation `$ \hat{\Sigma}_{Shrink} = \delta F + (1 - \delta) S $` to find out the ratio between shrinkage and estimation error, that is, `$ \frac{\delta}{1 - \delta} $`. Whenever this fraction is above `$ 0.5 $` the data has at least as much estimation error in the sample covarance matrix than as there bias in the structured `$ F $` matrix and, consequently, a higher `$ \delta $` is needed to equalize the bias and variance trade-off. 
+
+
+```{r, echo=TRUE}
+
+rollapply_list[[1]] %>% 
+    dplyr::left_join(rollapply_list[[2]], by = 'Date') %>% 
+    dplyr::left_join(rollapply_list[[3]], by = 'Date') %>% 
+    dplyr::left_join(rollapply_list[[4]], by = 'Date') %>% 
+    dplyr::rename(
+        `90 days`   = 'shrinkage_intensity_1', 
+        `252 days`  = 'shrinkage_intensity_2', 
+        `756 days`  = 'shrinkage_intensity_3', 
+        `1260 days` = 'shrinkage_intensity_4'
+        ) %>% 
+    tidyr::gather(Intensity, values, -Date) %>% 
+    dplyr::mutate_if(purrr::is_character, forcats::as_factor) %>% 
+    dplyr::group_by(Intensity) %>% 
+    dplyr::mutate(Error = values / (1 - values)) %>% 
+    
+    ggplot2::ggplot(aes(x = Date, y = Error, color = Intensity)) + 
+    ggplot2::facet_wrap(~ Intensity, scales = 'free_y') + 
+    ggplot2::geom_line(show.legend = FALSE, size = 1) +
+    ggplot2::labs(
+        title    = 'Estimation Error',
+        subtitle = 'Rolling Windows: 3 months, 1 year, 3 years and 5 years',
+        y        = '', 
+        x        = ''
+    ) + 
+    ggplot2::theme_classic() + 
+    tidyquant::scale_color_tq()
+
+```
+
+
+```{r, echo=FALSE, eval=TRUE}
+
+load('C:/Users/Berna/Desktop/R Programming/site/shrinkage_intensity.RData')
+
+rollapply_list[[1]] %>% 
+    dplyr::left_join(rollapply_list[[2]], by = 'Date') %>% 
+    dplyr::left_join(rollapply_list[[3]], by = 'Date') %>% 
+    dplyr::left_join(rollapply_list[[4]], by = 'Date') %>% 
+    dplyr::rename(
+        `90 days`   = 'shrinkage_intensity_1', 
+        `252 days`  = 'shrinkage_intensity_2', 
+        `756 days`  = 'shrinkage_intensity_3', 
+        `1260 days` = 'shrinkage_intensity_4'
+        ) %>% 
+    tidyr::gather(Intensity, values, -Date) %>% 
+    dplyr::mutate_if(purrr::is_character, forcats::as_factor) %>% 
+    dplyr::group_by(Intensity) %>% 
+    dplyr::mutate(Error = values / (1 - values)) %>% 
+    ggplot2::ggplot(aes(x = Date, y = Error, color = Intensity)) + 
+    ggplot2::facet_wrap(~ Intensity, scales = 'free_y') + 
+    ggplot2::geom_line(show.legend = FALSE, size = 1) +
+    ggplot2::labs(
+        title    = 'Estimation Error',
+        subtitle = 'Rolling Windows: 3 months, 1 year, 3 years and 5 years',
+        y        = '', 
+        x        = ''
+    ) + 
+    ggplot2::theme_classic() + 
+    tidyquant::scale_color_tq()
+
+```
+
+
+Despite the huge outlier presented in the estimation process around 2012, the amount of error for periods of less than one year is significant. For 3 months, the median error rate é about 80%. This value decreases significantly for one year and stabilizes after three years onwards. 
+
+```{r, echo=TRUE}
+
+rollapply_list[[1]] %>% 
+    dplyr::left_join(rollapply_list[[2]], by = 'Date') %>% 
+    dplyr::left_join(rollapply_list[[3]], by = 'Date') %>% 
+    dplyr::left_join(rollapply_list[[4]], by = 'Date') %>% 
+    dplyr::rename(
+        `90 days`   = 'shrinkage_intensity_1', 
+        `252 days`  = 'shrinkage_intensity_2', 
+        `756 days`  = 'shrinkage_intensity_3', 
+        `1260 days` = 'shrinkage_intensity_4'
+        ) %>% 
+    tidyr::gather(Intensity, values, -Date) %>% 
+    dplyr::mutate_if(purrr::is_character, forcats::as_factor) %>% 
+    dplyr::group_by(Intensity) %>% 
+    dplyr::mutate(Error = values / (1 - values)) %>% 
+    dplyr::summarise(median = median(values, na.rm = TRUE))
+
+```
+
+
+```{r, echo=FALSE, eval=TRUE}
+
+load('C:/Users/Berna/Desktop/R Programming/site/shrinkage_intensity.RData')
+
+rollapply_list[[1]] %>% 
+    dplyr::left_join(rollapply_list[[2]], by = 'Date') %>% 
+    dplyr::left_join(rollapply_list[[3]], by = 'Date') %>% 
+    dplyr::left_join(rollapply_list[[4]], by = 'Date') %>% 
+    dplyr::rename(
+        `90 days`   = 'shrinkage_intensity_1', 
+        `252 days`  = 'shrinkage_intensity_2', 
+        `756 days`  = 'shrinkage_intensity_3', 
+        `1260 days` = 'shrinkage_intensity_4'
+        ) %>% 
+    tidyr::gather(Intensity, values, -Date) %>% 
+    dplyr::mutate_if(purrr::is_character, forcats::as_factor) %>% 
+    dplyr::group_by(Intensity) %>% 
+    dplyr::mutate(Error = values / (1 - values)) %>% 
+    dplyr::summarise(Median_Error = median(Error, na.rm = TRUE))
+
+```
+

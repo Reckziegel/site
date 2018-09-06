@@ -18,7 +18,7 @@
       
       <guid>/2018/08/06/brazilian-debt/</guid>
       <description>In this post I will show how you can recursively download macroeconomic data covered by the IMF using the Quandl package. To motivate the application, the Brazilian public debt will be used as a variable of interest.
-If you are familiar with Quandl you probably heard about the Quandl.search() function. What it does is try to look for database that matches a specific pattern that you may have interest in, like “oil”, or “GDP”, for example.</description>
+If you are familiar with Quandl you probably heard about the Quandl.search() function. What it does is try to look for a database that matches a specific pattern that you may have interest in, like “oil”, or “GDP”, for example.</description>
     </item>
     
   </channel>

@@ -237,14 +237,20 @@ rollapply_list[[1]] %>%
     dplyr::left_join(rollapply_list[[3]], by = 'Date') %>% 
     dplyr::left_join(rollapply_list[[4]], by = 'Date') %>% 
     dplyr::rename(
-        `90`   = 'shrinkage_intensity_1', 
-        `252`  = 'shrinkage_intensity_2', 
-        `756`  = 'shrinkage_intensity_3', 
-        `1260` = 'shrinkage_intensity_4') %>% 
+        `90 days`   = 'shrinkage_intensity_1', 
+        `252 days`  = 'shrinkage_intensity_2', 
+        `756 days`  = 'shrinkage_intensity_3', 
+        `1260 days` = 'shrinkage_intensity_4') %>% 
     tidyr::gather(Intensity, values, -Date) %>% 
     dplyr::mutate_if(purrr::is_character, forcats::as_factor) %>% 
-    ggplot2::ggplot(aes(x = Date, y = values, color = intensity)) + 
-    ggplot2::geom_line() +
+    ggplot2::ggplot(aes(x = Date, y = values, color = Intensity)) + 
+    ggplot2::geom_line(size = 1) +
+    ggplot2::labs(
+        title    = 'Shrinkage Intensity',
+        subtitle = 'Rolling Windows: 3 months, 1 year, 3 years and 5 years',
+        y        = '', 
+        x        = ''
+    ) + 
     ggplot2::theme_classic() + 
     tidyquant::scale_color_tq()
 
@@ -256,10 +262,10 @@ rollapply_list[[1]] %>%
     dplyr::left_join(rollapply_list[[3]], by = 'Date') %>% 
     dplyr::left_join(rollapply_list[[4]], by = 'Date') %>% 
     dplyr::rename(
-        `90`   = 'shrinkage_intensity_1', 
-        `252`  = 'shrinkage_intensity_2', 
-        `756`  = 'shrinkage_intensity_3', 
-        `1260` = 'shrinkage_intensity_4'
+        `90 days`   = 'shrinkage_intensity_1', 
+        `252 days`  = 'shrinkage_intensity_2', 
+        `756 days`  = 'shrinkage_intensity_3', 
+        `1260 days` = 'shrinkage_intensity_4'
         ) %>% 
     tidyr::gather(Intensity, values, -Date) %>% 
     dplyr::mutate_if(purrr::is_character, forcats::as_factor) %>% 
@@ -267,6 +273,12 @@ rollapply_list[[1]] %>%
     dplyr::mutate(Error = values / (1 - values)) %>% 
     ggplot2::ggplot(aes(x = Date, y = Error, color = Intensity)) + 
     ggplot2::facet_wrap(~ Intensity, scales = 'free_y') + 
-    ggplot2::geom_line(show.legend = FALSE) +
+    ggplot2::geom_line(show.legend = FALSE, size = 1) +
+    ggplot2::labs(
+        title    = 'Estimation Error',
+        subtitle = 'Rolling Windows: 3 months, 1 year, 3 years and 5 years',
+        y        = '', 
+        x        = ''
+    ) + 
     ggplot2::theme_classic() + 
     tidyquant::scale_color_tq()

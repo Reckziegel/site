@@ -1,0 +1,377 @@
+---
+title: How much shrinkage does the stock market requires?
+author: Bernardo Reckziegel
+date: '2018-09-05'
+slug: how-much-shrinkage-does-the-stock-market-requires
+categories:
+  - finance
+  - R
+  - estimation
+tags:
+  - finance
+  - robust statistics
+  - shrinkage
+---
+
+
+
+<p>Shrinkage is hardly new in finance. In 1956, Charles Stein published a famous paper called <a href="https://projecteuclid.org/euclid.bsmsp/1200501656"><em>Inadmissibility of the usual estimator for the mean of a multivariate normal distribution</em></a>. He shows that, if the sum of the squares of the errors is used as a loss function, then, for <code>$ n \geq 2 $</code>, the sample mean can be improved by exploring the trade-off among bias and variance. This improvement is due to shrinkage!</p>
+<p>Simply put, shrinkage is a form of averaging different estimators, and its composed of three parts:</p>
+<ol style="list-style-type: decimal">
+<li>An estimator of little or no structure (the sample mean and the sample covariance are often good candidates in this case)</li>
+<li>An estimator with a lot of structure (a single value for the mean or a diagonal matrix for the variance would be acceptable examples)</li>
+<li>The shrinkage target (goes from 0 to 1 allowing for convex combinations between the structurerd and the non-structured estimators).</li>
+</ol>
+<p>To the best of my knowledge, <a href="https://www.researchgate.net/publication/227357373_Bayes-Stein_Estimation_For_Portfolio_Analysis">Jorrion</a> was the first to apply this concept in the financial industry and portfolio optimization problems. Almost 20 years later, Ledoit&amp;Wolf published a paper called <a href="http://www.ledoit.net/honey.pdf"><em>Honey, I Shrunk the Sample Covariance Matrix</em></a> in which the authors strongly claim:</p>
+<p><em>“The central message of this paper is that nobody should be using the sample covariance matrix for the purpose of portfolio optimization. It contains estimation error of the kind most likely to perturb a mean-variance optimizer. In its place, we suggest using the matrix obtained from the sample covariance matrix through a transformation called shrinkage. This tends to pull the most extreme coefficients towards more central values, thereby systematically reducing estimation error where it matters most. Statistically, the challenge is to know the optimal shrinkage intensity, and we give the formula for that. Without changing any other step in the portfolio optimization process, we show on actual stock market data that shrinkage reduces tracking error relative to a benchmark index, and substantially increases the realized information ratio of the active portfolio manager”.</em></p>
+<p>In this post we are going to implement the equation (2) of their original paper</p>
+<p><code>$$ \hat{\Sigma}_{Shrink} = \hat{\delta} F + (1 - \hat{\delta}) S $$</code></p>
+<p>to estimate the optimal shrinkage intensity for the S&amp;P 500 stocks using a daily database (from 2000-01-01 up to 2018-09-04). In second place, we will verify if these “optimal” values are stable across time by using different rolling windows to estimate <code>$ \hat{\delta} $</code>. Lastly, we are going to extract the amount of error embedded in the estimation process to verify if they are increasing or decreasing over time.</p>
+<p>Let’s get started!</p>
+<div id="required-libraries" class="section level2">
+<h2>Required Libraries</h2>
+<pre class="r"><code>library(tidyverse)
+library(tidyquant)
+library(rvest)
+library(Quandl)</code></pre>
+<p>If you still don’t have an account at <a href="https://www.quandl.com/">Quandl</a>, I will highly recommend you to do a free registration. This will enable you to download an unlimited amount of times series every day, in contrast to only 50 per day without being registered.</p>
+</div>
+<div id="download-the-sp-500-stocks" class="section level2">
+<h2>Download the S&amp;P 500 stocks</h2>
+<pre class="r"><code># function to get sp500 tickers -------------------------------------------
+
+get_sp500_tickers &lt;- function() {
+    
+    raw_get &lt;- function() {
+        
+        xml2::read_html(&#39;https://en.wikipedia.org/wiki/List_of_S%26P_500_companies&#39;) %&gt;% 
+            rvest::html_node(&#39;table.wikitable&#39;) %&gt;% 
+            rvest::html_table() %&gt;% 
+            dplyr::as_tibble()
+        
+    }
+    
+    possible_get &lt;- purrr::possibly(
+        .f        = raw_get, 
+        otherwise = NA
+    )
+    
+    possible_get() %&gt;% 
+        dplyr::rename(
+            ticker_symbol     = &#39;Ticker symbol&#39;, 
+            security          = &#39;Security&#39;,
+            sec_filings       = &#39;SEC filings&#39;, 
+            gics_sector       = &#39;GICS Sector&#39;,
+            gics_sub_industry = &#39;GICS Sub Industry&#39;
+        )
+    
+}
+
+
+# download the tickers ----------------------------------------------------
+
+tickers &lt;- get_sp500_tickers()
+
+
+# function to download the sp500 stocks from tickers ----------------------
+
+download_stocks_from_tickers &lt;- function(data, ...) {
+    
+    # tidy eval
+    dots_expr &lt;- dplyr::quos(...)
+    
+    # defensive programming
+    possible_quandl &lt;- purrr::possibly(Quandl::Quandl, NA)
+    
+    # data manipulation
+    data %&gt;% 
+        dplyr::mutate(possible_download = purrr::map(
+            .x = ., 
+            .f = ~ possible_quandl(., !!! dots_expr)
+        )
+    )
+    
+}
+
+
+# download the sp500 stocks -----------------------------------------------
+
+stocks &lt;- tickers %&gt;% 
+    
+    # create the list columns to map over
+    dplyr::mutate(wiki_tickers = str_c(&#39;WIKI/&#39;, ticker_symbol, &#39;.11&#39;)) %&gt;% 
+    tidyr::nest(wiki_tickers) %&gt;%
+    
+    # download data from 2009 onwards
+    dplyr::mutate(download_tickers = map(
+        .x           = data, 
+        .f           = download_stocks_from_tickers, # the custom function is here!
+        order        = &#39;asc&#39;, 
+        collapse     = &#39;daily&#39;, 
+        type         = &#39;raw&#39;, 
+        start_date   = &#39;2000-01-01&#39;, 
+        column_index = 11) # column 11 = adjusted close price
+    ) %&gt;% 
+    
+    # reorganize the data in a clean tibble format
+    dplyr::select(ticker_symbol, 
+                  security, 
+                  gics_sector, 
+                  gics_sub_industry, 
+                  download_tickers
+    ) %&gt;% 
+    tidyr::unnest(download_tickers) %&gt;% 
+    
+    # exclude all the column-lists with NA 
+    dplyr::filter(!is.na(possible_download)) %&gt;% 
+    
+    # cleaning 
+    tidyr::unnest(possible_download) %&gt;% 
+    dplyr::rename(prices = `Adj. Close`) %&gt;% 
+    dplyr::select(Date, 
+                  ticker_symbol, 
+                  prices
+    ) %&gt;% 
+    
+    # calculate returns
+    dplyr::group_by(ticker_symbol) %&gt;% 
+    tidyquant::tq_mutate(
+        select     = prices, 
+        mutate_fun = periodReturn,
+        col_rename = &#39;returns&#39;,
+        period     = &#39;daily&#39;,
+        type       = &#39;log&#39;
+    ) %&gt;% 
+    dplyr::ungroup()
+
+stocks</code></pre>
+<pre><code>## # A tibble: 2,031,982 x 4
+##    ticker_symbol Date       prices  returns
+##    &lt;chr&gt;         &lt;date&gt;      &lt;dbl&gt;    &lt;dbl&gt;
+##  1 MMM           2000-01-03   30.8  0      
+##  2 MMM           2000-01-04   29.6 -0.0405 
+##  3 MMM           2000-01-05   31.1  0.0497 
+##  4 MMM           2000-01-06   32.9  0.0566 
+##  5 MMM           2000-01-07   33.5  0.0196 
+##  6 MMM           2000-01-10   33.4 -0.00488
+##  7 MMM           2000-01-11   32.8 -0.0178 
+##  8 MMM           2000-01-12   32.9  0.00298
+##  9 MMM           2000-01-13   32.9  0      
+## 10 MMM           2000-01-14   32.4 -0.0149 
+## # ... with 2,031,972 more rows</code></pre>
+<p>This code is almost identical to the one I had used in my previous post. If you want to have a detailed explanation on how it works, please, feel free to so by clicking <a href="http://www.bernardo.codes/2018/08/27/how-many-stocks-in-the-s-p-500-do-follow-a-random-walk/">here</a>.</p>
+<p>The <code>stocks</code> tibble is composed of a daily database from 2000 onwards. Note, however, that many of the stocks have only a few number of observations.</p>
+<pre class="r"><code>stocks %&gt;%
+    dplyr::select(Date, ticker_symbol, returns) %&gt;% 
+    dplyr::group_by(ticker_symbol) %&gt;% 
+    dplyr::summarise(
+        n          = dplyr::n(), 
+        first_date = min(Date)
+    ) %&gt;% 
+    dplyr::arrange(dplyr::desc(first_date))</code></pre>
+<pre><code>## # A tibble: 500 x 3
+##    ticker_symbol     n first_date
+##    &lt;chr&gt;         &lt;int&gt; &lt;date&gt;    
+##  1 CBRE              4 2018-03-22
+##  2 BKNG             14 2018-03-08
+##  3 WELL             14 2018-03-08
+##  4 APTV             74 2017-12-08
+##  5 IQV              90 2017-11-15
+##  6 TPR             100 2017-10-31
+##  7 DWDP            141 2017-09-01
+##  8 BHF             159 2017-08-08
+##  9 ANDV            162 2017-08-03
+## 10 BHGE            181 2017-07-06
+## # ... with 490 more rows</code></pre>
+<p>Working with unbalanced data challenges the estimation process. Let’s add simple filter to exclude all the stock with less than <code>$ 4000 $</code> trading days (~ 15 years).</p>
+<pre class="r"><code>stocks_filtered &lt;- stocks %&gt;% 
+    dplyr::select(Date, ticker_symbol, returns) %&gt;%
+    
+    # manipulate
+    dplyr::group_by(ticker_symbol) %&gt;% 
+    dplyr::mutate(n = dplyr::n()) %&gt;% 
+    dplyr::filter(n &gt; 4000) %&gt;% 
+    dplyr::select(-n) %&gt;% 
+    dplyr::ungroup() %&gt;% 
+    
+    # spread the data
+    tidyr::spread(ticker_symbol, returns) %&gt;% 
+    tidyr::drop_na()
+
+stocks_filtered</code></pre>
+<pre><code>## # A tibble: 4,015 x 406
+##    Date              A      AAP     AAPL      ABC     ABMD      ABT
+##    &lt;date&gt;        &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+##  1 2001-12-13 -0.0740  -0.00950 -0.0231   5.53e-3 -0.0692   0.00282
+##  2 2001-12-14  0.0108  -0.0244  -0.0295   2.45e-2 -0.0242   0.0225 
+##  3 2001-12-17  0.00277  0.00269  0.0112  -9.63e-3  0       -0.00738
+##  4 2001-12-18 -0.00312  0        0.0187   2.12e-2 -0.00779 -0.00278
+##  5 2001-12-19 -0.00941  0.00122  0.0286   2.56e-2 -0.0380   0.0179 
+##  6 2001-12-20 -0.0302   0.0300  -0.0449  -3.24e-4 -0.0447   0.0141 
+##  7 2001-12-21  0.00898  0.0694   0.0158   1.46e-2  0.0447   0.0176 
+##  8 2001-12-24  0.0198   0.0101   0.0170   9.70e-3  0.0247  -0.00230
+##  9 2001-12-26 -0.0145   0.00436  0.00607  5.21e-3  0.00910  0.00548
+## 10 2001-12-27  0.0260   0.0204   0.0266  -8.85e-3 -0.0214  -0.00477
+## # ... with 4,005 more rows, and 399 more variables: ACN &lt;dbl&gt;, ADBE &lt;dbl&gt;,
+## #   ADI &lt;dbl&gt;, ADM &lt;dbl&gt;, ADP &lt;dbl&gt;, ADS &lt;dbl&gt;, ADSK &lt;dbl&gt;, AEE &lt;dbl&gt;,
+## #   AEP &lt;dbl&gt;, AES &lt;dbl&gt;, AET &lt;dbl&gt;, AFL &lt;dbl&gt;, AGN &lt;dbl&gt;, AIG &lt;dbl&gt;,
+## #   AIV &lt;dbl&gt;, AJG &lt;dbl&gt;, AKAM &lt;dbl&gt;, ALB &lt;dbl&gt;, ALGN &lt;dbl&gt;, ALK &lt;dbl&gt;,
+## #   ALL &lt;dbl&gt;, ALXN &lt;dbl&gt;, AMAT &lt;dbl&gt;, AMD &lt;dbl&gt;, AME &lt;dbl&gt;, AMG &lt;dbl&gt;,
+## #   AMGN &lt;dbl&gt;, AMT &lt;dbl&gt;, AMZN &lt;dbl&gt;, ANSS &lt;dbl&gt;, ANTM &lt;dbl&gt;, AON &lt;dbl&gt;,
+## #   AOS &lt;dbl&gt;, APA &lt;dbl&gt;, APC &lt;dbl&gt;, APD &lt;dbl&gt;, APH &lt;dbl&gt;, ARE &lt;dbl&gt;,
+## #   ARNC &lt;dbl&gt;, ATVI &lt;dbl&gt;, AVB &lt;dbl&gt;, AVY &lt;dbl&gt;, AXP &lt;dbl&gt;, AZO &lt;dbl&gt;,
+## #   BA &lt;dbl&gt;, BAC &lt;dbl&gt;, BAX &lt;dbl&gt;, BBT &lt;dbl&gt;, BBY &lt;dbl&gt;, BDX &lt;dbl&gt;,
+## #   BEN &lt;dbl&gt;, BIIB &lt;dbl&gt;, BK &lt;dbl&gt;, BLK &lt;dbl&gt;, BLL &lt;dbl&gt;, BMY &lt;dbl&gt;,
+## #   BSX &lt;dbl&gt;, BWA &lt;dbl&gt;, BXP &lt;dbl&gt;, C &lt;dbl&gt;, CA &lt;dbl&gt;, CAG &lt;dbl&gt;,
+## #   CAH &lt;dbl&gt;, CAT &lt;dbl&gt;, CB &lt;dbl&gt;, CCI &lt;dbl&gt;, CCL &lt;dbl&gt;, CDNS &lt;dbl&gt;,
+## #   CELG &lt;dbl&gt;, CERN &lt;dbl&gt;, CHD &lt;dbl&gt;, CHRW &lt;dbl&gt;, CI &lt;dbl&gt;, CINF &lt;dbl&gt;,
+## #   CL &lt;dbl&gt;, CLX &lt;dbl&gt;, CMA &lt;dbl&gt;, CMCSA &lt;dbl&gt;, CMI &lt;dbl&gt;, CMS &lt;dbl&gt;,
+## #   CNC &lt;dbl&gt;, CNP &lt;dbl&gt;, COF &lt;dbl&gt;, COG &lt;dbl&gt;, COL &lt;dbl&gt;, COO &lt;dbl&gt;,
+## #   COP &lt;dbl&gt;, COST &lt;dbl&gt;, CPB &lt;dbl&gt;, CPRT &lt;dbl&gt;, CSCO &lt;dbl&gt;, CSX &lt;dbl&gt;,
+## #   CTAS &lt;dbl&gt;, CTL &lt;dbl&gt;, CTSH &lt;dbl&gt;, CTXS &lt;dbl&gt;, CVS &lt;dbl&gt;, CVX &lt;dbl&gt;,
+## #   D &lt;dbl&gt;, DE &lt;dbl&gt;, ...</code></pre>
+</div>
+<div id="honey-i-translated-a-matlab-function-to-r" class="section level2">
+<h2>Honey, I translated a MATLAB function to R</h2>
+<p>In his page, Michael Wolf provides the MATLAB <a href="https://www.econ.uzh.ch/en/people/faculty/wolf/publications.html">code</a> for most of it’s publications. I translated the function associated with the paper <em>Honey, I Shrunk the Sample Covariance Matrix</em>. See bellow:</p>
+<pre class="r"><code>honey_shrunk &lt;- function(R, shrink = NULL) {
+    
+    # &quot;Honey, I Shrunk the Sample Covariance Matrix&quot;
+    # http://www.ledoit.net/honey.pdf
+    # https://www.econ.uzh.ch/en/people/faculty/wolf/publications.html
+    
+    n  &lt;- nrow(R)
+    p  &lt;- ncol(R)
+    mu &lt;- apply(R, 2, mean)
+    R  &lt;- R - matrix(rep(mu, times = n), ncol = p, byrow = TRUE)
+    
+    # Covariancia amostral usando  (R - mean)
+    sample  &lt;- (1 / n) * (t(R) %*% R)
+    
+    # Prior
+    var     &lt;- matrix(diag(sample), ncol = 1)
+    sqrtvar &lt;- sqrt(var)
+    tmpMat  &lt;- matrix(rep(sqrtvar, times = p), nrow = p)
+    rBar    &lt;- (sum(sum(sample / (tmpMat * t(tmpMat)))) - p) / (p * (p - 1))
+    prior   &lt;- rBar * tmpMat * t(tmpMat)
+    diag(prior) &lt;- var
+    
+    if (is.null(shrink)) {
+        
+        # pi-hat
+        y      &lt;- R ^ 2
+        phiMat &lt;- t(y) %*% y / n - 2 * (t(R) %*% R) * sample / n + sample ^ 2
+        phi    &lt;- sum(phiMat)
+        
+        # Wrho-hat
+        aux1     &lt;- (t(R ^ 3) %*% R) / n
+        help     &lt;- t(R) %*% R / n
+        helpDiag &lt;- matrix(diag(help), ncol = 1)
+        aux2     &lt;- matrix(rep(helpDiag, times = p), ncol = p) * sample
+        aux3     &lt;- help * matrix(rep(var, times = p), ncol = p)
+        aux4     &lt;- matrix(rep(var, times = p), ncol = p) * sample
+        thetaMat &lt;- aux1 - aux2 - aux3 + aux4
+        diag(thetaMat) &lt;- 0
+        rho      &lt;- sum(diag(phiMat)) + rBar * sum(sum(((1 / sqrtvar) %*% t(sqrtvar)) * thetaMat))
+        
+        # gamma-hat
+        gamma &lt;- norm(sample - prior, &quot;F&quot;) ^ 2
+        
+        # Shrinkage constant
+        kappa     &lt;- (phi - rho) / gamma
+        shrinkage &lt;- max(0, min(1, kappa / n))
+        
+    } else {
+        
+        shrinkage &lt;- shrink
+        
+    }
+    
+    # Estimador
+    sigma &lt;- shrinkage * prior + (1 - shrinkage) * sample
+    out   &lt;- list(cov = sigma, prior = prior, shrinkage = shrinkage)
+    
+    return(out)
+    
+}</code></pre>
+<p>The final output contains three lists:</p>
+<ul>
+<li><strong>cov</strong>: this is equivalent to <code>$ \hat{\Sigma}_{Shrink} $</code> or, if you prefer, the equation (2) in their original paper;</li>
+<li><strong>prior</strong>: this is the <code>$ F $</code> matrix or the equation (3), as they present in the appendix A;</li>
+<li><strong>shrinkage</strong>: this is the optimal <code>$ \hat{\delta} $</code> that appears in equation (2).</li>
+</ul>
+</div>
+<div id="rolling-windows" class="section level2">
+<h2>Rolling Windows</h2>
+<p>To answer our initial question <em>How much shrinkage does the stock market requires?</em> we wil need to use the <code>honey_shrunk()</code> function on a rolling window to measure how the shrinkage intensity envolves across time.</p>
+<p>There are many ways in which we could do that, but I chose the simplest one, which is using nothing more than a <code>for</code> loop. The <code>tq_transmute()</code> function from the <code>tidyquant</code> package fits nicely to this tasks, simplifing a lot of data manipulation for us.</p>
+<p>For sake of simplicity, I’ve also chose 3 months, 1 year, 3 years and 5 years as estimation windows to map over. That is no specific reason to keep them fixed and you can experiment different windows if you like to. But before using the following script, be aware that its probably going to take one or two hours to run.</p>
+<pre class="r"><code>rolling_windows &lt;- c(90, 252, 756, 1260)
+rollapply_list &lt;- vector(&#39;list&#39;, length(rolling_windows))
+
+for (i in seq_along(rolling_windows)) {
+    
+    rollapply_list[[i]] &lt;- stocks_filtered %&gt;% 
+        tidyquant::tq_transmute(
+            mutate_fun = rollapply, 
+            width      = rolling_windows[[i]], 
+            FUN        = function(x) honey_shrunk(x[ , -1])$shrinkage, 
+            by.column  = FALSE, 
+            col_rename = stringr::str_c(&#39;shrinkage_intensity_&#39;, rolling_windows[[i]])
+        )    
+    
+}</code></pre>
+<p>As expected, as we increase the numbers of observations from 90, to 252, … up to 1260 days the shrinkage intensity diminishes signifcantly. For 90 days, the amout of shrinkage required is almost the double of the one required for 252 days, which is more than double demanded for 3 years, and so on so forth. This is in accordance to the <a href="https://en.wikipedia.org/wiki/Asymptotic_analysis">assimptotic theory</a> that states that the sample covariance matrix is an unbiased estimator for the “true” covariance matrix as <code>$ n $</code>, the number of observations, increase indefinetly.</p>
+<p><img src="/post/2018-09-05-how-much-shrinkage-does-the-stock-market-requires_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p>Furthermore, we can explore the equation <code>$ \hat{\Sigma}_{Shrink} = \delta F + (1 - \delta) S $</code> to find out the ratio between shrinkage and estimation error, that is, <code>$ \frac{\delta}{1 - \delta} $</code>. whenever this fraction is above <code>$ 0.5 $</code> the data has at least as much estimation error in the sample covarance matrix than as there bias in the structured <code>$ F $</code> matrix and, consequently, a higher <code>$ \delta $</code> is needed to equalize the bias and variance trade-off.</p>
+<pre class="r"><code>rollapply_list[[1]] %&gt;% 
+    dplyr::left_join(rollapply_list[[2]], by = &#39;Date&#39;) %&gt;% 
+    dplyr::left_join(rollapply_list[[3]], by = &#39;Date&#39;) %&gt;% 
+    dplyr::left_join(rollapply_list[[4]], by = &#39;Date&#39;) %&gt;% 
+    dplyr::rename(
+        `90 days`   = &#39;shrinkage_intensity_1&#39;, 
+        `252 days`  = &#39;shrinkage_intensity_2&#39;, 
+        `756 days`  = &#39;shrinkage_intensity_3&#39;, 
+        `1260 days` = &#39;shrinkage_intensity_4&#39;
+        ) %&gt;% 
+    tidyr::gather(Intensity, values, -Date) %&gt;% 
+    dplyr::mutate_if(purrr::is_character, forcats::as_factor) %&gt;% 
+    dplyr::group_by(Intensity) %&gt;% 
+    dplyr::mutate(Error = values / (1 - values)) %&gt;% 
+    
+    ggplot2::ggplot(aes(x = Date, y = Error, color = Intensity)) + 
+    ggplot2::facet_wrap(~ Intensity, scales = &#39;free_y&#39;) + 
+    ggplot2::geom_line(show.legend = FALSE, size = 1) +
+    ggplot2::labs(
+        title    = &#39;Estimation Error&#39;,
+        subtitle = &#39;Rolling Windows: 3 months, 1 year, 3 years and 5 years&#39;,
+        y        = &#39;&#39;, 
+        x        = &#39;&#39;
+    ) + 
+    ggplot2::theme_classic() + 
+    tidyquant::scale_color_tq()</code></pre>
+<p><img src="/post/2018-09-05-how-much-shrinkage-does-the-stock-market-requires_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p>Despite the huge outlier presented in the estimation process around 2012, the amount of error for periods of less than one year is significant. For 3 months, the median error rate é about 80%. This value decreases significantly for one year and stabilizes after three years onwards.</p>
+<pre class="r"><code>rollapply_list[[1]] %&gt;% 
+    dplyr::left_join(rollapply_list[[2]], by = &#39;Date&#39;) %&gt;% 
+    dplyr::left_join(rollapply_list[[3]], by = &#39;Date&#39;) %&gt;% 
+    dplyr::left_join(rollapply_list[[4]], by = &#39;Date&#39;) %&gt;% 
+    dplyr::rename(
+        `90 days`   = &#39;shrinkage_intensity_1&#39;, 
+        `252 days`  = &#39;shrinkage_intensity_2&#39;, 
+        `756 days`  = &#39;shrinkage_intensity_3&#39;, 
+        `1260 days` = &#39;shrinkage_intensity_4&#39;
+        ) %&gt;% 
+    tidyr::gather(Intensity, values, -Date) %&gt;% 
+    dplyr::mutate_if(purrr::is_character, forcats::as_factor) %&gt;% 
+    dplyr::group_by(Intensity) %&gt;% 
+    dplyr::mutate(Error = values / (1 - values)) %&gt;% 
+    dplyr::summarise(median = median(values, na.rm = TRUE))</code></pre>
+<pre><code>## # A tibble: 4 x 2
+##   Intensity Median_Error
+##   &lt;fct&gt;            &lt;dbl&gt;
+## 1 90 days          0.784
+## 2 252 days         0.332
+## 3 756 days         0.160
+## 4 1260 days        0.130</code></pre>
+</div>

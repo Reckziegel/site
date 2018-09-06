@@ -6,10 +6,19 @@
     <description>Recent content in Finance on A Hugo website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 27 Aug 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 05 Sep 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/categories/finance/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>How much shrinkage does the stock market requires?</title>
+      <link>/2018/09/05/how-much-shrinkage-does-the-stock-market-requires/</link>
+      <pubDate>Wed, 05 Sep 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/09/05/how-much-shrinkage-does-the-stock-market-requires/</guid>
+      <description>Shrinkage is hardly new in finance. In 1956, Charles Stein published a famous paper called Inadmissibility of the usual estimator for the mean of a multivariate normal distribution. He shows that, if the sum of the squares of the errors is used as a loss function, then, for $ n \geq 2 $, the sample mean can be improved by exploring the trade-off among bias and variance. This improvement is due to shrinkage!</description>
+    </item>
     
     <item>
       <title>How many stocks in the S&amp;P 500 do follow a random-walk?</title>
