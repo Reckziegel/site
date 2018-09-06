@@ -21,13 +21,13 @@ knitr::opts_chunk$set(echo = FALSE, eval = FALSE, message = FALSE, warning = FAL
 ```
 
 
-Shrinkage is hardly new in finance. In 1956, Charles Stein published a famous paper called [*Inadmissibility of the usual estimator for the mean of a multivariate normal distribution*](https://projecteuclid.org/euclid.bsmsp/1200501656). He shows that, if the sum of the squares of the errors is used as a loss function, then, for `$ n \geq 2 $`, the sample mean can be improved by exploring the trade-off among bias and variance. This improvement is due to shrinkage!
+Shrinkage is hardly new in finance. In 1956, Charles Stein published a famous paper called [*Inadmissibility of the usual estimator for the mean of a multivariate normal distribution*](https://projecteuclid.org/euclid.bsmsp/1200501656). In this work, he shows that, if the sum of the squares of the errors (SSE) is used as a loss function, then, for `$ n \geq 2 $`, the sample mean is not an optimal estimator and can be improved by exploring the trade-off among bias and variance. This improvement is done through shrinkage!
 
 Simply put, shrinkage is a form of averaging different estimators, and its composed of three parts:
 
 1. An estimator of little or no structure (the sample mean and the sample covariance are often good candidates in this case)
 2. An estimator with a lot of structure (a single value for the mean or a diagonal matrix for the variance would be acceptable examples)
-3. The shrinkage target (goes from 0 to 1 allowing for convex combinations between the structurerd and the non-structured estimators).
+3. The shrinkage target (goes from 0 to 1 allowing for convex combinations between the highly structurerd and the non-structured estimators).
 
 To the best of my knowledge, [Jorrion (1986)](https://www.researchgate.net/publication/227357373_Bayes-Stein_Estimation_For_Portfolio_Analysis) was the first to apply this concept in the financial industry and portfolio optimization problems. Almost 20 years later, Ledoit&Wolf published a paper called [*Honey, I Shrunk the Sample Covariance Matrix*](http://www.ledoit.net/honey.pdf) in which the authors strongly claim:
 
@@ -182,7 +182,7 @@ stocks
 ```
 
 
-This code is almost identical to the one I had used in my previous post. If you want to have a detailed explanation on how it works, please, feel free to so by clicking [here](http://www.bernardo.codes/2018/08/27/how-many-stocks-in-the-s-p-500-do-follow-a-random-walk/). 
+This code is almost identical to the one I had used in my previous post. If you want to see a detailed explanation on how it works, please, feel free to so by clicking [here](http://www.bernardo.codes/2018/08/27/how-many-stocks-in-the-s-p-500-do-follow-a-random-walk/). 
 
 The `stocks` tibble is composed of a daily database from 2000 onwards. Note, however, that many of the stocks have only a few number of observations.
 
@@ -216,7 +216,7 @@ stocks %>%
 ```
 
 
-Working with unbalanced data challenges the estimation process. Let's add simple filter to exclude all the stock with less than `$ 4000 $` trading days (~ 15 years).
+Working with unbalanced data (like the one above) challenges the estimation process. Let's add simple filter to exclude all the stock with less than `$ 4000 $` trading days (~ 15 years).
 
 
 ```{r echo=TRUE}
@@ -251,7 +251,7 @@ stocks_filtered
 
 ## Honey, I translated a MATLAB function to R
 
-In his page, Michael Wolf provides the MATLAB [code](https://www.econ.uzh.ch/en/people/faculty/wolf/publications.html) for most of it's publications. I translated the function associated with the paper *Honey, I Shrunk the Sample Covariance Matrix*. See bellow:
+In his page, Michael Wolf provides the MATLAB [code](https://www.econ.uzh.ch/en/people/faculty/wolf/publications.html) for most of it's publications. I translated the function associated with the paper *Honey, I Shrunk the Sample Covariance Matrix*, in which you can download [here](https://www.econ.uzh.ch/dam/jcr:ffffffff-935a-b0d6-ffff-ffffde5e2d4e/covCor.m.zip). See bellow:
 
 ```{r, echo=TRUE}
 
@@ -357,7 +357,7 @@ for (i in seq_along(rolling_windows)) {
 
 As expected, as we increase the numbers of observations from 90, to 252, ... up to 1260 days the shrinkage intensity diminishes signifcantly. For 90 days, the amout of shrinkage required is almost the double of the one required for 252 days, which is more than double demanded for 3 years, and so on so forth. This is in accordance to the [assimptotic theory](https://en.wikipedia.org/wiki/Asymptotic_analysis) that states that the sample covariance matrix is an unbiased estimator for the "true" covariance matrix as `$ n $`, the number of observations, increase indefinetly.
 
-```{r}
+```{r, echo=TRUE}
 
 rollapply_list[[1]] %>% 
     dplyr::left_join(rollapply_list[[2]], by = 'Date') %>% 
@@ -481,7 +481,7 @@ rollapply_list[[1]] %>%
 ```
 
 
-Despite the huge outlier presented in the estimation process around 2012, the amount of error for periods of less than one year is significant. For 3 months, the median error rate é about 80%. This value decreases significantly for one year and stabilizes after three years onwards. 
+Despite the huge outlier presented in the estimation process around 2012, the amount of error for a period of less than a year is significant. For 3 months, the median error rate é about 80%. This value decreases sharply for one year and stabilizes after three years onwards. 
 
 ```{r, echo=TRUE}
 
@@ -526,3 +526,4 @@ rollapply_list[[1]] %>%
 
 ```
 
+**The central message is that, if we are working with daily data, we should use as much osbservations as we can**. Five years is a reasonable period and standard practice form most researchers in the financial industry. For monthly or quaterly time series, however, it's not clear if the same applies. Can data from 10 years ago give us any clue about the predictive paths of a stock? I will came back to this topic in more detail, but in a latter post. 
