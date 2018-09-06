@@ -349,7 +349,7 @@ It's easy to see through the use of partial derivatives
 
 `$$ \frac{\partial{AIC}}{\partial{k}} = 2 $$`
 
-and 
+and
 
 `$$ \frac{\partial{BIC}}{\partial{k}} = ln(n) $$`
 

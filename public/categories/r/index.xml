@@ -26,7 +26,7 @@
       <pubDate>Mon, 27 Aug 2018 00:00:00 +0000</pubDate>
       
       <guid>/2018/08/27/how-many-stocks-in-the-s-p-500-do-follow-a-random-walk/</guid>
-      <description>There has been a huge growth of machine learning models’ in finance. The underlying idea behind those models is that a if the data is identically and independent distributed (i.i.d.) the statistician can use the law of large numbers (LLN) and the Glivenko-Canteli theorem to uncover the asymptotic behavior of the “true” distribution, which is, in fact, unknown. As the number of observations increase, closer and closer we get to the true values.</description>
+      <description>There has been a huge growth of machine learning models’ in finance. The underlying idea behind those models is that if the data is identically and independent distributed (i.i.d.) the statistician can use the law of large numbers (LLN) and the Glivenko-Canteli theorem to uncover the asymptotic behavior of the “true” distribution, which is, in fact, unknown. As the number of observations increase, closer and closer we get to the true hidden values.</description>
     </item>
     
     <item>
