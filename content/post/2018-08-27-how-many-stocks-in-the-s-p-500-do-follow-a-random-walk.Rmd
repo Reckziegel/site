@@ -25,9 +25,11 @@ knitr::opts_chunk$set(
 ```
 
 
-There has been a huge growth of machine learning models’ in finance. The underlying idea behind those models is that a if the data is identically and independent distributed (i.i.d.) the statistician can use the law of large numbers (LLN) and the [Glivenko-Canteli theorem](https://en.wikipedia.org/wiki/Glivenko–Cantelli_theorem) to uncover the asymptotic behavior of the “true” distribution, which is, in fact, unknown. As the number of observations increase, closer and closer we get to the true values.
+There has been a huge growth of machine learning models’ in finance. The underlying idea behind those models is that if the data is identically and independent distributed (i.i.d.) the statistician can use the law of large numbers (LLN) and the [Glivenko-Canteli theorem](https://en.wikipedia.org/wiki/Glivenko–Cantelli_theorem) to uncover the asymptotic behavior of the “true” distribution, which is, in fact, unknown. As the number of observations increase, closer and closer we get to the true hidden values.
 
-At the same time, forecasters have been spending, during the last 30 years, a huge amount of time trying to detect hidden patterns in the stock market, most often than not, with a questionable rate of success. As the [Nobel Prize Winner](https://www.nobelprize.org/prizes/economics/2003/granger/facts/), Clive Granger [states](http://www.forecastingprinciples.com/paperpdf/Granger-stockmarket.pdf), at some sense, the market must follow a random walk, otherwise the it would be an unlimited source of money machine. So, two questions emerge: how many stocks of the S&P 500 show any evidence of following a random-walk? And what implications the results impose for machine learning models in finance? 
+At the same time, forecasters have been spending over the last 30 years, a huge amount of time trying to detect veiled patterns in the stock market, most often than not, with a questionable rate of success. 
+
+As the [Nobel Prize Winner](https://www.nobelprize.org/prizes/economics/2003/granger/facts/), Clive Granger [states](http://www.forecastingprinciples.com/paperpdf/Granger-stockmarket.pdf), at some sense, the market must follow a random walk, otherwise the it would be an unlimited source of money machine. Therefore, is reasonable to ask two questions: how many stocks of the S&P 500 show any evidence of actually following a random-walk? And what implications these results impose for machine learning models in finance? 
 
 Those are the issues I will try to address in this post.
 
@@ -84,7 +86,7 @@ get_sp500_tickers <- function() {
 ```
 
 
-I've used a function inside another function because I believe that this is one of the biggest assets of working with `R`: great chunks of code can be decomposed in small pieces and then grouped together latter on to solve the bigger picture. Specially important is the use of `possibly()` that "guarantees" that the main script will run. If any error occurs, we get `NA` as an answer, but the code still runs.
+I've used a function inside another function because this is one of the biggest assets of working with `R`: great chunks of code can be decomposed in small pieces and then grouped together latter on to solve the bigger picture. Specially important is the use of `possibly()` that "guarantees" that the main script will run. If any error occurs, we get a `NA` as an answer, but the code still runs.
 
 
 ```{r}
@@ -235,13 +237,13 @@ stocks_to_ts
 
 ## Map over list columns
 
-Now the setup is complete and we are able to use the framework presented in the [chapter 25](http://r4ds.had.co.nz/many-models.html) of **R for data Science**. The `map()` function recursively estimates which ARMA model fits better in which one of the stocks according to [Akaike](https://en.wikipedia.org/wiki/Akaike_information_criterion) selection criterion. The AIC formula is
+Now the setup is complete and we are able to use the framework presented in the [chapter 25](http://r4ds.had.co.nz/many-models.html) of **R for data Science**. The `map()` function recursively estimates which ARMA model fits better in which one of the stocks, according to [Akaike](https://en.wikipedia.org/wiki/Akaike_information_criterion) selection criterion. The AIC formula is
 
 `$$ AIC = 2k - 2ln(\hat{L}) $$`
 
-in which `$k$`is the number of parameters in the model. The higher the `$k$`, higher the penalization and smaller the change of an overparametrized model being chose.
+in which `$k$` is the number of parameters in the model. The higher the `$k$`, higher the penalization and smaller the chance of an overparametrized model being chose.
 
-I also limited the number of lags in the p and q factor to be no more than 2. Since the data is organized on a monthly period, I’m also assuming that today's random shocks are not capable of disturb stock returns by more than two months ahead (at least, from a statistical significant point of view).  
+The number of lags in the p and q factor were limited to be no more than 2. Since the data is organized on a monthly period, this is identical to assume that today's random shocks are not capable of disturb stock returns by more than two months ahead (at least, from a statistically significant point of view).  
 
 ```{r}
 
@@ -266,7 +268,7 @@ stocks_to_ts_modeling
 
 ```
 
-In the last two lines of the printed tibble we see that the `stocks_to_ts_modeling` object now has all the standard evaluation metrics, like AIC, BIC, ME, RMSE, MAE, MAPE, MASE, ACF1. Not for one stock, but for all of them. The [tidyverse](https://www.tidyverse.org/) is power!
+In the last two lines of the printed tibble we see that the `stocks_to_ts_modeling` object now has all the standard evaluation metrics, like AIC, BIC, ME, RMSE, MAE, MAPE, MASE, ACF1. Not for one stock, but for all of them. That's how powerful the [tidyverse](https://www.tidyverse.org/) really is!
 
 ```{r, eval=TRUE, echo=FALSE}
 
@@ -339,11 +341,23 @@ stocks_to_ts_modeling %>%
 
 ```
 
-It’s incredible that 70% of the S&P 500 stocks do not present any sign of predictability (they are represented by the ARIMA(0, 0, 0) model, which is a random-walk). On top of that, an additional 10% of the stocks are composed by the ARIMA(0, 0, 1), which also follows the $E_t(y_t) = E_t(y_{t-1})$ rule. 
+It’s incredible that 70% of the S&P 500 stocks do not present any sign of predictability (as they are represented by the ARIMA(0, 0, 0) model, which is the random-walk). On top of that, an additional 10% of the stocks are composed by the ARIMA(0, 0, 1), which also follows the $E_t(y_{t + 1}) = E_t(y_{t})$ rule. 
 
-Specially interesting is the fact we have used the AIC criterion for selecting the models, which is known for having a lighter penalization than the [Bayesian Information Criterion (BIC)](https://en.wikipedia.org/wiki/Bayesian_information_criterion). That is, if we had used the BIC criterion as a cutoff, we would probably increase the number of models resembling a random walk, because a fewer parameters would be estimated.
+Specially interesting is the fact we have used the AIC criterion for selecting the models. The AIC is known for having a lighter penalization than the [Bayesian Information Criterion (BIC)](https://en.wikipedia.org/wiki/Bayesian_information_criterion). That is, if we had used the BIC criterion as a cutoff, we would probably increase the number of models resembling a random walk, because a fewer parameters would be estimated.
 
-But... What Machine Learning has to do with all of these? What the data is telling us, is that we should be very careful before blindly using ML techniques, specially if we care about over-fitting. If you keep continually digging into the surface (using parallel computing, non-linear models, etc.) at some point you will face *modeling risk*. In simple terms, model risk means that we are never certain that the selected model is, indeed, a representation of "true" data generating process. 
+It's easy to see through the use of partial derivatives
+
+`$$ \frac{\partial{AIC}}{\partial{k}} = 2 $$`
+
+and 
+
+`$$ \frac{\partial{BIC}}{\partial{k}} = ln(n) $$`
+
+but `$ 2 > ln(n) $` for any `$ n > 7 $`, which is always the case.  
+
+Now, let's come back to the main question: what does Machine Learning has to do with all of these? 
+
+The way that I see is: what the data is telling us, is that we should be very careful before blindly using ML techniques, specially if we care about over-fitting. Whenever you continually unearth into the surface (using parallel computing, non-linear models, etc.) at some point *modeling risk* will came up and get you. In simple terms, model risk means that we are never certain that the selected model is, indeed, a representation of "true" data generating process. 
 
 In the end of the day, we all have to face the fact that financial time series are fabulously noisy, up to a point of being almost completely random. This is the market efficiency in which Granger was [talking about](http://www.forecastingprinciples.com/paperpdf/Granger-stockmarket.pdf), and there is not much Machine Learning models can do to change that. They can calibrate hyper-parameters, but cannot change the state of the world!
 
