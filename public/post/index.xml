@@ -6,10 +6,20 @@
     <description>Recent content in Posts on A Hugo website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 05 Sep 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 08 Sep 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>A Covariance Matrix</title>
+      <link>/2018/09/08/a-covariance-matrix/</link>
+      <pubDate>Sat, 08 Sep 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/09/08/a-covariance-matrix/</guid>
+      <description>The code bellow is a transcription from the MATLAB code done by Ledoit&amp;amp;Wolf for their work Improved estimation of the covariance matrix of stock returns with an application to portfolio selection, which can be found here. If you also want to take a look on the original MATLAB code click here.
+covMarket &amp;lt;- function(x, shrink = TRUE) {# some operations work better with the matrix formatif (is.matrix(x) != TRUE) {x &amp;lt;- as.</description>
+    </item>
     
     <item>
       <title>How much shrinkage does the stock market requires?</title>
