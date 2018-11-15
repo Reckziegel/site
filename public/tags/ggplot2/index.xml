@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ggplot2 on A Hugo website</title>
+    <link>/tags/ggplot2/</link>
+    <description>Recent content in Ggplot2 on A Hugo website</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 14 Nov 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/ggplot2/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>The Dance of Yield</title>
+      <link>/2018/11/14/the-dance-of-yield/</link>
+      <pubDate>Wed, 14 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/11/14/the-dance-of-yield/</guid>
+      <description>Studying for the 2019 CFA Level III exam I came across a very interesting chapter on yield curve strategies. The content, among other things, explores the role of convexity and its importance in building custom views for expected returns. The code below intents to visually show that the US yields indeed change in a non-linear fashion very often.
+In theory, this can be used to concentrate or spread-out the portfolio maturity holdings.</description>
+    </item>
+    
+  </channel>
+</rss>

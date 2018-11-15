@@ -6,10 +6,20 @@
     <description>Recent content in R on A Hugo website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 08 Sep 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 14 Nov 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>The Dance of Yield</title>
+      <link>/2018/11/14/the-dance-of-yield/</link>
+      <pubDate>Wed, 14 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/11/14/the-dance-of-yield/</guid>
+      <description>Studying for the 2019 CFA Level III exam I came across a very interesting chapter on yield curve strategies. The content, among other things, explores the role of convexity and its importance in building custom views for expected returns. The code below intents to visually show that the US yields indeed change in a non-linear fashion very often.
+In theory, this can be used to concentrate or spread-out the portfolio maturity holdings.</description>
+    </item>
     
     <item>
       <title>A Covariance Matrix</title>
