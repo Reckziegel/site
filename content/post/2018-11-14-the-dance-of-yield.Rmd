@@ -1,5 +1,5 @@
 ---
-title: The Dance of Yield
+title: The Dance of the Yield
 author: Bernardo Reckziegel
 date: '2018-11-14'
 slug: the-dance-of-yield

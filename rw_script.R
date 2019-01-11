@@ -159,3 +159,7 @@ stocks_to_ts_modeling %>%
     ggplot(aes(x = arma, y = percent, color = arma)) + 
     geom_point(show.legend = FALSE) + 
     coord_flip() 
+
+save(stocks, stocks_to_ts, stocks_to_ts_modeling, tickers, 
+     file = 'rw_script_dataset.Rdata')
+

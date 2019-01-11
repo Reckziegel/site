@@ -1,0 +1,16 @@
+---
+title: Xi Jinping's Message
+author: Bernardo Reckziegel
+date: '2019-01-10'
+slug: xi-jinping-s-message
+categories: []
+tags: []
+---
+
+_I have a wall. You don't!_
+
+```{r, echo=FALSE}
+knitr::include_graphics('/images/chinese_wall.jpg')
+```
+
+LOL!
