@@ -11,13 +11,9 @@ tags:
   - ggplot2
 ---
 
-Studying for the 2019 CFA Level III exam I came across a very interesting chapter on yield curve strategies. The content, among other things, explores the role of convexity and its importance in building custom views for expected returns. The code below intents to visually show that the US yields indeed change in a non-linear fashion very often. 
+Studying for the 2019 CFA Level III exam I came across a very interesting chapter on yield curve strategies. The content, among other things, explores the role of convexity and its importance in building custom views for expected returns. 
 
-In theory, this can be used to concentrate or spread-out the portfolio maturity holdings. The retionale follows from convexity deffinition, which is a measure of the effect of non-linear shifts in interest-rates. 
-
-In a porfolio management context, convexity is an "asset" because imposes an assimetry in bond returns that almost every player in the market is looking for: the bond increases more than sugested by duration metrics if interest-rates decrease. Convexity becomes even more valuable when interest-rates volatility are expected to increase as well.  
-
-See the code.
+The code below intents to visually show that the US yields indeed change in a non-linear fashion very often. 
 
 ```{r, message=FALSE, warning=FALSE, fig.align='center', fig.width=12}
 # load libraries
@@ -65,8 +61,9 @@ animate(plot = p, nframes = n,  fps = 5)
 
 ```
 
+In a porfolio management context, this convexity can be tought as an "asset". It's main benefit is to twist bond returns: _prices increases_ more than sugested by linear metrics (such as duration) whenever _interest-rates go down_. This feature becomes even more valuable if interest-rates volatility is also expected to increase.  
 
-The main challenge to backtest [bullets](https://www.investopedia.com/terms/b/bulllet.asp) and [barbells](https://www.investopedia.com/terms/b/barbell.asp) strategies is how to set the *correct* prior conditional to the fact that time-series information vanishes often vary fast. Maybe factor analysis can play a role here (through level, stepness and curvature), but I don't expect the result to be soo significant. 
+The main challenge to backtest strategies like [bullets](https://www.investopedia.com/terms/b/bulllet.asp) and [barbells](https://www.investopedia.com/terms/b/barbell.asp) is how to set the correct prior conditional to the fact that time-series information vanishes vary fast. 
 
 I shall come back to this topic in the future. 
 

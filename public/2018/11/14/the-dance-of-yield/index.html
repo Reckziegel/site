@@ -67,10 +67,8 @@
     
 
     <div class="article-content">
-      <p>Studying for the 2019 CFA Level III exam I came across a very interesting chapter on yield curve strategies. The content, among other things, explores the role of convexity and its importance in building custom views for expected returns. The code below intents to visually show that the US yields indeed change in a non-linear fashion very often.</p>
-<p>In theory, this can be used to concentrate or spread-out the portfolio maturity holdings. The retionale follows from convexity deffinition, which is a measure of the effect of non-linear shifts in interest-rates.</p>
-<p>In a porfolio management context, convexity is an “asset” because imposes an assimetry in bond returns that almost every player in the market is looking for: the bond increases more than sugested by duration metrics if interest-rates decrease. Convexity becomes even more valuable when interest-rates volatility are expected to increase as well.</p>
-<p>See the code.</p>
+      <p>Studying for the 2019 CFA Level III exam I came across a very interesting chapter on yield curve strategies. The content, among other things, explores the role of convexity and its importance in building custom views for expected returns.</p>
+<p>The code below intents to visually show that the US yields indeed change in a non-linear fashion very often.</p>
 <pre class="r"><code># load libraries
 library(Quandl)
 library(tidyverse)
@@ -114,7 +112,8 @@ p &lt;- us_yields %&gt;%
 # animate
 animate(plot = p, nframes = n,  fps = 5)</code></pre>
 <p><img src="/post/2018-11-14-the-dance-of-yield_files/figure-html/unnamed-chunk-1-1.gif" style="display: block; margin: auto;" /></p>
-<p>The main challenge to backtest <a href="https://www.investopedia.com/terms/b/bulllet.asp">bullets</a> and <a href="https://www.investopedia.com/terms/b/barbell.asp">barbells</a> strategies is how to set the <em>correct</em> prior conditional to the fact that time-series information vanishes often vary fast. Maybe factor analysis can play a role here (through level, stepness and curvature), but I don’t expect the result to be soo significant.</p>
+<p>In a porfolio management context, this convexity can be tought as an “asset”. It’s main benefit is to twist bond returns: <em>prices increases</em> more than sugested by linear metrics (such as duration) whenever <em>interest-rates go down</em>. This feature becomes even more valuable if interest-rates volatility is also expected to increase.</p>
+<p>The main challenge to backtest strategies like <a href="https://www.investopedia.com/terms/b/bulllet.asp">bullets</a> and <a href="https://www.investopedia.com/terms/b/barbell.asp">barbells</a> is how to set the correct prior conditional to the fact that time-series information vanishes vary fast.</p>
 <p>I shall come back to this topic in the future.</p>
 
     </div>
