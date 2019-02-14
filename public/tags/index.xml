@@ -6,10 +6,19 @@
     <description>Recent content in Tags on A Hugo website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 08 Sep 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 29 Jan 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Consumption</title>
+      <link>/tags/consumption/</link>
+      <pubDate>Tue, 29 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/consumption/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>Estimation</title>
@@ -39,11 +48,47 @@
     </item>
     
     <item>
+      <title>Instrumental Variables</title>
+      <link>/tags/instrumental-variables/</link>
+      <pubDate>Tue, 29 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/instrumental-variables/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Islm</title>
+      <link>/tags/islm/</link>
+      <pubDate>Thu, 10 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/islm/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Macroeconomics</title>
+      <link>/tags/macroeconomics/</link>
+      <pubDate>Thu, 10 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/macroeconomics/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Manymodels</title>
       <link>/tags/manymodels/</link>
       <pubDate>Mon, 27 Aug 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/manymodels/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Ols</title>
+      <link>/tags/ols/</link>
+      <pubDate>Tue, 29 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/ols/</guid>
       <description></description>
     </item>
     
@@ -89,6 +134,15 @@
       <pubDate>Wed, 05 Sep 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/robust-statistics/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Short Run</title>
+      <link>/tags/short-run/</link>
+      <pubDate>Thu, 10 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/short-run/</guid>
       <description></description>
     </item>
     
