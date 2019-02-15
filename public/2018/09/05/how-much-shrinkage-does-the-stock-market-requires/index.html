@@ -67,12 +67,13 @@
     
 
     <div class="article-content">
-      <p>Shrinkage is hardly new in finance. In 1956, Charles Stein published a famous paper called <a href="https://projecteuclid.org/euclid.bsmsp/1200501656"><em>Inadmissibility of the usual estimator for the mean of a multivariate normal distribution</em></a>. In this work, he shows that, if the sum of the squares of the errors (SSE) is used as a loss function, then, for <code>$ n \geq 2 $</code>, the sample mean is not an optimal estimator and can be improved by exploring the trade-off among bias and variance. This improvement is done through shrinkage!</p>
-<p>Simply put, shrinkage is a form of averaging different estimators, and its composed of three parts:</p>
+      <p>Shrinkage is hardly new in finance. In 1956, Charles Stein published a famous paper called <a href="https://projecteuclid.org/euclid.bsmsp/1200501656"><em>Inadmissibility of the usual estimator for the mean of a multivariate normal distribution</em></a>. In this work, he shows that, if the sum of the squares of the errors (SSE) is used as a loss function, then, for <code>$ n \geq 2 $</code>, the sample mean is not an optimal estimator and can be improved by exploring the trade-off among bias and variance.</p>
+<p>This improvement is done through shrinkage!</p>
+<p>Simply put, <strong>shrinkage is a form of averaging different estimators</strong>, and its composed of three parts:</p>
 <ol style="list-style-type: decimal">
 <li>An estimator of little or no structure (the sample mean and the sample covariance are often good candidates in this case)</li>
 <li>An estimator with a lot of structure (a single value for the mean or a diagonal matrix for the variance would be acceptable examples)</li>
-<li>The shrinkage target (goes from 0 to 1 allowing for convex combinations between the highly structurerd and the non-structured estimators).</li>
+<li>The shrinkage target (goes from 0 to 1 allowing for convex combinations between the highly structured and the non-structured estimators).</li>
 </ol>
 <p>To the best of my knowledge, <a href="https://www.researchgate.net/publication/227357373_Bayes-Stein_Estimation_For_Portfolio_Analysis">Jorrion (1986)</a> was the first to apply this concept in the financial industry and portfolio optimization problems. Almost 20 years later, Ledoit&amp;Wolf published a paper called <a href="http://www.ledoit.net/honey.pdf"><em>Honey, I Shrunk the Sample Covariance Matrix</em></a> in which the authors strongly claim:</p>
 <p><em>“The central message of this paper is that nobody should be using the sample covariance matrix for the purpose of portfolio optimization. It contains estimation error of the kind most likely to perturb a mean-variance optimizer. In its place, we suggest using the matrix obtained from the sample covariance matrix through a transformation called shrinkage. This tends to pull the most extreme coefficients towards more central values, thereby systematically reducing estimation error where it matters most. Statistically, the challenge is to know the optimal shrinkage intensity, and we give the formula for that. Without changing any other step in the portfolio optimization process, we show on actual stock market data that shrinkage reduces tracking error relative to a benchmark index, and substantially increases the realized information ratio of the active portfolio manager”.</em></p>
@@ -86,7 +87,7 @@
 library(tidyquant)
 library(rvest)
 library(Quandl)</code></pre>
-<p>If you still don’t have an account at <a href="https://www.quandl.com/">Quandl</a>, I will highly recommend you to do a free registration. This will enable you to download an unlimited amount of times series every day, in contrast to only 50 per day without being registered.</p>
+<p>If you still don’t have an account at <a href="https://www.quandl.com/">Quandl</a>, I will highly recommend you to do a free registration. This will enable you to download an unlimited amount of times series every day, in contrast to only 50 (if not registered).</p>
 </div>
 <div id="download-the-sp-500-stocks" class="section level2">
 <h2>Download the S&amp;P 500 stocks</h2>
@@ -211,8 +212,8 @@ stocks</code></pre>
 ##  9 MMM           2000-01-13   32.9  0      
 ## 10 MMM           2000-01-14   32.4 -0.0149 
 ## # ... with 2,031,972 more rows</code></pre>
-<p>This code is almost identical to the one I had used in my previous post. If you want to see a detailed explanation on how it works, please, feel free to so by clicking <a href="http://www.bernardo.codes/2018/08/27/how-many-stocks-in-the-s-p-500-do-follow-a-random-walk/">here</a>.</p>
-<p>The <code>stocks</code> tibble is composed of a daily database from 2000 onwards. Note, however, that many of the stocks have only a few number of observations.</p>
+<p>This code is almost identical to the one I had used in my <a href="https://www.bernardo.codes/2018/08/27/how-many-stocks-in-the-s-p-500-do-follow-a-random-walk/">previous post</a>. Therefore, no additional comments will be made.</p>
+<p>The <code>stocks</code> tibble is composed of a daily database from 2000 inwards. Note, however, that many of the stocks have only a few number of observations.</p>
 <pre class="r"><code>stocks %&gt;%
     dplyr::select(Date, ticker_symbol, returns) %&gt;% 
     dplyr::group_by(ticker_symbol) %&gt;% 
@@ -235,7 +236,7 @@ stocks</code></pre>
 ##  9 ANDV            162 2017-08-03
 ## 10 BHGE            181 2017-07-06
 ## # ... with 490 more rows</code></pre>
-<p>Working with unbalanced data (like the one above) challenges the estimation process. Let’s add simple filter to exclude all the stock with less than <code>$ 4000 $</code> trading days (~ 15 years).</p>
+<p>Working with unbalanced data (like the one above) challenges the estimation process. Let’s add simple filter to exclude all the stocks with less than <code>$ 4000 $</code> trading days (~ 15 years).</p>
 <pre class="r"><code>stocks_filtered &lt;- stocks %&gt;% 
     dplyr::select(Date, ticker_symbol, returns) %&gt;%
     
@@ -285,7 +286,8 @@ stocks_filtered</code></pre>
 </div>
 <div id="honey-i-translated-a-matlab-function-to-r" class="section level2">
 <h2>Honey, I translated a MATLAB function to R</h2>
-<p>In his page, Michael Wolf provides the MATLAB <a href="https://www.econ.uzh.ch/en/people/faculty/wolf/publications.html">code</a> for most of it’s publications. I translated the function associated with the paper <em>Honey, I Shrunk the Sample Covariance Matrix</em>, in which you can download <a href="https://www.econ.uzh.ch/dam/jcr:ffffffff-935a-b0d6-ffff-ffffde5e2d4e/covCor.m.zip">here</a>. See bellow:</p>
+<p>In his page, Michael Wolf provides the MATLAB <a href="https://www.econ.uzh.ch/en/people/faculty/wolf/publications.html">code</a> for most of it’s publications. I translated the function associated with the paper: <em>Honey, I Shrunk the Sample Covariance Matrix</em>, in which you can download <a href="https://www.econ.uzh.ch/dam/jcr:ffffffff-935a-b0d6-ffff-ffffde5e2d4e/covCor.m.zip">here</a>.</p>
+<p>See bellow:</p>
 <pre class="r"><code>honey_shrunk &lt;- function(R, shrink = NULL) {
     
     # &quot;Honey, I Shrunk the Sample Covariance Matrix&quot;
@@ -355,9 +357,10 @@ stocks_filtered</code></pre>
 </div>
 <div id="rolling-windows" class="section level2">
 <h2>Rolling Windows</h2>
-<p>To answer our initial question <em>How much shrinkage does the stock market requires?</em> we wil need to use the <code>honey_shrunk()</code> function on a rolling window to measure how the shrinkage intensity envolves across time.</p>
-<p>There are many ways in which we could do that, but I chose the simplest one, which is using nothing more than a <code>for</code> loop. The <code>tq_transmute()</code> function from the <code>tidyquant</code> package fits nicely to this tasks, simplifing a lot of data manipulation for us.</p>
-<p>For sake of simplicity, I’ve also chose 3 months, 1 year, 3 years and 5 years as estimation windows to map over. That is no specific reason to keep them fixed and you can experiment different windows if you like to. But before using the following script, be aware that its probably going to take one or two hours to run.</p>
+<p>To answer our initial question <em>How much shrinkage does the stock market requires?</em> we will need to use the <code>honey_shrunk()</code> function on a rolling window to measure how the shrinkage intensity evolves across time.</p>
+<p>There are many ways in which we could do that, but I chose the simplest one, which is using nothing more than a <code>for</code> loop. The <code>tq_transmute()</code> function from the <code>tidyquant</code> package fits nicely to this task, simplifying a lot of data manipulation for us.</p>
+<p>For sake of simplicity, I’ve also chose 3 months, 1 year, 3 years and 5 years as estimation windows to map over. That is no specific reason to keep them fixed and you can experiment different windows if you like to.</p>
+<p><strong>Before using the following script, be aware that its probably going to take one hour or two to run.</strong></p>
 <pre class="r"><code>rolling_windows &lt;- c(90, 252, 756, 1260)
 rollapply_list &lt;- vector(&#39;list&#39;, length(rolling_windows))
 
@@ -373,7 +376,7 @@ for (i in seq_along(rolling_windows)) {
         )    
     
 }</code></pre>
-<p>As expected, as we increase the numbers of observations from 90, to 252, … up to 1260 days the shrinkage intensity diminishes signifcantly. For 90 days, the amout of shrinkage required is almost the double of the one required for 252 days, which is more than double demanded for 3 years, and so on so forth. This is in accordance to the <a href="https://en.wikipedia.org/wiki/Asymptotic_analysis">assimptotic theory</a> that states that the sample covariance matrix is an unbiased estimator for the “true” covariance matrix as <code>$ n $</code>, the number of observations, increase indefinetly.</p>
+<p>As expected, as we increase the numbers of observations from 90, to 252, … up to 1260 days the shrinkage intensity diminishes significantly. For 90 days, the amount of shrinkage required is almost the double of the one required for 252 days, which is more than double demanded for 3 years, and so on so forth. This is in accordance to the <a href="https://en.wikipedia.org/wiki/Asymptotic_analysis">assimptotic theory</a> that states that the sample covariance matrix is an unbiased estimator for the “true” covariance matrix as <code>$ n $</code>, the number of observations, increase indefinitely.</p>
 <pre class="r"><code>rollapply_list[[1]] %&gt;% 
     dplyr::left_join(rollapply_list[[2]], by = &#39;Date&#39;) %&gt;% 
     dplyr::left_join(rollapply_list[[3]], by = &#39;Date&#39;) %&gt;% 
@@ -396,7 +399,8 @@ for (i in seq_along(rolling_windows)) {
     ggplot2::theme_classic() + 
     tidyquant::scale_color_tq()</code></pre>
 <p><img src="/post/2018-09-05-how-much-shrinkage-does-the-stock-market-requires_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
-<p>Furthermore, we can explore the equation <code>$ \hat{\Sigma}_{Shrink} = \delta F + (1 - \delta) S $</code> to find out the ratio between shrinkage and estimation error, that is, <code>$ \frac{\delta}{1 - \delta} $</code>. Whenever this fraction is above <code>$ 0.5 $</code> the data has at least as much estimation error in the sample covarance matrix than as there bias in the structured <code>$ F $</code> matrix and, consequently, a higher <code>$ \delta $</code> is needed to equalize the bias and variance trade-off.</p>
+<p>Furthermore, we can explore the equation <code>$ \hat{\Sigma}_{Shrink} = \delta F + (1 - \delta) S $</code> to find out the ratio between shrinkage and estimation error, that is, <code>$ \frac{\delta}{1 - \delta} $</code>.</p>
+<p><strong>Whenever the fraction is above <code>$ 0.5 $</code> the data has at least as much estimation error in the sample covarance matrix than as there bias in the structured <code>$ F $</code> matrix. Consequently, a higher <code>$ \delta $</code> is needed to equalize the bias and variance trade-off.</strong></p>
 <pre class="r"><code>rollapply_list[[1]] %&gt;% 
     dplyr::left_join(rollapply_list[[2]], by = &#39;Date&#39;) %&gt;% 
     dplyr::left_join(rollapply_list[[3]], by = &#39;Date&#39;) %&gt;% 
@@ -424,7 +428,7 @@ for (i in seq_along(rolling_windows)) {
     ggplot2::theme_classic() + 
     tidyquant::scale_color_tq()</code></pre>
 <p><img src="/post/2018-09-05-how-much-shrinkage-does-the-stock-market-requires_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
-<p>Despite the huge outlier presented in the estimation process around 2012, the amount of error for a period of less than a year is significant. For 3 months, the median error rate é about 80%. This value decreases sharply for one year and stabilizes after three years onwards.</p>
+<p>Despite the huge outlier presented in the estimation process around 2012, the amount of error for one year or less is significant. For 3 months, the median error rate is about 80%. This value decreases sharply for one year and stabilizes after three years or more.</p>
 <pre class="r"><code>rollapply_list[[1]] %&gt;% 
     dplyr::left_join(rollapply_list[[2]], by = &#39;Date&#39;) %&gt;% 
     dplyr::left_join(rollapply_list[[3]], by = &#39;Date&#39;) %&gt;% 
@@ -447,7 +451,11 @@ for (i in seq_along(rolling_windows)) {
 ## 2 252 days         0.332
 ## 3 756 days         0.160
 ## 4 1260 days        0.130</code></pre>
-<p><strong>The central message is that, if we are working with daily data, we should use as much osbservations as we can</strong>. Five years is a reasonable period and standard practice form most researchers in the financial industry. For monthly or quaterly time series, however, it’s not clear if the same applies. Can data from 10 years ago give us any clue about the predictive paths of a stock? I will came back to this topic in more detail, but in a latter post.</p>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p><strong>The central message is: if we are working with daily data, we should use as much osbservations as we can</strong>. Five years is a reasonable period and standard practice form most researchers in the financial industry. For monthly or quarterly time series, however, it’s not clear if the same applies. Can data from 10 years ago give us any clue about the predictive paths of a stock? I’m skeptical.</p>
+<p>I intent to came back to this topic in more detail, but in a future date.</p>
 </div>
 
     </div>

@@ -25,11 +25,13 @@ knitr::opts_chunk$set(
 ```
 
 
-There has been a huge growth of machine learning models’ in finance. The underlying idea behind those models is that if the data is identically and independent distributed (i.i.d.) the statistician can use the law of large numbers (LLN) and the [Glivenko-Canteli theorem](https://en.wikipedia.org/wiki/Glivenko–Cantelli_theorem) to uncover the asymptotic behavior of the “true” distribution, which is, in fact, unknown. As the number of observations increase, closer and closer we get to the true hidden values.
+There has been a huge growth of machine learning models’ for finance. The underlying idea behind those models is to put in practice an agnostic search, mostly by brute force, that will deliver forecasts, around some loss function, that are as accuratte the data can tell.
 
-At the same time, forecasters have been spending over the last 30 years, a huge amount of time trying to detect veiled patterns in the stock market, most often than not, with a questionable rate of success. 
+At the same time, forecasters have been spending, over the last 30 years, a huge amount of effort trying to detect veiled patterns in the stock market. Most often than not, with a questionable rate of success. 
 
-As the [Nobel Prize Winner](https://www.nobelprize.org/prizes/economics/2003/granger/facts/), Clive Granger [states](http://www.forecastingprinciples.com/paperpdf/Granger-stockmarket.pdf), at some sense, the market must follow a random walk, otherwise the it would be an unlimited source of money machine. Therefore, is reasonable to ask two questions: how many stocks of the S&P 500 show any evidence of actually following a random-walk? And what implications these results impose for machine learning models in finance? 
+As the [Nobel Prize Winner](https://www.nobelprize.org/prizes/economics/2003/granger/facts/), Clive Granger [states](http://www.forecastingprinciples.com/paperpdf/Granger-stockmarket.pdf), at some sense, the market must follow a random walk, otherwise the it would be an unlimited source of money machine. 
+
+Therefore, is reasonable to ask two questions: how many stocks of the S&P 500 show any evidence of actually following a random-walk? And what implications these results impose for machine learning models in finance? 
 
 Those are the issues I will try to address in this post.
 
@@ -52,7 +54,7 @@ library(Quandl)
 
 ## Download the S&P 500 tickers
 
-After loading the required packages, it’s necessary to download the tickers for all the S&P 500 stocks. These can easily be done by web-scraping the Wikipedia [webpage](https://en.wikipedia.org/wiki/List_of_S%26P_500_companies).
+After loading the required packages, it’s necessary to get the tickers for all the S&P 500 stocks. These can easily be done by web-scraping the Wikipedia [webpage](https://en.wikipedia.org/wiki/List_of_S%26P_500_companies).
 
 ```{r}
 
@@ -86,7 +88,7 @@ get_sp500_tickers <- function() {
 ```
 
 
-I've used a function inside another function because this is one of the biggest assets of working with `R`: great chunks of code can be decomposed in small pieces and then grouped together latter on to solve the bigger picture. Specially important is the use of `possibly()` that "guarantees" that the main script will run. If any error occurs, we get a `NA` as an answer, but the code still runs.
+`raw_get` funtion is used inside `get_sp500_tickers`. In this way, greater pieces of chunk can be decomposed in smaller fragments and grouped latter on to solve the bigger picture. It's a good practice to use of `possibly()`, from `purrr` to "guarantee" the main script will run. If any error occurs, we get a `NA`, but the code still runs.
 
 
 ```{r}
@@ -108,9 +110,9 @@ tickers
 
 
 
-## From tickers to stocks
+## From Tickers to Stocks
 
-The next step is to construct a robust function that will allow us to use all the tickers above to download the S&P 500 stocks. The function `download_stocks_from_tickers()` is designed to do exactly that and will be used inside the `map()` function from the `purrr` [package](https://purrr.tidyverse.org/).
+The next step is to construct a robust function that will allow us to use all the tickers we got to download the S&P 500 stocks. The function `download_stocks_from_tickers()` is designed to do exactly that and will be used inside the `map()` function from the `purrr` [package](https://purrr.tidyverse.org/).
 
 ```{r}
 
@@ -198,9 +200,7 @@ stocks
 ```
 
 
-To avoid downloading unnecessary data the argument `column_index = 11`, which only contains the adjusted prices, was used in conjunction with `download_stocks_from_tickers()`.  The data was downloaded from the free [WIKI database](https://www.quandl.com/databases/WIKIP/documentation/about) in Quandl.
-
-In some cases, may be that we cannot get the data through the provided API. In this occurs, `possibly()` will return a `NA` and the command ` filter(!is.na(possible_download))` will wipe out those rows from the dataset. Finally, using the known fact that stock prices are not stationary, the returns were calculated and included for future modeling. 
+The argument `column_index = 11` ensures that we only get the close prices (adjusted for dividends). This is a courtesy from the [WIKI database](https://www.quandl.com/databases/WIKIP/documentation/about). Stock prices, however, are not stationary and the log-returns were included for future modeling. 
 
 
 ## From `tibble()` to `ts()` 
@@ -235,15 +235,17 @@ stocks_to_ts
 ```
 
 
-## Map over list columns
+## Map Over List Columns
 
-Now the setup is complete and we are able to use the framework presented in the [chapter 25](http://r4ds.had.co.nz/many-models.html) of **R for data Science**. The `map()` function recursively estimates which ARMA model fits better in which one of the stocks, according to [Akaike](https://en.wikipedia.org/wiki/Akaike_information_criterion) selection criterion. The AIC formula is
+Now the setup is complete. We are now able to use the framework presented in the [chapter 25](http://r4ds.had.co.nz/many-models.html) of **R for data Science**. 
+
+The `auto.arima` function will recursively estimate the most suitable $ARMA$model for each S&P 500 stock. [Akaike](https://en.wikipedia.org/wiki/Akaike_information_criterion) is the default selection criteria. The AIC formula is
 
 `$$ AIC = 2k - 2ln(\hat{L}) $$`
 
-in which `$k$` is the number of parameters in the model. The higher the `$k$`, higher the penalization and smaller the chance of an overparametrized model being chose.
+in which, `$k$` is the number of parameters in the model and $\hat{L}$ is the minimum value achieved in the likelihood function. With a higher the `$k$`, higher is the penalization and smaller is the chance of a model with more parameters being chosed.
 
-The number of lags in the p and q factor were limited to be no more than 2. Since the data is organized on a monthly period, this is identical to assume that today's random shocks are not capable of disturb stock returns by more than two months ahead (at least, from a statistically significant point of view).  
+The number of lags in the $p$ and $q$ factor from the $ARMA$ model were limited to be no more than 2. Since the data is monthly, this is identical to assume that shocks at time $t$ are not capable of sistematicaly impact returns by more than $t + 2$ perios ahead (at least from the point of view of statistical significance).  
 
 ```{r}
 
@@ -268,7 +270,7 @@ stocks_to_ts_modeling
 
 ```
 
-In the last two lines of the printed tibble we see that the `stocks_to_ts_modeling` object now has all the standard evaluation metrics, like AIC, BIC, ME, RMSE, MAE, MAPE, MASE, ACF1. Not for one stock, but for all of them. That's how powerful the [tidyverse](https://www.tidyverse.org/) really is!
+The `stocks_to_ts_modeling` object has standard evaluation metrics, like AIC, BIC, ME, RMSE, MAE, MAPE, MASE, ACF1. Not for one stock, but for all of them. That's how powerful the [tidyverse](https://www.tidyverse.org/) ecosystem can really be!
 
 ```{r, eval=TRUE, echo=FALSE}
 
@@ -278,9 +280,9 @@ stocks_to_ts_modeling
 
 ```
 
-## Final Manipulation and addicional toughts
+## Final Manipulation and Addicional Toughts
 
-After some extra manipulation we get to the following result
+After some extra manipulation we get to the following table:
 
 ```{r}
 
@@ -303,7 +305,7 @@ stocks_to_ts_modeling %>%
     dplyr::mutate(ARMA = fct_reorder(ARMA, percent)) %>%
     knitr::kable(
         digits  = 2,
-        caption = 'ARMA models fitted according to AIC Criterion', 
+        caption = 'ARMA models selected by the AIC Criteria', 
         align   = 'c'
     )
 
@@ -334,7 +336,7 @@ stocks_to_ts_modeling %>%
     dplyr::mutate(ARMA = forcats::fct_reorder(ARMA, percent)) %>%
     knitr::kable(
         digits  = 2,
-        caption = 'ARMA models fitted according to AIC Criterion', 
+        caption = 'ARMA models selected by the AIC Criteria', 
         align   = 'c'
     )
 

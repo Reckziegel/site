@@ -67,10 +67,11 @@
     
 
     <div class="article-content">
-      <p>The code bellow is a transcription from the MATLAB code done by Ledoit&amp;Wolf for their work <em>Improved estimation of the covariance matrix of stock returns with an application to portfolio selection</em>, which can be found <a href="http://www.ledoit.net/ole2.pdf">here</a>. If you also want to take a look on the original MATLAB code click <a href="https://www.econ.uzh.ch/dam/jcr:ffffffff-935a-b0d6-0000-0000648dfc98/covMarket.m.zip">here</a>.</p>
+      <p>The function bellow is a transcription from the MATLAB code done by Ledoit&amp;Wolf in their work: <em>Improved estimation of the covariance matrix of stock returns with an application to portfolio selection</em>, which can be found <a href="http://www.ledoit.net/ole2.pdf">here</a>.</p>
+<p>If you also want to take a look on the original programming source, check the Michael’s Wolf <a href="https://www.econ.uzh.ch/en/people/faculty/wolf/publications.html#9">website</a>.</p>
 <pre class="r"><code>covMarket &lt;- function(x, shrink = TRUE) {
     
-    # some operations work better with the matrix format
+    # some operations work better with the matrix class
     if (is.matrix(x) != TRUE) {
         
         x &lt;- as.matrix(x) 
@@ -129,10 +130,16 @@
     return(out)
     
 }</code></pre>
-<p>This estimator is a weighted average of the sample covariance matrix and a “prior” (given by the Sharpe Ratio as a single factor model). The factor is equal to the cross-sectional average of all the random variables.</p>
-<p>As the authors argument, there is a strong consensus on the nature of the Sharpe Ratio, in contrast to an arbitrary number of factors given by a pure statistical model (PCA, for example).</p>
 <p>The final output contains the shrinked matrix and the shrinkage intensity, respectively.</p>
-<p>I hope this estimator can serve you well!</p>
+<p>This estimator is a weighted average of the sample covariance matrix and a “prior” (given by the Sharpe-Ratio as a single factor model).</p>
+<p>As the authors argument, there is a strong consensus on the nature of the Sharpe-Ratio, in contrast to an arbitrary number of factors given by a pure statistical model (<a href="https://en.wikipedia.org/wiki/Principal_component_analysis">PCA</a>, for example).</p>
+<p>The implicit assumptions used to derive this estimator are:</p>
+<ul>
+<li>Stock return are independent and identically distribuited (IID);</li>
+<li>The number os stocks is fixed (finite) as time realizations goes to infinity; and</li>
+<li>Stocks have a finite four moment, so the variance can be measured.</li>
+</ul>
+<p>I hope this function can serve you well!</p>
 
     </div>
   </article>

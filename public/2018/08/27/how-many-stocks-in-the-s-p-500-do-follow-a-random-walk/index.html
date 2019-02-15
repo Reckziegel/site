@@ -67,9 +67,10 @@
     
 
     <div class="article-content">
-      <p>There has been a huge growth of machine learning models’ in finance. The underlying idea behind those models is that if the data is identically and independent distributed (i.i.d.) the statistician can use the law of large numbers (LLN) and the <a href="https://en.wikipedia.org/wiki/Glivenko–Cantelli_theorem">Glivenko-Canteli theorem</a> to uncover the asymptotic behavior of the “true” distribution, which is, in fact, unknown. As the number of observations increase, closer and closer we get to the true hidden values.</p>
-<p>At the same time, forecasters have been spending over the last 30 years, a huge amount of time trying to detect veiled patterns in the stock market, most often than not, with a questionable rate of success.</p>
-<p>As the <a href="https://www.nobelprize.org/prizes/economics/2003/granger/facts/">Nobel Prize Winner</a>, Clive Granger <a href="http://www.forecastingprinciples.com/paperpdf/Granger-stockmarket.pdf">states</a>, at some sense, the market must follow a random walk, otherwise the it would be an unlimited source of money machine. Therefore, is reasonable to ask two questions: how many stocks of the S&amp;P 500 show any evidence of actually following a random-walk? And what implications these results impose for machine learning models in finance?</p>
+      <p>There has been a huge growth of machine learning models’ for finance. The underlying idea behind those models is to put in practice an agnostic search, mostly by brute force, that will deliver forecasts, around some loss function, that are as accuratte the data can tell.</p>
+<p>At the same time, forecasters have been spending, over the last 30 years, a huge amount of effort trying to detect veiled patterns in the stock market. Most often than not, with a questionable rate of success.</p>
+<p>As the <a href="https://www.nobelprize.org/prizes/economics/2003/granger/facts/">Nobel Prize Winner</a>, Clive Granger <a href="http://www.forecastingprinciples.com/paperpdf/Granger-stockmarket.pdf">states</a>, at some sense, the market must follow a random walk, otherwise the it would be an unlimited source of money machine.</p>
+<p>Therefore, is reasonable to ask two questions: how many stocks of the S&amp;P 500 show any evidence of actually following a random-walk? And what implications these results impose for machine learning models in finance?</p>
 <p>Those are the issues I will try to address in this post.</p>
 <div id="load-libraries" class="section level2">
 <h2>Load Libraries</h2>
@@ -83,7 +84,7 @@ library(Quandl)</code></pre>
 </div>
 <div id="download-the-sp-500-tickers" class="section level2">
 <h2>Download the S&amp;P 500 tickers</h2>
-<p>After loading the required packages, it’s necessary to download the tickers for all the S&amp;P 500 stocks. These can easily be done by web-scraping the Wikipedia <a href="https://en.wikipedia.org/wiki/List_of_S%26P_500_companies">webpage</a>.</p>
+<p>After loading the required packages, it’s necessary to get the tickers for all the S&amp;P 500 stocks. These can easily be done by web-scraping the Wikipedia <a href="https://en.wikipedia.org/wiki/List_of_S%26P_500_companies">webpage</a>.</p>
 <pre class="r"><code>get_sp500_tickers &lt;- function() {
     
     raw_get &lt;- function() {
@@ -110,7 +111,7 @@ library(Quandl)</code></pre>
         )
     
 }</code></pre>
-<p>I’ve used a function inside another function because this is one of the biggest assets of working with <code>R</code>: great chunks of code can be decomposed in small pieces and then grouped together latter on to solve the bigger picture. Specially important is the use of <code>possibly()</code> that “guarantees” that the main script will run. If any error occurs, we get a <code>NA</code> as an answer, but the code still runs.</p>
+<p><code>raw_get</code> funtion is used inside <code>get_sp500_tickers</code>. In this way, greater pieces of chunk can be decomposed in smaller fragments and grouped latter on to solve the bigger picture. It’s a good practice to use of <code>possibly()</code>, from <code>purrr</code> to “guarantee” the main script will run. If any error occurs, we get a <code>NA</code>, but the code still runs.</p>
 <pre class="r"><code>tickers &lt;- get_sp500_tickers()
 
 tickers</code></pre>
@@ -131,8 +132,8 @@ tickers</code></pre>
 ## #   added[3][4]` &lt;chr&gt;, CIK &lt;int&gt;, Founded &lt;chr&gt;</code></pre>
 </div>
 <div id="from-tickers-to-stocks" class="section level2">
-<h2>From tickers to stocks</h2>
-<p>The next step is to construct a robust function that will allow us to use all the tickers above to download the S&amp;P 500 stocks. The function <code>download_stocks_from_tickers()</code> is designed to do exactly that and will be used inside the <code>map()</code> function from the <code>purrr</code> <a href="https://purrr.tidyverse.org/">package</a>.</p>
+<h2>From Tickers to Stocks</h2>
+<p>The next step is to construct a robust function that will allow us to use all the tickers we got to download the S&amp;P 500 stocks. The function <code>download_stocks_from_tickers()</code> is designed to do exactly that and will be used inside the <code>map()</code> function from the <code>purrr</code> <a href="https://purrr.tidyverse.org/">package</a>.</p>
 <pre class="r"><code>download_stocks_from_tickers &lt;- function(data, ...) {
     
     # tidy eval
@@ -213,8 +214,7 @@ stocks</code></pre>
 ##  9 MMM           2009-09-30 3M Comp~ Industrials Industrial Cong~   60.4
 ## 10 MMM           2009-10-31 3M Comp~ Industrials Industrial Cong~   60.2
 ## # ... with 52,175 more rows, and 1 more variable: returns &lt;dbl&gt;</code></pre>
-<p>To avoid downloading unnecessary data the argument <code>column_index = 11</code>, which only contains the adjusted prices, was used in conjunction with <code>download_stocks_from_tickers()</code>. The data was downloaded from the free <a href="https://www.quandl.com/databases/WIKIP/documentation/about">WIKI database</a> in Quandl.</p>
-<p>In some cases, may be that we cannot get the data through the provided API. In this occurs, <code>possibly()</code> will return a <code>NA</code> and the command <code>filter(!is.na(possible_download))</code> will wipe out those rows from the dataset. Finally, using the known fact that stock prices are not stationary, the returns were calculated and included for future modeling.</p>
+<p>The argument <code>column_index = 11</code> ensures that we only get the close prices (adjusted for dividends). This is a courtesy from the <a href="https://www.quandl.com/databases/WIKIP/documentation/about">WIKI database</a>. Stock prices, however, are not stationary and the log-returns were included for future modeling.</p>
 </div>
 <div id="from-tibble-to-ts" class="section level2">
 <h2>From <code>tibble()</code> to <code>ts()</code></h2>
@@ -248,11 +248,12 @@ stocks</code></pre>
 ## # ... with 491 more rows</code></pre>
 </div>
 <div id="map-over-list-columns" class="section level2">
-<h2>Map over list columns</h2>
-<p>Now the setup is complete and we are able to use the framework presented in the <a href="http://r4ds.had.co.nz/many-models.html">chapter 25</a> of <strong>R for data Science</strong>. The <code>map()</code> function recursively estimates which ARMA model fits better in which one of the stocks, according to <a href="https://en.wikipedia.org/wiki/Akaike_information_criterion">Akaike</a> selection criterion. The AIC formula is</p>
+<h2>Map Over List Columns</h2>
+<p>Now the setup is complete. We are now able to use the framework presented in the <a href="http://r4ds.had.co.nz/many-models.html">chapter 25</a> of <strong>R for data Science</strong>.</p>
+<p>The <code>auto.arima</code> function will recursively estimate the most suitable <span class="math inline">\(ARMA\)</span>model for each S&amp;P 500 stock. <a href="https://en.wikipedia.org/wiki/Akaike_information_criterion">Akaike</a> is the default selection criteria. The AIC formula is</p>
 <p><code>$$ AIC = 2k - 2ln(\hat{L}) $$</code></p>
-<p>in which <code>$k$</code> is the number of parameters in the model. The higher the <code>$k$</code>, higher the penalization and smaller the chance of an overparametrized model being chose.</p>
-<p>The number of lags in the p and q factor were limited to be no more than 2. Since the data is organized on a monthly period, this is identical to assume that today’s random shocks are not capable of disturb stock returns by more than two months ahead (at least, from a statistically significant point of view).</p>
+<p>in which, <code>$k$</code> is the number of parameters in the model and <span class="math inline">\(\hat{L}\)</span> is the minimum value achieved in the likelihood function. With a higher the <code>$k$</code>, higher is the penalization and smaller is the chance of a model with more parameters being chosed.</p>
+<p>The number of lags in the <span class="math inline">\(p\)</span> and <span class="math inline">\(q\)</span> factor from the <span class="math inline">\(ARMA\)</span> model were limited to be no more than 2. Since the data is monthly, this is identical to assume that shocks at time <span class="math inline">\(t\)</span> are not capable of sistematicaly impact returns by more than <span class="math inline">\(t + 2\)</span> perios ahead (at least from the point of view of statistical significance).</p>
 <pre class="r"><code>stocks_to_ts_modeling &lt;- stocks_to_ts %&gt;%
     dplyr::group_by(ticker_symbol) %&gt;% 
     dplyr::mutate(model   = map(
@@ -271,7 +272,7 @@ stocks</code></pre>
     dplyr::ungroup() 
 
 stocks_to_ts_modeling</code></pre>
-<p>In the last two lines of the printed tibble we see that the <code>stocks_to_ts_modeling</code> object now has all the standard evaluation metrics, like AIC, BIC, ME, RMSE, MAE, MAPE, MASE, ACF1. Not for one stock, but for all of them. That’s how powerful the <a href="https://www.tidyverse.org/">tidyverse</a> really is!</p>
+<p>The <code>stocks_to_ts_modeling</code> object has standard evaluation metrics, like AIC, BIC, ME, RMSE, MAE, MAPE, MASE, ACF1. Not for one stock, but for all of them. That’s how powerful the <a href="https://www.tidyverse.org/">tidyverse</a> ecosystem can really be!</p>
 <pre><code>## # A tibble: 501 x 19
 ##    ticker_symbol security gics_sector gics_sub_indust~ data  ts    model
 ##    &lt;chr&gt;         &lt;chr&gt;    &lt;chr&gt;       &lt;chr&gt;            &lt;lis&gt; &lt;lis&gt; &lt;lis&gt;
@@ -290,8 +291,8 @@ stocks_to_ts_modeling</code></pre>
 ## #   MAE &lt;dbl&gt;, MPE &lt;dbl&gt;, MAPE &lt;dbl&gt;, MASE &lt;dbl&gt;, ACF1 &lt;dbl&gt;</code></pre>
 </div>
 <div id="final-manipulation-and-addicional-toughts" class="section level2">
-<h2>Final Manipulation and addicional toughts</h2>
-<p>After some extra manipulation we get to the following result</p>
+<h2>Final Manipulation and Addicional Toughts</h2>
+<p>After some extra manipulation we get to the following table:</p>
 <pre class="r"><code>stocks_to_ts_modeling %&gt;% 
     dplyr::mutate_if(is.character, as_factor) %&gt;% 
     dplyr::count(model.desc, sort = TRUE) %&gt;% 
@@ -311,11 +312,11 @@ stocks_to_ts_modeling</code></pre>
     dplyr::mutate(ARMA = fct_reorder(ARMA, percent)) %&gt;%
     knitr::kable(
         digits  = 2,
-        caption = &#39;ARMA models fitted according to AIC Criterion&#39;, 
+        caption = &#39;ARMA models selected by the AIC Criteria&#39;, 
         align   = &#39;c&#39;
     )</code></pre>
 <table>
-<caption><span id="tab:unnamed-chunk-13">Table 1: </span>ARMA models fitted according to AIC Criterion</caption>
+<caption><span id="tab:unnamed-chunk-13">Table 1: </span>ARMA models selected by the AIC Criteria</caption>
 <thead>
 <tr class="header">
 <th align="center">ARMA</th>

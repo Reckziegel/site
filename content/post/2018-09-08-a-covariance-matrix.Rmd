@@ -11,13 +11,15 @@ tags:
   - estimation
 ---
 
-The code bellow is a transcription from the MATLAB code done by Ledoit&Wolf for their work *Improved estimation of the covariance matrix of stock returns with an application to portfolio selection*, which can be found [here](http://www.ledoit.net/ole2.pdf). If you also want to take a look on the original MATLAB code click [here](https://www.econ.uzh.ch/dam/jcr:ffffffff-935a-b0d6-0000-0000648dfc98/covMarket.m.zip).
+The function bellow is a transcription from the MATLAB code done by Ledoit&Wolf in their work: *Improved estimation of the covariance matrix of stock returns with an application to portfolio selection*, which can be found [here](http://www.ledoit.net/ole2.pdf). 
+
+If you also want to take a look on the original programming source, check the Michael's Wolf [website](https://www.econ.uzh.ch/en/people/faculty/wolf/publications.html#9).
 
 ```{r}
 
 covMarket <- function(x, shrink = TRUE) {
     
-    # some operations work better with the matrix format
+    # some operations work better with the matrix class
     if (is.matrix(x) != TRUE) {
         
         x <- as.matrix(x) 
@@ -80,13 +82,18 @@ covMarket <- function(x, shrink = TRUE) {
 
 ```
 
-
-This estimator is a weighted average of the sample covariance matrix and a "prior" (given by the Sharpe Ratio as a single factor model). The factor is equal to the cross-sectional average of all the random variables. 
-
-As the authors argument, there is a strong consensus on the nature of the Sharpe Ratio, in contrast to an arbitrary number of factors given by a pure statistical model (PCA, for example).
-
 The final output contains the shrinked matrix and the shrinkage intensity, respectively. 
 
-I hope this estimator can serve you well!
+This estimator is a weighted average of the sample covariance matrix and a "prior" (given by the Sharpe-Ratio as a single factor model).
+
+As the authors argument, there is a strong consensus on the nature of the Sharpe-Ratio, in contrast to an arbitrary number of factors given by a pure statistical model ([PCA](https://en.wikipedia.org/wiki/Principal_component_analysis), for example).
+
+The implicit assumptions used to derive this estimator are:
+
+- Stock return are independent and identically distribuited (IID);
+- The number os stocks is fixed (finite) as time realizations goes to infinity; and
+- Stocks have a finite four moment, so the variance can be measured.
+
+I hope this function can serve you well!
 
 
