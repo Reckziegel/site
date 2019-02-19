@@ -8,8 +8,9 @@ categories:
   - finance
 tags:
   - manymodels
+  - randon-walk
+  - machine-learning
 ---
-
 
 
 ```{r setup, include=FALSE}
@@ -25,18 +26,21 @@ knitr::opts_chunk$set(
 ```
 
 
-There has been a huge growth of machine learning models’ for finance. The underlying idea behind those models is to put in practice an agnostic search, mostly by brute force, that will deliver forecasts, around some loss function, that are as accuratte the data can tell.
+Machine Learning (ML) models are trendy and gaining popularity in finance. Practitioners noticed that little help can come from asymptotic theory if the researcher is constrained by the number of observations (in which $n \rightarrow \infty$ do never happens). 
 
-At the same time, forecasters have been spending, over the last 30 years, a huge amount of effort trying to detect veiled patterns in the stock market. Most often than not, with a questionable rate of success. 
+The solution offered by a great deal of ML models is a complete twist in econometric tradition. Forget about odd features and ugly names, like autocorrelation, multicollinearity and heteroskedasticity. Just pay attention to the forecasts: are they good or not? If not, _make_ them be! 
 
-As the [Nobel Prize Winner](https://www.nobelprize.org/prizes/economics/2003/granger/facts/), Clive Granger [states](http://www.forecastingprinciples.com/paperpdf/Granger-stockmarket.pdf), at some sense, the market must follow a random walk, otherwise the it would be an unlimited source of money machine. 
+Still, reality continues to show that it's hard to profit from "hidden" patterns in the stock market. In fact, only a lucky few may know how does it feels like, in the long-run.
 
-Therefore, is reasonable to ask two questions: how many stocks of the S&P 500 show any evidence of actually following a random-walk? And what implications these results impose for machine learning models in finance? 
+As the [Nobel Prize Winner](https://www.nobelprize.org/prizes/economics/2003/granger/facts/), Clive Granger [states](http://www.forecastingprinciples.com/paperpdf/Granger-stockmarket.pdf): at some sense, the market must follow a random-walk, otherwise the it would be an unlimited source of money machine.
 
-Those are the issues I will try to address in this post.
+Hard to disagree. On those grounds, I asked myself: how many stocks of the S&P 500 show any evidence of actually following a random-walk process? Is it the number high or low? Think of it: if it's low, no doubt ML models can help a great deal. If not, we are just "drying ice". So.. how do we stand?
 
+I will do my best to address this issue along the way.
 
 ## Load Libraries
+
+The required `R` packages for this experiment are:
 
 ```{r}
 
@@ -54,7 +58,8 @@ library(Quandl)
 
 ## Download the S&P 500 tickers
 
-After loading the required packages, it’s necessary to get the tickers for all the S&P 500 stocks. These can easily be done by web-scraping the Wikipedia [webpage](https://en.wikipedia.org/wiki/List_of_S%26P_500_companies).
+Once the packages are loaded, we have to start from the scratch. The first step it’s to chase after all S&P 500 tickers. They are not what we really care about, but without them it is hard to move forward. This task can easily be done by web-scraping [Wikipedia's](https://en.wikipedia.org/wiki/List_of_S%26P_500_companies) site.
+
 
 ```{r}
 
@@ -88,7 +93,19 @@ get_sp500_tickers <- function() {
 ```
 
 
-`raw_get` funtion is used inside `get_sp500_tickers`. In this way, greater pieces of chunk can be decomposed in smaller fragments and grouped latter on to solve the bigger picture. It's a good practice to use of `possibly()`, from `purrr` to "guarantee" the main script will run. If any error occurs, we get a `NA`, but the code still runs.
+In `R`, (i) every object is a function and (ii) every function can be used inside another function. That's why `raw_get` is part of `get_sp500_tickers`. In the `purrr` syntax, we are also allowed to write something like this, without having to same intermediary objects.
+
+```{r, eval=FALSE}
+possible_get <- purrr::possibly(
+        .f = ~ xml2::read_html('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies') %>% 
+            rvest::html_node('table.wikitable') %>% 
+            rvest::html_table() %>% 
+            dplyr::as_tibble(), 
+        otherwise = NA
+    )
+```
+
+The output is the same. `possibly()`, also from `purrr`, "guarantees" the main script will run. If any error occurs, we get a `NA`, but the code still runs. A safe bet for _loops_ with dozens of elements like this one. 
 
 
 ```{r}
@@ -109,10 +126,9 @@ tickers
 ```
 
 
-
 ## From Tickers to Stocks
 
-The next step is to construct a robust function that will allow us to use all the tickers we got to download the S&P 500 stocks. The function `download_stocks_from_tickers()` is designed to do exactly that and will be used inside the `map()` function from the `purrr` [package](https://purrr.tidyverse.org/).
+The next step is to construct a function that will allow us to use all the tickers we got to download the companies price history. The function `download_stocks_from_tickers()` will do the work.
 
 ```{r}
 
@@ -200,12 +216,16 @@ stocks
 ```
 
 
-The argument `column_index = 11` ensures that we only get the close prices (adjusted for dividends). This is a courtesy from the [WIKI database](https://www.quandl.com/databases/WIKIP/documentation/about). Stock prices, however, are not stationary and the log-returns were included for future modeling. 
+This data is a courtesy from the [WIKI database](https://www.quandl.com/databases/WIKIP/documentation/about). Of course, getting access to historical prices of 500 different assets may require some time. To speed up things a beat, the argument `column_index = 11` was used to only get the close prices (adjusted by dividends). I'm assuming that other information like the minimum, maximum and opening prices are irrelevant for our purposes.
+
+Finally, `tq_mutate()` is used to calculate stock returns. The adjusted prices are not stationary and shouldn't be used for modeling. [The stationary property of returns make them preferable](https://www.investopedia.com/articles/trading/07/stationary.asp).
 
 
 ## From `tibble()` to `ts()` 
 
-At this point, we have almost everything is needed to estimate the data generating process (DGP) of S&P 500 stock returns. The next step is to `group_by()` each one of the stocks and coerce them to the `ts` class (remember that the `forecast` [package](http://pkg.robjhyndman.com/forecast/) is built upon the `ts` class). 
+At this point, we have almost everything is needed to estimate the data generating process (DGP) of the S&P 500 stocks. In `R`, the forecasting power-horse is the `forecast` [package](http://pkg.robjhyndman.com/forecast/), build upon the `ts` class.
+
+The script bellow adds this structure into a `tibble` called `stocks_to_ts`. 
 
 ```{r}
 
@@ -235,17 +255,19 @@ stocks_to_ts
 ```
 
 
-## Map Over List Columns
+## Map Over List-Columns
 
-Now the setup is complete. We are now able to use the framework presented in the [chapter 25](http://r4ds.had.co.nz/many-models.html) of **R for data Science**. 
+Now the setup is complete and we are able to use the framework presented in the [chapter 25](http://r4ds.had.co.nz/many-models.html) of **R for data Science**. 
 
-The `auto.arima` function will recursively estimate the most suitable $ARMA$model for each S&P 500 stock. [Akaike](https://en.wikipedia.org/wiki/Akaike_information_criterion) is the default selection criteria. The AIC formula is
+The [`auto.arima`](http://pkg.robjhyndman.com/forecast/reference/auto.arima.html) function will recursively estimate the most suitable $ARMA$ model for each of the S&P 500 stocks. By default, the models are selected according to the [Akaike Selection Criteria (AIC)](https://en.wikipedia.org/wiki/Akaike_information_criterion). 
 
-`$$ AIC = 2k - 2ln(\hat{L}) $$`
+The AIC formula (in it's log form) is written as:
 
-in which, `$k$` is the number of parameters in the model and $\hat{L}$ is the minimum value achieved in the likelihood function. With a higher the `$k$`, higher is the penalization and smaller is the chance of a model with more parameters being chosed.
+$$ AIC = 2k - 2ln( \hat{L} ) $$
 
-The number of lags in the $p$ and $q$ factor from the $ARMA$ model were limited to be no more than 2. Since the data is monthly, this is identical to assume that shocks at time $t$ are not capable of sistematicaly impact returns by more than $t + 2$ perios ahead (at least from the point of view of statistical significance).  
+in which, $k$ is the number of parameters in the model and $\hat{L}$ is the minimum value achieved in the log-likelihood function. A boost in $k$, increases the penalization and more complex models have as smaller chance of being chosen. 
+
+The number of lags in the $(p,q)$ arguments are limited to be no more than 2. As we will see, this constraint doesn't bind for most stocks, yet serves to speeds up computations greatly. Of course, you can also attach an economic meaning to it: a shock that occurs at time $t$ doesn't impact returns by more than $t + 2$ periods (at least from a probabilistic point of view).    
 
 ```{r}
 
@@ -270,7 +292,7 @@ stocks_to_ts_modeling
 
 ```
 
-The `stocks_to_ts_modeling` object has standard evaluation metrics, like AIC, BIC, ME, RMSE, MAE, MAPE, MASE, ACF1. Not for one stock, but for all of them. That's how powerful the [tidyverse](https://www.tidyverse.org/) ecosystem can really be!
+The `stocks_to_ts_modeling` object have standard evaluation metrics, like AIC, BIC, ME, RMSE, MAE, MAPE, MASE, ACF1. Not for one stock, but for all in the S&P 500 index!
 
 ```{r, eval=TRUE, echo=FALSE}
 
@@ -337,30 +359,29 @@ stocks_to_ts_modeling %>%
     knitr::kable(
         digits  = 2,
         caption = 'ARMA models selected by the AIC Criteria', 
-        align   = 'c'
+        align   = 'c', 
+        format.args = list(width = 15)
     )
 
 
 ```
 
-It’s incredible that 70% of the S&P 500 stocks do not present any sign of predictability (as they are represented by the ARIMA(0, 0, 0) model, which is the random-walk). On top of that, an additional 10% of the stocks are composed by the ARIMA(0, 0, 1), which also follows the $E_t(y_{t + 1}) = E_t(y_{t})$ rule. 
+For 70% of our sample, the $ARIMA(0, 0, 0)$ won the day! (ps: This is the Random-Walk!) On top of that, an additional 10% of total number of stocks are composed by $ARIMA(0, 0, 1)$, who also obeys the $E_t(y_{t + 1}) = E_t(y_{t})$ rule[^1]. The best point forecast for tomorrow is today's return.  
 
-Specially interesting is the fact we have used the AIC criterion for selecting the models. The AIC is known for having a lighter penalization than the [Bayesian Information Criterion (BIC)](https://en.wikipedia.org/wiki/Bayesian_information_criterion). That is, if we had used the BIC criterion as a cutoff, we would probably increase the number of models resembling a random walk, because a fewer parameters would be estimated.
+Of course, a different selection criteria could yield contrasting results. But let's keep in mind that $AIC$ actually is not the toughest penalizer. As an example, take the [Bayesian Information Criterion (BIC)](https://en.wikipedia.org/wiki/Bayesian_information_criterion), that's widely known. If we calculate the partial derivatives with respect to $k$ (the number of model parameters) for both criteria, we get the following[^2]:
 
-It's easy to see through the use of partial derivatives
+$$ \frac{\partial{AIC}}{\partial{k}} = 2 $$
 
-`$$ \frac{\partial{AIC}}{\partial{k}} = 2 $$`
+$$ \frac{\partial{BIC}}{\partial{k}} = ln(n) $$
 
-and
+But $ln(n) > 2$, whenever $n > 7$. Our data  definitely has more than 7 observations, so we can be pretty confident that the $BIC$ criterion would hurt overparemetrized models by even more than $AIC$ actually did. That is, $BIC$ would put even more pressure to select simple parsimonious models. In this case, the percentage of random-walks would be grater than we just found. 
 
-`$$ \frac{\partial{BIC}}{\partial{k}} = ln(n) $$`
+To make it clear: returns seems to be so fluky that, for 70% of our sample, not even a single parameter (besides a constant) was worth to attaching. That's the market efficiency in which Granger was [talking about](http://www.forecastingprinciples.com/paperpdf/Granger-stockmarket.pdf). What can Machine Learning _algos_ "learn" in such a case? 
 
-but `$ 2 > ln(n) $` for any `$ n > 7 $`, which is always the case.  
+The quest for accuracy may come at a high cost of a misstated reality.
 
-Now, let's come back to the main question: what does Machine Learning has to do with all of these? 
 
-The way that I see is: what the data is telling us, is that we should be very careful before blindly using ML techniques, specially if we care about over-fitting. Whenever you continually unearth into the surface (using parallel computing, non-linear models, etc.) at some point *modeling risk* will came up and get you. In simple terms, model risk means that we are never certain that the selected model is, indeed, a representation of "true" data generating process. 
+[^1]: The variance, however, is different. This can lead to some variance-bias trade-off.
 
-In the end of the day, we all have to face the fact that financial time series are fabulously noisy, up to a point of being almost completely random. This is the market efficiency in which Granger was [talking about](http://www.forecastingprinciples.com/paperpdf/Granger-stockmarket.pdf), and there is not much Machine Learning models can do to change that. They can calibrate hyper-parameters, but cannot change the state of the world!
-
+[^2]: Someone could argue that $ln(\hat{L})$ and $ln(\sigma^2_e)$ also depends on the number of parameters. That's true, but they only have an indirect effect in $\frac{\partial{AIC}}{\partial{k}}$ and $\frac{\partial{BIC}}{\partial{k}}$ and I'm interested mainly in the direct effects. For this reason, I've omitted $\frac{\partial{AIC}}{\partial{ln(\hat{L})}} \frac{d{ln(\hat{L})}}{d{k}}$ and $\frac{\partial{BIC}}{\partial{ln(\sigma^2_e)}} \frac{d{ln(\sigma^2_e})}{d{k}}$ from the above equations.
 
