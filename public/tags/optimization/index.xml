@@ -17,8 +17,8 @@
       <pubDate>Wed, 20 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/2019/02/20/portfolio-analytics-in-the-tidyverse/</guid>
-      <description>Portfolio Analytics (PA) is a well known library for portfolio optimization in the R community. Written before the tidyverse gain pulse, the PA package is often used in the “Base R” context. The objective of this post is to show that it can also be use inside the tidyverse (with all the power that comes with it!).
-The basic usage of portfolio Analytics can be found here and in it’s four vignettes.</description>
+      <description>Portfolio Analytics (PA) is a well known library for portfolio optimization in R. Written before the tidyverse gain pulse, the PA package is often used in the “Base R” context. The objective of this post is to show that it can also be use inside the tidyverse (with all the power that comes with it!).
+The basic usage of portfolio Analytics can be found here. I’ll go straight to the tidy-world.</description>
     </item>
     
   </channel>

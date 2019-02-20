@@ -14,8 +14,8 @@ tags:
 
 
 
-<p><code>Portfolio Analytics</code> (PA) is a well known library for portfolio optimization in the <code>R</code> community. Written before the <code>tidyverse</code> gain pulse, the PA package is often used in the “Base R” context. The objective of this post is to show that it can also be use inside the <code>tidyverse</code> (with all the power that comes with it!).</p>
-<p>The basic usage of <code>portfolio Analytics</code> can be found <a href="https://cran.r-project.org/web/packages/PortfolioAnalytics/index.html">here</a> and in it’s four vignettes. I’ll start direct from the tidy-world.</p>
+<p><code>Portfolio Analytics</code> (PA) is a well known library for portfolio optimization in <code>R</code>. Written before the <code>tidyverse</code> gain pulse, the PA package is often used in the “Base R” context. The objective of this post is to show that it can also be use inside the <code>tidyverse</code> (with all the power that comes with it!).</p>
+<p>The basic usage of <code>portfolio Analytics</code> can be found <a href="https://cran.r-project.org/web/packages/PortfolioAnalytics/index.html">here</a>. I’ll go straight to the tidy-world.</p>
 <div id="libraries" class="section level2">
 <h2>Libraries</h2>
 <pre class="r"><code>library(PortfolioAnalytics)
@@ -25,8 +25,8 @@ library(rsample)
 library(timetk)
 library(tibbletime)</code></pre>
 </div>
-<div id="get-the-data" class="section level1">
-<h1>Get the Data</h1>
+<div id="get-the-data" class="section level2">
+<h2>Get the Data</h2>
 <p><code>PortfolioAnalytics</code> comes the <code>edhec</code> dataset. Unfortunately, this data ends in 2009. To increase the number of observations lets download the full history of the EDHEC Hedge-Funds Index.</p>
 <pre class="r"><code>edhec_updated &lt;- 
     
@@ -59,6 +59,7 @@ edhec_updated %&gt;%
 ## #   Arbitrage` &lt;dbl&gt;, `Relative Value` &lt;dbl&gt;, `Short Selling` &lt;dbl&gt;,
 ## #   `Funds Of Funds` &lt;dbl&gt;</code></pre>
 <p>We now have gained ten additional years of data.</p>
+</div>
 <div id="tidy-portfolios" class="section level2">
 <h2>Tidy Portfolios</h2>
 <p>With a clean data at hand, let’s <code>pipe</code> a simple mean-variance portfolio.</p>
@@ -71,8 +72,8 @@ mean_var_pspec &lt;- portfolio.spec(assets = colnames(edhec_updated_xts)) %&gt;%
   add.constraint(portfolio = ., type = &quot;box&quot;, min = 0.00, max = 1.00) %&gt;%
   add.objective(portfolio = ., type = &quot;risk&quot;, name = &quot;var&quot;) %&gt;% 
   add.objective(portfolio = ., type = &quot;return&quot;, name = &quot;mean&quot;)</code></pre>
-<p>The first insight is that you can “pipe” the portfolios you want to work with. Second, the <code>tidyverse</code>offers a succinct way of making a reference to a <em>current objects</em>: the “<code>.</code>” (dot). The “dot” could also be ignored in this case, but I decided to keep it so the similarity with “Base R” could stand-out more clearly.</p>
-<p>The optimization for the full period yields.</p>
+<p>First, you can <em>pipe</em> portfolios as any other tidy-objects. Second, the <code>tidyverse</code> offers a succinct way of making reference to current objects: the “<code>.</code>” (dot). In this case, the “dot” could also be ignored, but I decided to keep it so the similarity with “Base R” could stand-out more clearly.</p>
+<p>The optimization for the full period yields the following result.</p>
 <pre class="r"><code>optim_port &lt;- edhec_updated_xts %&gt;% 
     optimize.portfolio(
         R               = ., 
@@ -109,11 +110,11 @@ optim_port</code></pre>
 ## 
 ##  StdDev 
 ## 0.01711</code></pre>
-<p>A monthly return of 0.6831061 and a standard-deviation of 1.7111451.</p>
+<p>A monthly return of 0.68 percent and a standard-deviation of 1.71 is found.</p>
 </div>
 <div id="rolling-tidy-portfolios" class="section level2">
 <h2>Rolling Tidy-Portfolios</h2>
-<p>Suppose now that we would like to do this operation on a rolling-basis. It’s possible to use <code>optimize.portfolio.rebalancing()</code>, but we would be outside the tidy-world. Instead, let’s go tidy with full-power.</p>
+<p>Suppose that we would like to do this operation on a rolling-basis. It’s possible to use <code>optimize.portfolio.rebalancing()</code>, but we would be outside the tidy-world. Instead, let’s go tidy in full.</p>
 <pre class="r"><code>opt_port_rolling &lt;- edhec_updated %&gt;% 
     rolling_origin(data        = ., 
                    initial     = 60, 
@@ -138,9 +139,11 @@ opt_port_rolling</code></pre>
 ##  9 &lt;split [68/1]&gt; Slice009
 ## 10 &lt;split [69/1]&gt; Slice010
 ## # ... with 194 more rows</code></pre>
-<p>The object <code>edhec_updated</code> has 264 rows while <code>opt_port_rolling</code> has only 204. That is, with the <code>rolling_origin</code> function from the <code>rsample</code> package we created a <code>tibble</code> with 204 separated time-slices in which is possible to apply the optimization separably on a expanding window (<code>cumulative = TRUE</code>). The <code>rsample</code> <a href="https://tidymodels.github.io/rsample/index.html">website</a> explain it’s main functions in more detail. Worth while spending some time there!</p>
-<p>The important to remind thought, is that for every row we have now an <code>analysis()</code> (training) period and an <code>assessment()</code> (testing) period that can be directly assessed.</p>
-<pre class="r"><code>opt_port_rolling$splits[[1]] %&gt;% 
+<p>The object <code>edhec_updated</code> has 264 rows while <code>opt_port_rolling</code> has only 204. The <code>rolling_origin</code> function (from the <code>rsample</code> package) created a <code>tibble</code> with 204 separated time-slices in which is possible to apply the optimization on a expanding time-windows (<code>cumulative = TRUE</code>).</p>
+<p>The <code>rsample</code> <a href="https://tidymodels.github.io/rsample/index.html">website</a> explain it’s main functions in detail. Worth while spending some time there!</p>
+<p>The important to remind that for every row we now have an <code>analysis()</code> - training - period and an <code>assessment()</code> - testing - period.</p>
+<pre class="r"><code># 1 training sample. Start-date: 2001-07-31
+opt_port_rolling$splits[[1]] %&gt;% 
     analysis() %&gt;% 
     tail()</code></pre>
 <pre><code>## # A tibble: 6 x 14
@@ -158,8 +161,9 @@ opt_port_rolling</code></pre>
 ## #   Arbitrage` &lt;dbl&gt;, `Relative Value` &lt;dbl&gt;, `Short Selling` &lt;dbl&gt;,
 ## #   `Funds Of Funds` &lt;dbl&gt;</code></pre>
 <p>This is the first period.</p>
-<p>In the second one we move forward by one month exactly as we would like to.</p>
-<pre class="r"><code>opt_port_rolling$splits[[2]] %&gt;% 
+<p>In the second period we move forward exactly by one month as we would like to.</p>
+<pre class="r"><code># 2 training sample. Start-date: 2001-08-31
+opt_port_rolling$splits[[2]] %&gt;% 
     analysis() %&gt;% 
     tail()</code></pre>
 <pre><code>## # A tibble: 6 x 14
@@ -180,13 +184,23 @@ opt_port_rolling</code></pre>
 </div>
 <div id="purrr-them-all" class="section level2">
 <h2><code>purrr</code> them all!</h2>
-<p><code>tidyverse</code> works best with <code>tibbles</code>. <code>PortfolioAnalytics</code>, on the other hand, requires an <code>xts</code> <a href="https://cran.r-project.org/web/packages/xts/index.html">object</a>. Let’s do the required coercion (from <code>tibble</code> to <code>xts</code>) inside <code>map()</code> so we can continue working in the tidy-world.</p>
+<p><code>tidyverse</code> works best with <code>tibbles</code>. <code>PortfolioAnalytics</code>, on the other hand, requires an <code>xts</code> <a href="https://cran.r-project.org/web/packages/xts/index.html">object</a>. Let’s do the necessary coercion (from <code>tibble</code> to <code>xts</code>) inside <code>map()</code>, so we can continue working in the tidy-world.</p>
 <pre class="r"><code>start_purrr &lt;- Sys.time()
 map_opt_port_rolling &lt;- opt_port_rolling %&gt;%
+    
+    # add a new column with the optimizations
     mutate(optimizations = map(
+        
+        # map over each split
         .x = .$splits, 
+        
+        # extract the training period
         .f =  ~ analysis(.x) %&gt;% 
+            
+            # coerce to the xts class
             tk_xts(data = ., date_var = date, silent = TRUE) %&gt;% 
+            
+            # and optimize the portfolios
             optimize.portfolio(
                 R               = ., 
                 portfolio       = mean_var_pspec, 
@@ -213,7 +227,7 @@ map_opt_port_rolling</code></pre>
 ##  9 &lt;split [68/1]&gt; Slice009 &lt;S3: optimize.portfolio.ROI&gt;
 ## 10 &lt;split [69/1]&gt; Slice010 &lt;S3: optimize.portfolio.ROI&gt;
 ## # ... with 194 more rows</code></pre>
-<p>Every row of the <code>optimizations</code> column has an optimal portfolio for each period of time.</p>
+<p>Every row of the <code>optimizations</code> column has an optimal portfolio that used data from the beginning of the series up to that period (remember, <code>cumulative = TRUE</code>).</p>
 <pre class="r"><code># for period 1
 # using 60 realizations
 map_opt_port_rolling$optimizations[[1]]</code></pre>
@@ -304,8 +318,8 @@ map_opt_port_rolling$optimizations[[3]]</code></pre>
 ## 
 ##  StdDev 
 ## 0.01664</code></pre>
-<p>Notice that in period 2 the algorithm have not found a solution. There are ways to circumvent this problem inside the <code>tidyverse</code>. My preferred ones is by using <code>purrr</code>’s adverbs: <code>safely()</code>, <code>quietly()</code>, <code>possibly()</code> and <code>insistently()</code>. I’m not going to do that here, however, because the main objective is how to use the <code>PortfolioAnalytics</code> in the <code>tidyverse</code>, not to solve every possible bug.</p>
-<p>To extract the weights, returns and the standard-deviation let’s continue mapping.</p>
+<p>Notice that in period 2 the algorithm have not found a solution. There are many ways to circumvent this problem inside the <code>tidyverse</code>. My preferred ones is by using <code>purrr</code>’s adverbs: <code>safely()</code>, <code>quietly()</code>, <code>possibly()</code> and <code>insistently()</code>. I’m not going to do that here, however, because the main objective is how to use the <code>PortfolioAnalytics</code> in the <code>tidyverse</code>, not to solve every possible bug.</p>
+<p>To extract the optimal weights, returns, standard-deviation and the sharpe-ratio let’s continue mapping.</p>
 <pre class="r"><code>map_opt_port_rolling %&gt;% 
     mutate(weights = map(.x = optimizations, .f = ~ .x$weights), 
            std_dev  = map_dbl(.x = optimizations, .f = ~ .x$objective_measures$StdDev), 
@@ -329,7 +343,8 @@ map_opt_port_rolling$optimizations[[3]]</code></pre>
 ## # ... with 194 more rows</code></pre>
 <p>Those are the <em>in-sample</em> statistics.</p>
 <p>The true <em>out-of-sample</em> statistics can be calculated by using the <code>assesment()</code> function.</p>
-<pre class="r"><code># true out-of_sample data for the 1 period optimization
+<pre class="r"><code># true out-of_sample data for the 1 period 
+# only 1 line of data because &quot;assess = 1&quot; in  rolling_origin()
 opt_port_rolling$splits[[1]] %&gt;% 
     assessment()</code></pre>
 <pre><code>## # A tibble: 1 x 14
@@ -341,7 +356,8 @@ opt_port_rolling$splits[[1]] %&gt;%
 ## #   `Global Macro` &lt;dbl&gt;, `Long/Short Equity` &lt;dbl&gt;, `Merger
 ## #   Arbitrage` &lt;dbl&gt;, `Relative Value` &lt;dbl&gt;, `Short Selling` &lt;dbl&gt;,
 ## #   `Funds Of Funds` &lt;dbl&gt;</code></pre>
-<pre class="r"><code># true out-of_sample data for the 2 period optimization
+<pre class="r"><code># true out-of_sample data for the 2 period 
+# only 1 line of data because &quot;assess = 1&quot; in  rolling_origin()
 opt_port_rolling$splits[[2]] %&gt;% 
     assessment()</code></pre>
 <pre><code>## # A tibble: 1 x 14
@@ -353,12 +369,12 @@ opt_port_rolling$splits[[2]] %&gt;%
 ## #   `Global Macro` &lt;dbl&gt;, `Long/Short Equity` &lt;dbl&gt;, `Merger
 ## #   Arbitrage` &lt;dbl&gt;, `Relative Value` &lt;dbl&gt;, `Short Selling` &lt;dbl&gt;,
 ## #   `Funds Of Funds` &lt;dbl&gt;</code></pre>
-<p>As expected, every time we change the “splits” the data moves forward by one month.</p>
-<p>The <code>assessment</code> periods can be used to measure the amount of error in the estimation process, for example. Think of investors that are not be risk-averse, but <em>error-averse</em> (see chapter 12 of <a href="https://www.amazon.com/Robust-Portfolio-Optimization-Management-Fabozzi/dp/047192122X/ref=sr_1_1?ie=UTF8&amp;qid=1550689618&amp;sr=8-1&amp;keywords=robust+portfolio+optimization+and+management">Robust Portfolio Optimization Management</a> for details).</p>
+<p>As expected, every time we change the “splits”, the data moves forward by one month.</p>
+<p>The <code>assessment</code> periods can be used to measure the amount of error in the estimation process, for example. Think of investors that are not be risk-averse, but error-averse (see chapter 12 of <a href="https://www.amazon.com/Robust-Portfolio-Optimization-Management-Fabozzi/dp/047192122X/ref=sr_1_1?ie=UTF8&amp;qid=1550689618&amp;sr=8-1&amp;keywords=robust+portfolio+optimization+and+management">Robust Portfolio Optimization Management</a> for details).</p>
 </div>
 <div id="who-is-faster" class="section level2">
 <h2>Who is Faster?</h2>
-<p>Lets address a final question: who is faster: <code>PortfolioAnalycis</code> or <code>purrr</code>? Let’s find out.</p>
+<p>Lets address a final question: who is faster: <code>PortfolioAnalycis</code> or <code>purrr</code>?</p>
 <pre class="r"><code>pa_opt_time &lt;- edhec_updated_xts %&gt;% 
     optimize.portfolio.rebalancing(
                 R               = ., 
@@ -369,10 +385,11 @@ opt_port_rolling$splits[[2]] %&gt;%
                 rolling_window  = NULL, 
                 rebalance_on    = &quot;months&quot; ) %&gt;% 
     .[[&quot;elapsed_time&quot;]]</code></pre>
+<p>The time difference is:</p>
 <ul>
-<li><code>PortfolioAnalytics</code>: 2.4672201</li>
-<li><code>purrr</code> consumed 4.0988691</li>
+<li><code>PortfolioAnalytics</code>: 4.12</li>
+<li><code>purrr</code>: 5.87</li>
 </ul>
-<p><code>purrr</code>is slower. For several of hundreds of assets in a granular periodicity this is definitely a drawback. It’s interesting to investigate how <a href="https://davisvaughan.github.io/furrr/"><code>furrr</code></a> responds to tests like the one above. I still hold a preference for the “tidy-way” because of the great flexibility that gives for the user.</p>
-</div>
+<p><code>purrr</code> is slower. For several of hundreds of assets in a granular periodicity this is definitely a drawback. It’s interesting to investigate how <a href="https://davisvaughan.github.io/furrr/"><code>furrr</code></a> responds to tests like the one above.</p>
+<p>I still hold a preference for the “clean” syntax of <code>tidyverse</code> and the great flexibility that provides for the user.</p>
 </div>

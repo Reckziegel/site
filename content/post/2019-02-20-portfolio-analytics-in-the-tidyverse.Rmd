@@ -25,9 +25,9 @@ library(timetk)
 ```
 
 
-`Portfolio Analytics` (PA) is a well known library for portfolio optimization in the `R` community. Written before the `tidyverse` gain pulse, the PA package is often used in the "Base R" context. The objective of this post is to show that it can also be use inside the `tidyverse` (with all the power that comes with it!).
+`Portfolio Analytics` (PA) is a well known library for portfolio optimization in `R`. Written before the `tidyverse` gain pulse, the PA package is often used in the "Base R" context. The objective of this post is to show that it can also be use inside the `tidyverse` (with all the power that comes with it!).
 
-The basic usage of `portfolio Analytics` can be found [here](https://cran.r-project.org/web/packages/PortfolioAnalytics/index.html) and in it's four vignettes. I'll start direct from the tidy-world.
+The basic usage of `portfolio Analytics` can be found [here](https://cran.r-project.org/web/packages/PortfolioAnalytics/index.html). I'll go straight to the tidy-world.
 
 ## Libraries
 
@@ -40,7 +40,7 @@ library(timetk)
 library(tibbletime)
 ```
 
-# Get the Data
+## Get the Data
 
 `PortfolioAnalytics` comes the `edhec` dataset. Unfortunately, this data ends in 2009. To increase the number of observations lets download the full history of the EDHEC Hedge-Funds Index.
 
@@ -82,9 +82,9 @@ mean_var_pspec <- portfolio.spec(assets = colnames(edhec_updated_xts)) %>%
   add.objective(portfolio = ., type = "return", name = "mean")
 ```
 
-The first insight is that you can "pipe" the portfolios you want to work with. Second, the `tidyverse`offers a succinct way of making a reference to a _current objects_: the "`.`" (dot). The "dot" could also be ignored in this case, but I decided to keep it so the similarity with "Base R" could stand-out more clearly.
+First, you can _pipe_ portfolios as any other tidy-objects. Second, the `tidyverse` offers a succinct way of making reference to current objects: the "`.`" (dot). In this case, the "dot" could also be ignored, but I decided to keep it so the similarity with "Base R" could stand-out more clearly.
 
-The optimization for the full period yields. 
+The optimization for the full period yields the following result. 
 
 ```{r}
 optim_port <- edhec_updated_xts %>% 
@@ -100,11 +100,12 @@ optim_port
 
 ```
 
-A monthly return of `r optim_port$objective_measures$mean * 100` and a standard-deviation of `r optim_port$objective_measures$StdDev * 100`.
+A monthly return of `r round(optim_port$objective_measures$mean * 100, 2)` percent and a standard-deviation of `r round(optim_port$objective_measures$StdDev * 100, 2)` is found.
+
 
 ## Rolling Tidy-Portfolios 
 
-Suppose now that we would like to do this operation on a rolling-basis. It's possible to use `optimize.portfolio.rebalancing()`, but we would be outside the tidy-world. Instead, let's go tidy with full-power.
+Suppose that we would like to do this operation on a rolling-basis. It's possible to use `optimize.portfolio.rebalancing()`, but we would be outside the tidy-world. Instead, let's go tidy in full.
 
 ```{r}
 
@@ -120,12 +121,14 @@ opt_port_rolling
 
 ```
 
-The object `edhec_updated` has `r nrow(edhec_updated)` rows while `opt_port_rolling` has only `r nrow(opt_port_rolling)`. That is, with the `rolling_origin` function from the `rsample` package we created a `tibble` with `r nrow(opt_port_rolling)` separated time-slices in which is possible to apply the optimization separably on a expanding window (`cumulative = TRUE`). The `rsample` [website](https://tidymodels.github.io/rsample/index.html) explain it's main functions in more detail. Worth while spending some time there! 
+The object `edhec_updated` has `r nrow(edhec_updated)` rows while `opt_port_rolling` has only `r nrow(opt_port_rolling)`. The `rolling_origin` function (from the `rsample` package) created a `tibble` with `r nrow(opt_port_rolling)` separated time-slices in which is possible to apply the optimization on a expanding time-windows (`cumulative = TRUE`). 
 
-The important to remind thought, is that for every row we have now an `analysis()` (training) period and an `assessment()` (testing) period that can be directly assessed.
+The `rsample` [website](https://tidymodels.github.io/rsample/index.html) explain it's main functions in detail. Worth while spending some time there! 
 
+The important to remind that for every row we now have an `analysis()` - training - period and an `assessment()` - testing - period. 
 
 ```{r}
+# 1 training sample. Start-date: 2001-07-31
 opt_port_rolling$splits[[1]] %>% 
     analysis() %>% 
     tail()
@@ -133,9 +136,10 @@ opt_port_rolling$splits[[1]] %>%
 
 This is the first period. 
 
-In the second one we move forward by one month exactly as we would like to.
+In the second period we move forward exactly by one month as we would like to.
 
 ```{r}
+# 2 training sample. Start-date: 2001-08-31
 opt_port_rolling$splits[[2]] %>% 
     analysis() %>% 
     tail()
@@ -145,16 +149,26 @@ And this process continues until the end of the series.
 
 ## `purrr` them all!
 
-`tidyverse` works best with `tibbles`. `PortfolioAnalytics`, on the other hand, requires an `xts` [object](https://cran.r-project.org/web/packages/xts/index.html). Let's do the required coercion (from `tibble` to `xts`) inside `map()` so we can continue working in the tidy-world. 
+`tidyverse` works best with `tibbles`. `PortfolioAnalytics`, on the other hand, requires an `xts` [object](https://cran.r-project.org/web/packages/xts/index.html). Let's do the necessary coercion (from `tibble` to `xts`) inside `map()`, so we can continue working in the tidy-world. 
 
 ```{r}
 
 start_purrr <- Sys.time()
 map_opt_port_rolling <- opt_port_rolling %>%
+    
+    # add a new column with the optimizations
     mutate(optimizations = map(
+        
+        # map over each split
         .x = .$splits, 
+        
+        # extract the training period
         .f =  ~ analysis(.x) %>% 
+            
+            # coerce to the xts class
             tk_xts(data = ., date_var = date, silent = TRUE) %>% 
+            
+            # and optimize the portfolios
             optimize.portfolio(
                 R               = ., 
                 portfolio       = mean_var_pspec, 
@@ -169,7 +183,7 @@ map_opt_port_rolling
 
 ```
 
-Every row of the `optimizations` column has an optimal portfolio for each period of time. 
+Every row of the `optimizations` column has an optimal portfolio that used data from the beginning of the series up to that period (remember, `cumulative = TRUE`). 
 
 ```{r}
 
@@ -195,9 +209,9 @@ map_opt_port_rolling$optimizations[[3]]
 
 ```
 
-Notice that in period 2 the algorithm have not found a solution. There are ways to circumvent this problem inside the `tidyverse`. My preferred ones is by using `purrr`'s adverbs: `safely()`, `quietly()`, `possibly()` and `insistently()`. I'm not going to do that here, however, because the main objective is how to use the `PortfolioAnalytics` in the `tidyverse`, not to solve every possible bug. 
+Notice that in period 2 the algorithm have not found a solution. There are many ways to circumvent this problem inside the `tidyverse`. My preferred ones is by using `purrr`'s adverbs: `safely()`, `quietly()`, `possibly()` and `insistently()`. I'm not going to do that here, however, because the main objective is how to use the `PortfolioAnalytics` in the `tidyverse`, not to solve every possible bug. 
 
-To extract the weights, returns and the standard-deviation let's continue mapping.
+To extract the optimal weights, returns, standard-deviation and the sharpe-ratio let's continue mapping.
 
 ```{r}
 
@@ -215,23 +229,25 @@ Those are the _in-sample_ statistics.
 The true _out-of-sample_ statistics can be calculated by using the `assesment()` function.
 
 ```{r}
-# true out-of_sample data for the 1 period optimization
+# true out-of_sample data for the 1 period 
+# only 1 line of data because "assess = 1" in  rolling_origin()
 opt_port_rolling$splits[[1]] %>% 
     assessment()
 ```
 
 ```{r}
-# true out-of_sample data for the 2 period optimization
+# true out-of_sample data for the 2 period 
+# only 1 line of data because "assess = 1" in  rolling_origin()
 opt_port_rolling$splits[[2]] %>% 
     assessment()
 ```
-As expected, every time we change the "splits" the data moves forward by one month. 
+As expected, every time we change the "splits", the data moves forward by one month. 
 
-The `assessment` periods can be used to measure the amount of error in the estimation process, for example. Think of investors that are not be risk-averse, but _error-averse_ (see chapter 12 of [Robust Portfolio Optimization Management](https://www.amazon.com/Robust-Portfolio-Optimization-Management-Fabozzi/dp/047192122X/ref=sr_1_1?ie=UTF8&qid=1550689618&sr=8-1&keywords=robust+portfolio+optimization+and+management) for details).
+The `assessment` periods can be used to measure the amount of error in the estimation process, for example. Think of investors that are not be risk-averse, but error-averse (see chapter 12 of [Robust Portfolio Optimization Management](https://www.amazon.com/Robust-Portfolio-Optimization-Management-Fabozzi/dp/047192122X/ref=sr_1_1?ie=UTF8&qid=1550689618&sr=8-1&keywords=robust+portfolio+optimization+and+management) for details).
 
 ## Who is Faster?
 
-Lets address a final question: who is faster: `PortfolioAnalycis` or `purrr`? Let's find out.
+Lets address a final question: who is faster: `PortfolioAnalycis` or `purrr`? 
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -248,10 +264,14 @@ pa_opt_time <- edhec_updated_xts %>%
 
 ```
 
-- `PortfolioAnalytics`: `r pa_opt_time` 
-- `purrr` consumed `r end_purrr - start_purrr`
+The time difference is:
 
-`purrr`is slower. For several of hundreds of assets in a granular periodicity this is definitely a drawback. It's interesting to investigate how [`furrr`](https://davisvaughan.github.io/furrr/) responds to tests like the one above. I still hold a preference for the "tidy-way" because of the great flexibility that gives for the user. 
+- `PortfolioAnalytics`: `r round(pa_opt_time, 2)` 
+- `purrr`: `r round(end_purrr - start_purrr, 2)`
+
+`purrr` is slower. For several of hundreds of assets in a granular periodicity this is definitely a drawback. It's interesting to investigate how [`furrr`](https://davisvaughan.github.io/furrr/) responds to tests like the one above. 
+
+I still hold a preference for the "clean" syntax of `tidyverse` and the great flexibility that provides for the user. 
 
 
 
