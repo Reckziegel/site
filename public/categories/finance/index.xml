@@ -39,7 +39,7 @@ covMarket &amp;lt;- function(x, shrink = TRUE) {# some operations work better w
       <pubDate>Wed, 05 Sep 2018 00:00:00 +0000</pubDate>
       
       <guid>/2018/09/05/how-much-shrinkage-does-the-stock-market-requires/</guid>
-      <description>Shrinkage is hardly new in finance. In 1956, Charles Stein published a famous paper called Inadmissibility of the usual estimator for the mean of a multivariate normal distribution. In this work, he shows that, if the sum of the squares of the errors (SSE) is used as a loss function, then, for $ n \geq 2 $, the sample mean is not an optimal estimator and can be improved by exploring the trade-off among bias and variance.</description>
+      <description>Shrinkage is hardly new in finance. In 1956, Charles Stein published a famous paper called Inadmissibility of the usual estimator for the mean of a multivariate normal distribution. In his work, he shows that, if the sum of the squares of the errors (SSE) is used as a loss function, then, for $ n \geq 2 $, the sample mean is not an optimal estimator. It an be improved by exploring the trade-off among bias and variance.</description>
     </item>
     
     <item>
@@ -48,8 +48,8 @@ covMarket &amp;lt;- function(x, shrink = TRUE) {# some operations work better w
       <pubDate>Mon, 27 Aug 2018 00:00:00 +0000</pubDate>
       
       <guid>/2018/08/27/how-many-stocks-in-the-s-p-500-do-follow-a-random-walk/</guid>
-      <description>There has been a huge growth of machine learning models’ for finance. The underlying idea behind those models is to put in practice an agnostic search, mostly by brute force, that will deliver forecasts, around some loss function, that are as accuratte the data can tell.
-At the same time, forecasters have been spending, over the last 30 years, a huge amount of effort trying to detect veiled patterns in the stock market.</description>
+      <description>Machine Learning (ML) models are trendy and gaining popularity in finance. Practitioners noticed that little help can come from asymptotic theory if the researcher is constrained by the number of observations (in which \(n \rightarrow \infty\) do never happens).
+The solution offered by a great deal of ML models is a complete twist in econometric tradition. Forget about odd features and ugly names, like autocorrelation, multicollinearity and heteroskedasticity. Just pay attention to the forecasts: are they good or not?</description>
     </item>
     
   </channel>
