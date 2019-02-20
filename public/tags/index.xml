@@ -23,7 +23,7 @@
     <item>
       <title>Estimation</title>
       <link>/tags/estimation/</link>
-      <pubDate>Sat, 08 Sep 2018 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 20 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/estimation/</guid>
       <description></description>
@@ -98,6 +98,15 @@
       <pubDate>Tue, 29 Jan 2019 00:00:00 +0000</pubDate>
       
       <guid>/tags/ols/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Optimization</title>
+      <link>/tags/optimization/</link>
+      <pubDate>Wed, 20 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/optimization/</guid>
       <description></description>
     </item>
     
@@ -179,6 +188,15 @@
       <pubDate>Fri, 27 Jul 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/simulation/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Tidyverse</title>
+      <link>/tags/tidyverse/</link>
+      <pubDate>Wed, 20 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/tidyverse/</guid>
       <description></description>
     </item>
     

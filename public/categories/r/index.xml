@@ -6,10 +6,20 @@
     <description>Recent content in R on A Hugo website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 14 Nov 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 20 Feb 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Portfolio Analytics in the Tidyverse</title>
+      <link>/2019/02/20/portfolio-analytics-in-the-tidyverse/</link>
+      <pubDate>Wed, 20 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/2019/02/20/portfolio-analytics-in-the-tidyverse/</guid>
+      <description>Portfolio Analytics (PA) is a well known library for portfolio optimization in the R community. Written before the tidyverse gain pulse, the PA package is often used in the “Base R” context. The objective of this post is to show that it can also be use inside the tidyverse (with all the power that comes with it!).
+The basic usage of portfolio Analytics can be found here and in it’s four vignettes.</description>
+    </item>
     
     <item>
       <title>The Dance of the Yield</title>
