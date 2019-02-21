@@ -45,7 +45,7 @@
     
     <li><a href="/about/">About</a></li>
     
-    <li><a href="/cv_canvas.pdf">CV</a></li>
+    <li><a href="/cv">CV</a></li>
     
     <li><a href="https://github.com/Reckziegel">GitHub</a></li>
     
@@ -196,7 +196,7 @@ opt_port_rolling</code></pre>
 ## # ... with 194 more rows</code></pre>
 <p>The object <code>edhec_updated</code> has 264 rows while <code>opt_port_rolling</code> has only 204. The <code>rolling_origin</code> function (from the <code>rsample</code> package) created a <code>tibble</code> with 204 separated time-slices in which is possible to apply the optimization on a expanding time-windows (<code>cumulative = TRUE</code>).</p>
 <p>The <code>rsample</code> <a href="https://tidymodels.github.io/rsample/index.html">website</a> explain it’s main functions in detail. Worth while spending some time there!</p>
-<p>The important to remind that for every row we now have an <code>analysis()</code> - training - period and an <code>assessment()</code> - testing - period.</p>
+<p>It’s important to remind that for every row we now have an <code>analysis()</code> - training - period and an <code>assessment()</code> - testing - period.</p>
 <pre class="r"><code># 1 training sample. Start-date: 2001-07-31
 opt_port_rolling$splits[[1]] %&gt;% 
     analysis() %&gt;% 
@@ -442,8 +442,8 @@ opt_port_rolling$splits[[2]] %&gt;%
     .[[&quot;elapsed_time&quot;]]</code></pre>
 <p>The time difference is:</p>
 <ul>
-<li><code>PortfolioAnalytics</code>: 4.12</li>
-<li><code>purrr</code>: 5.87</li>
+<li><code>PortfolioAnalytics</code>: 2.94</li>
+<li><code>purrr</code>: 3.75</li>
 </ul>
 <p><code>purrr</code> is slower. For several of hundreds of assets in a granular periodicity this is definitely a drawback. It’s interesting to investigate how <a href="https://davisvaughan.github.io/furrr/"><code>furrr</code></a> responds to tests like the one above.</p>
 <p>I still hold a preference for the “clean” syntax of <code>tidyverse</code> and the great flexibility that provides for the user.</p>
