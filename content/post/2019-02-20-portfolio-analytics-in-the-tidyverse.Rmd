@@ -125,7 +125,7 @@ The object `edhec_updated` has `r nrow(edhec_updated)` rows while `opt_port_roll
 
 The `rsample` [website](https://tidymodels.github.io/rsample/index.html) explain it's main functions in detail. Worth while spending some time there! 
 
-The important to remind that for every row we now have an `analysis()` - training - period and an `assessment()` - testing - period. 
+It's important to remind that for every row we now have an `analysis()` - training - period and an `assessment()` - testing - period. 
 
 ```{r}
 # 1 training sample. Start-date: 2001-07-31
