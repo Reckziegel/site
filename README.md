@@ -3,4 +3,4 @@
 Personal Website
 ================
 
-This is the repository I use to keep the contents of my personal [website](bernardo.codes).
+This is the repository I use to keep the contents of my personal [website](https://bernardo.codes/).
