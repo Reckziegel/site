@@ -1,6 +1,6 @@
 baseurl = "/"
 languageCode = "en-us"
-title = "A Hugo website"
+title = "Bernardo Reckziegel"
 theme = "hugo-lithium"
 googleAnalytics = ""
 disqusShortname = ""
@@ -17,7 +17,7 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
     url = "https://github.com/Reckziegel"
 [[menu.main]]
     name = "CV"
-    url = "/cv"
+    url = "/CV"
 
 [params]
     description = "A website built through Hugo and blogdown."
