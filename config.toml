@@ -1,4 +1,4 @@
-baseurl = "/"
+baseurl = "https://bernardo.codes/"
 languageCode = "en-us"
 title = "Bernardo Reckziegel"
 theme = "hugo-lithium"
