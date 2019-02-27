@@ -13,23 +13,23 @@ tags:
 
 
 
-<p>The Keynesian consumption function is one of the most famous equations in macroeconomics. This post will show how it can be estimated and how can we use a simple trick to add dynamics into the system.</p>
+<p>The Keynesian consumption function is one of the most famous equations in macroeconomics. This post will show how it can be estimated and how we can use a simple trick to add dynamics into the system.</p>
 <div id="a-functional-form-for-c_t" class="section level2">
 <h2>A functional form for <span class="math inline">\(C_t\)</span></h2>
 <p>A traditional representation of consumption is</p>
 <p><span class="math display">\[ C_t = \alpha + \beta_0 Y^d_t \]</span></p>
 <p>in which, <span class="math inline">\(C_t\)</span> is consumption at time <span class="math inline">\(t\)</span>, <span class="math inline">\(Y^d_t\)</span> is the disposable income at <span class="math inline">\(t\)</span> and <span class="math inline">\(\beta_0\)</span> is the <em>marginal propensity to consume</em> (MPC).</p>
-<p>This last parameter has a straightforward meaning: if the disposable income increases by one unit, consumption increases by <span class="math inline">\(\beta_0\)</span> units of <span class="math inline">\(Y^d\)</span>.</p>
+<p>This last parameter has a straightforward interpretation: if the disposable income increases by one unit, consumption increases by <span class="math inline">\(\beta_0\)</span> units of <span class="math inline">\(Y^d\)</span>.</p>
 <p>In theory, the adjustment occurs immediately. On reality, though, it is quite probable the adjustment requires some time to occur.</p>
 <p>A more realistic interpretation of this phenomenon would be given by the following stochastic format</p>
-<p><span class="math display">\[ C_t = \alpha + \beta_0 Y_t + \beta_1 Y_{t-1} + ... + \beta_k Y_{t-k} + u_t \]</span> Now, we have a whole bunch of multipliers. <span class="math inline">\(\beta_0\)</span> is the short-term impact of <span class="math inline">\(Y_t\)</span> in <span class="math inline">\(C_t\)</span>, <span class="math inline">\(\beta_0 + \beta_1\)</span> measures an intermediate impact in <span class="math inline">\(C_t\)</span>, so on so forth. The long-run impact is given by <span class="math inline">\(\sum_{i=0}^{k} B_i\)</span>, which is the sum of all the different impacts that <span class="math inline">\(\beta_i\)</span> has in <span class="math inline">\(C_t\)</span>.</p>
-<p>OK, we now have the dynamics… but how many lags do we choose?</p>
+<p><span class="math display">\[ C_t = \alpha + \beta_0 Y_t + \beta_1 Y_{t-1} + ... + \beta_k Y_{t-k} + u_t \]</span> We now have a whole bunch of multipliers. <span class="math inline">\(\beta_0\)</span> is the short-term impact of <span class="math inline">\(Y_t\)</span> in <span class="math inline">\(C_t\)</span>, <span class="math inline">\(\beta_0 + \beta_1\)</span> measures an intermediate impact in <span class="math inline">\(C_t\)</span>, so on so forth. The long-run impact is given by <span class="math inline">\(\sum_{i=0}^{k} B_i\)</span>, which is the sum of all the different impacts that <span class="math inline">\(\beta_i\)</span> has in <span class="math inline">\(C_t\)</span>.</p>
+<p>OK, we have the dynamics… but how many lags do we choose?</p>
 </div>
 <div id="a-nice-approach" class="section level2">
 <h2>A Nice Approach</h2>
 <p>The trick here is to assume that <span class="math inline">\(\beta&#39;s\)</span> decline geometrically. If they do, they are tied in time by</p>
-<p><span class="math display">\[ \beta_k = \beta_0 \lambda ^ k \]</span> for <span class="math inline">\(k = 0, 1, 2, ...\)</span>, etc.</p>
-<p>This equation it is just saying the more recent the data is, the more relevant is to explain the current changes in <span class="math inline">\(C_t\)</span>. In finance, for example, analysts frequently use the <a href="https://www.investopedia.com/articles/07/ewma.asp">EWMA estimator</a>, which explores the same idea.</p>
+<p><span class="math display">\[ \beta_k = \beta_0 \lambda ^ k \]</span> for <span class="math inline">\(k = 0, 1, 2, ...\)</span></p>
+<p>The equation it is just saying the more recent the data is, the more relevant is to explain the current changes in <span class="math inline">\(C_t\)</span>. In finance, for example, analysts frequently use the <a href="https://www.investopedia.com/articles/07/ewma.asp">EWMA estimator</a>, which explores the same idea.</p>
 <p>When</p>
 <ul>
 <li><span class="math inline">\(k = 0 \rightarrow \beta_0 \approx \beta_0\)</span></li>
@@ -96,8 +96,8 @@ Cov(C_{t-1}, v_t) &amp;= -(1 - \gamma) \sigma ^2
 <p>Let’s assume that the <em>true</em> specification of <span class="math inline">\(C_t\)</span> is given by <span class="math inline">\(C_t = \alpha + \beta_0 Y^*_t + u_t\)</span> with adaptive expectations.</p>
 <p>From the steps derived above we have to estimate</p>
 <p><span class="math display">\[ C_t = \alpha(1 - \lambda) + \beta_0 Y_t + \lambda C_{t-1} + v_t \]</span> Let’s do that step-by-step using <a href="https://www.rstudio.com/">RStudio</a>.</p>
-<div id="load-libraries" class="section level4">
-<h4>1. Load libraries</h4>
+<div id="load-libraries" class="section level3">
+<h3>1. Load libraries</h3>
 <p>The required libraries for this exercise are</p>
 <pre class="r"><code>library(tidyverse)   # loads the tidyverse
 library(timetk)      # tidy time manipulation
@@ -109,8 +109,8 @@ library(sandwich)    # robust stardard errors
 library(strucchange) # stability tests</code></pre>
 <p>If you don’t have any of them installed yet, just run <code>install.packages('desired package')</code> into your console. All libraries are available at <a href="https://cran.r-project.org/">CRAN</a>.</p>
 </div>
-<div id="get-the-data" class="section level4">
-<h4>2. Get the data</h4>
+<div id="get-the-data" class="section level3">
+<h3>2. Get the data</h3>
 <p>The following data are needed:</p>
 <ul>
 <li>Consumption</li>
@@ -155,8 +155,8 @@ ipca &lt;- get_sidra(
     slice(-nrow(.)) %&gt;% 
     select(ipca = Valor)</code></pre>
 </div>
-<div id="dessazonalize-and-deflate" class="section level4">
-<h4>3. Dessazonalize and Deflate</h4>
+<div id="dessazonalize-and-deflate" class="section level3">
+<h3>3. Dessazonalize and Deflate</h3>
 <p>Those are “raw” objects and, not by surprise, exhibit a strong seasonal component (evidence omitted to save space). There are different ways of dealing with this issue and I think that, at least among economists, the most used technique is X-13 ARIMA-SEATS. This is the same procedure adopted by <a href="https://www.census.gov/srd/www/x13as/">US Census Bureau</a>. I will cherish the tradition among my peers by using it as well.</p>
 <p>The seasonally adjusted data have very different magnitudes. To make them more comparable, the year of 2003 is chosen as base year after the series being deflated. The base year is an index starting at 100.</p>
 <p>The script bellow show how it is done.</p>
@@ -233,8 +233,8 @@ data_clean</code></pre>
 ## 10 2005-04-01 00:00:00        128.  134.
 ## # ... with 53 more rows</code></pre>
 </div>
-<div id="fit-ols" class="section level4">
-<h4>4. Fit OLS</h4>
+<div id="fit-ols" class="section level3">
+<h3>4. Fit OLS</h3>
 <p>With a clean <code>tibble</code> at hand let’s jump straight to OLS estimation:</p>
 <pre class="r"><code>model_ols &lt;- data_clean %&gt;% 
     lm(consumption ~ y_d + lag(consumption, 1), data = .) 
@@ -289,8 +289,8 @@ C_t &amp;= -3.31 + 1.04 Y^d_t                &amp; \text{(long-term)}
     plot()</code></pre>
 <p><img src="/post/2019-01-29-a-consumtion-function-for-brazil_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 </div>
-<div id="fit-iv" class="section level4">
-<h4>4. Fit IV</h4>
+<div id="fit-iv" class="section level3">
+<h3>5. Fit IV</h3>
 <p>The IV estimation requires a two step procedure: (i) run <span class="math inline">\(C_t = \theta_0 + \theta_1 Y^d_t\)</span> and save <span class="math inline">\(\hat{C}_{t}\)</span>; (ii) run <span class="math inline">\(C_t = \alpha + \beta Y^d_t + \Theta \hat{C}_{t-1}\)</span>, in which <span class="math inline">\(\hat{C}_{t}\)</span> is now “purified” from it’s improper correlation with <span class="math inline">\(v_t\)</span>.</p>
 <pre class="r"><code>model_iv &lt;- data_clean %&gt;% 
     mutate(iv = lm(consumption ~ y_d, data = .)$fitted) %&gt;% 
@@ -440,7 +440,7 @@ list(
 </div>
 <div id="conclusions" class="section level2">
 <h2>Conclusions</h2>
-<p>In this post three different specifications were discussed to explain the brazilian consumption path. In agreement with the theory (see <a href="https://www.amazon.com/Advanced-Macroeconomics-Mcgraw-hill-Economics-David/dp/1260185214/ref=sr_1_1?ie=UTF8&amp;qid=1550107391&amp;sr=8-1&amp;keywords=advanced+macroeconomics+romer">Romer</a> chapter 8), the relationship between consumption and available income is flatter in the short-run and stepper for longer periods of time. There is also some uncertainty around the right parameter for <span class="math inline">\(Y^d\)</span>, that lies between <span class="math inline">\(\{0.27, 0.43\}\)</span>.</p>
+<p>In this post three different specifications were discussed to explain the brazilian consumption path. In agreement with the theory (see <a href="https://www.amazon.com/Advanced-Macroeconomics-Mcgraw-hill-Economics-David/dp/1260185214/ref=sr_1_1?ie=UTF8&amp;qid=1550107391&amp;sr=8-1&amp;keywords=advanced+macroeconomics+romer">Romer</a> chapter 8), the relationship between consumption and available income is flatter in the short-run and stepper for longer periods of time. There is also some uncertainty around the right parameter for <span class="math inline">\(Y^d\)</span>, that lies in between <span class="math inline">\(\{0.27, 0.43\}\)</span>.</p>
 <p>As we give time for shocks to fully accommodate, a unit change in <span class="math inline">\(Y^d\)</span> implies an impact of 1-to-1 in <span class="math inline">\(C\)</span>. The average adjustment occurs relatively fast, around 2 or 3 quarters. Taken together, the results indicate there is a low propensity to forgo consumption, given increases in income. In technical terms: <em>the intertemporal elasticity of substituition appears to be low</em>.</p>
 <p>It’s possible to expand this study in many ways. The inclusion of interest-rates may help to improve the results, since interest-rates can change the relative prices of consumption among the present and future. Credit as a fraction of the GDP, unemployment, local exchange-rate, etc. may also add new insights. All of those variables can be found at the Brazilian Central Bank (BCB) or IBGE webpages. Additional care with endogenity issues is never too much and always advisable.</p>
 </div>

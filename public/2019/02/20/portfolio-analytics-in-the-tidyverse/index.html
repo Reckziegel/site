@@ -6,8 +6,8 @@
 <meta name="generator" content="Hugo 0.39" />
 
 
-<title>Portfolio Analytics in the Tidyverse - A Hugo website</title>
-<meta property="og:title" content="Portfolio Analytics in the Tidyverse - A Hugo website">
+<title>Portfolio Analytics in the Tidyverse - Bernardo Reckziegel</title>
+<meta property="og:title" content="Portfolio Analytics in the Tidyverse - Bernardo Reckziegel">
 
 
 
@@ -425,7 +425,7 @@ opt_port_rolling$splits[[2]] %&gt;%
 ## #   Arbitrage` &lt;dbl&gt;, `Relative Value` &lt;dbl&gt;, `Short Selling` &lt;dbl&gt;,
 ## #   `Funds Of Funds` &lt;dbl&gt;</code></pre>
 <p>As expected, every time we change the “splits”, the data moves forward by one month.</p>
-<p>The <code>assessment</code> periods can be used to measure the amount of error in the estimation process, for example. Think of investors that are not be risk-averse, but error-averse (see chapter 12 of <a href="https://www.amazon.com/Robust-Portfolio-Optimization-Management-Fabozzi/dp/047192122X/ref=sr_1_1?ie=UTF8&amp;qid=1550689618&amp;sr=8-1&amp;keywords=robust+portfolio+optimization+and+management">Robust Portfolio Optimization Management</a> for details).</p>
+<p>The <code>assessment</code> periods can be used to measure the amount of error in the estimation process, for example. Think of investors that are not risk-averse, but error-averse (see chapter 12 of <a href="https://www.amazon.com/Robust-Portfolio-Optimization-Management-Fabozzi/dp/047192122X/ref=sr_1_1?ie=UTF8&amp;qid=1550689618&amp;sr=8-1&amp;keywords=robust+portfolio+optimization+and+management">Robust Portfolio Optimization Management</a> for details).</p>
 </div>
 <div id="who-is-faster" class="section level2">
 <h2>Who is Faster?</h2>
@@ -442,10 +442,10 @@ opt_port_rolling$splits[[2]] %&gt;%
     .[[&quot;elapsed_time&quot;]]</code></pre>
 <p>The time difference is:</p>
 <ul>
-<li><code>PortfolioAnalytics</code>: 2.94</li>
-<li><code>purrr</code>: 3.75</li>
+<li><code>PortfolioAnalytics</code>: 2.99</li>
+<li><code>purrr</code>: 6.49</li>
 </ul>
-<p><code>purrr</code> is slower. For several of hundreds of assets in a granular periodicity this is definitely a drawback. It’s interesting to investigate how <a href="https://davisvaughan.github.io/furrr/"><code>furrr</code></a> responds to tests like the one above.</p>
+<p><code>purrr</code> is slower. For several of hundreds of assets working on a more granular periodicity this is definitely a drawback. It’s interesting to investigate how <a href="https://davisvaughan.github.io/furrr/"><code>furrr</code></a> responds to this kind of test.</p>
 <p>I still hold a preference for the “clean” syntax of <code>tidyverse</code> and the great flexibility that provides for the user.</p>
 </div>
 

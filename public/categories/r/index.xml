@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>R on A Hugo website</title>
+    <title>R on Bernardo Reckziegel</title>
     <link>/categories/r/</link>
-    <description>Recent content in R on A Hugo website</description>
+    <description>Recent content in R on Bernardo Reckziegel</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 20 Feb 2019 00:00:00 +0000</lastBuildDate>
@@ -49,7 +49,7 @@ covMarket &amp;lt;- function(x, shrink = TRUE) {# some operations work better w
       <pubDate>Wed, 05 Sep 2018 00:00:00 +0000</pubDate>
       
       <guid>/2018/09/05/how-much-shrinkage-does-the-stock-market-requires/</guid>
-      <description>Shrinkage is hardly new in finance. In 1956, Charles Stein published a famous paper called Inadmissibility of the usual estimator for the mean of a multivariate normal distribution. In his work, he shows that, if the sum of the squares of the errors (SSE) is used as a loss function, then, for $ n \geq 2 $, the sample mean is not an optimal estimator. It an be improved by exploring the trade-off among bias and variance.</description>
+      <description>Shrinkage is hardly new in finance. In 1956, Charles Stein published a famous paper called Inadmissibility of the usual estimator for the mean of a multivariate normal distribution. In his work, he shows that, if the sum of the squares of the errors (SSE) is used as a loss function, then, for $ n \geq 2 $, the sample mean is not an optimal estimator. It can be improved by exploring the trade-off among bias and variance.</description>
     </item>
     
     <item>
@@ -70,17 +70,6 @@ The solution offered by a great deal of ML models is a complete twist in econome
       <guid>/2018/08/06/brazilian-debt/</guid>
       <description>In this post I will show how you can recursively download macroeconomic data covered by the IMF using the Quandl package. To motivate the application, the Brazilian public debt will be used as a variable of interest.
 If you are familiar with Quandl you probably heard about the Quandl.search() function. What it does is try to look for a database that matches a specific pattern that you may have interest in, like “oil”, or “GDP”, for example.</description>
-    </item>
-    
-    <item>
-      <title>Hello R Markdown</title>
-      <link>/2015/07/23/hello-r-markdown/</link>
-      <pubDate>Thu, 23 Jul 2015 21:13:14 -0500</pubDate>
-      
-      <guid>/2015/07/23/hello-r-markdown/</guid>
-      <description>R MarkdownThis is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see http://rmarkdown.rstudio.com.
-You can embed an R code chunk like this:
-summary(cars)## speed dist ## Min. : 4.0 Min. : 2.00 ## 1st Qu.:12.0 1st Qu.: 26.00 ## Median :15.0 Median : 36.00 ## Mean :15.4 Mean : 42.98 ## 3rd Qu.</description>
     </item>
     
   </channel>

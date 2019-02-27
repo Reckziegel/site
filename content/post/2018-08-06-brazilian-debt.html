@@ -15,7 +15,7 @@ tags:
 <p>In this post I will show how you can recursively download macroeconomic data covered by the IMF using the <code>Quandl</code> package. To motivate the application, the Brazilian public debt will be used as a variable of interest.</p>
 <hr />
 <p>If you are familiar with <code>Quandl</code> you probably heard about the <code>Quandl.search()</code> function. What it does is try to look for a database that matches a specific pattern that you may have interest in, like “oil”, or “GDP”, for example. Personally, I don’t like it, because the R console it was not made for printing description of large amounts of data. For that reason, I’ve been trying to write a group of functions that can be used more easily, if the intention is to consistently download large chunks of data.</p>
-<p>Take, for example, the <a href="https://www.quandl.com/data/ODA-IMF-Cross-Country-Macroeconomic-Statistics">IMF page on Quandl</a>. According to the information provided, any data that you may want to download has to obey the following format <code>ODA/{COUNTRY}_{INDICATOR}</code>. At the same page, they provide a list of countries covered and their respective ISO codes (see <a href="https://s3.amazonaws.com/quandl-production-static/API+Descriptions/WHO/ccodes.txt">here</a>). Once we have mapped the country ISO code and the respective <code>{indicator}</code>, the whole data set can be downloaded using the technique described in “Many Models” of <a href="http://r4ds.had.co.nz/many-models.html">R for Data Science</a>.</p>
+<p>Take, for example, the <a href="https://www.quandl.com/data/ODA-IMF-Cross-Country-Macroeconomic-Statistics">IMF page on Quandl</a>. According to the information provided, any data that you may want to download has to obey the following format: <code>ODA/{COUNTRY}_{INDICATOR}</code>. At the same page, they provide a list of countries covered and their respective ISO codes (see <a href="https://s3.amazonaws.com/quandl-production-static/API+Descriptions/WHO/ccodes.txt">here</a>). Once we have mapped the country ISO code and the respective <code>{indicator}</code>, the whole data set can be downloaded using the technique described in “Many Models” of <a href="http://r4ds.had.co.nz/many-models.html">R for Data Science</a>.</p>
 <p>But before doing that, let’s first do a quick web scrapping on Wikipedia to extract the names of all Latin American countries.</p>
 <div id="required-packages" class="section level2">
 <h2>Required Packages</h2>
@@ -41,15 +41,16 @@ latin_america %&gt;% glimpse()</code></pre>
 ## Variables: 10
 ## $ Rank                                &lt;chr&gt; &quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;, &quot;5&quot;, &quot;...
 ## $ `Country(or dependent territory)`   &lt;chr&gt; &quot;Brazil&quot;, &quot;Mexico&quot;, &quot;Colom...
-## $ `July 1, 2015projection[1]`         &lt;chr&gt; &quot;204,519,000&quot;, &quot;121,006,00...
+## $ `July 1, 2015projection[1]`         &lt;chr&gt; &quot;204,519,000&quot;, &quot;127,500,00...
 ## $ `% ofpop.`                          &lt;dbl&gt; 33.13, 19.60, 7.81, 6.99, ...
 ## $ `Averagerelativeannualgrowth(%)[2]` &lt;dbl&gt; 0.86, 1.08, 1.16, 1.09, 1....
 ## $ `Averageabsoluteannualgrowth[3]`    &lt;chr&gt; &quot;1,750,000&quot;, &quot;1,293,000&quot;, ...
 ## $ `Estimateddoublingtime(Years)[4]`   &lt;chr&gt; &quot;81&quot;, &quot;65&quot;, &quot;60&quot;, &quot;64&quot;, &quot;6...
-## $ `Officialfigure(whereavailable)`    &lt;chr&gt; &quot;209,690,000&quot;, &quot;122,273,47...
-## $ `Date oflast figure`                &lt;chr&gt; &quot;August 24, 2018&quot;, &quot;July 1...
+## $ `Officialfigure(whereavailable)`    &lt;chr&gt; &quot;210,531,000&quot;, &quot;122,273,47...
+## $ `Date oflast figure`                &lt;chr&gt; &quot;February 25, 2019&quot;, &quot;July...
 ## $ Source                              &lt;chr&gt; &quot;Official population clock...</code></pre>
-<p>As a rule of thumb, Wikipedia is a very easy website to extract data of. Not always, but most of the time, the <em>“table”</em> argument (on <code>html_node</code>) will take care of the hard work for us. When it’s not the case, you will have to continue working to clean the data. Fortunately, the <code>latin_america</code> table is well behaved as can be seen above. But there are too many features, and some have awkward names. The code bellow takes care of that by selecting only the country names, which is what we will need afterwards.</p>
+<p>As a rule of thumb, Wikipedia is a very easy website to extract data of. Not always, but most of the time, the <em>“table”</em> argument (on <code>html_node</code>) will take care of the hard work for us. When it’s not the case, you will have to continue working to clean the data. Fortunately, the <code>latin_america</code> table is well behaved as can be seen above. But there are too many features, and some have awkward names.</p>
+<p>The code bellow will address this issue by selecting only the country names, which is what we need afterwards.</p>
 <pre class="r"><code>latin_america &lt;- latin_america %&gt;% 
     select(2) %&gt;% 
     `colnames&lt;-`(&#39;LATAM&#39;) %&gt;% 
@@ -136,10 +137,10 @@ latin_america</code></pre>
 <p>It’s possible to summarise it’s main features in the following way:</p>
 <ol style="list-style-type: decimal">
 <li><p><strong>Tidy evaluation</strong>: the function accepts any arguments that can be used in the <code>Quandl()</code> function. This includes the arguments <code>type</code>, <code>transform</code>, <code>collapse</code>, <code>order</code>, <code>start_date</code>, …</p></li>
-<li><p><strong>List of countries covered by IMF</strong>: this part of the code contains the countries provided by the IMF. The <code>mutate()</code> function in simply expand the <code>ODA/{COUNTRY}_{INDICATOR}</code> rule for each country in the data set.</p></li>
+<li><p><strong>List of countries covered by IMF</strong>: this part of the code contains the countries provided by the IMF. The <code>mutate()</code> function simply expands the <code>ODA/{COUNTRY}_{INDICATOR}</code> rule for each country in the data set.</p></li>
 <li><p><strong>Must the data be filtered by country?</strong>: If you supply a vector of countries as an argument for <code>countries</code> the function takes that into consideration and will download only the data you supply.</p></li>
-<li><p><strong>Error handler</strong>: the <code>purrr</code> package, part of the <code>tidyverse</code>, offers interesting functions for manipulating data more safely. One of those function is <code>possibly()</code>, that always executes a function, if we ask for. If an error occurs, a custom message is printed. I chose <code>NA</code>.</p></li>
-<li><p><strong>Data wrangling</strong>: This task is divided in three. The first part tries to download data for all required countries (if no country is provided it will download the <code>indicator</code> for the whole data set). The second, excludes missing data, if there is any. The third, coerce the series in a time aware <code>tibble</code> in a nice tidy format.</p></li>
+<li><p><strong>Error handler</strong>: the <code>purrr</code> package, part of the <code>tidyverse</code>, offers interesting functions for manipulating data more safely. One of those function is <code>possibly()</code>, that always executes a function, if we ask for. When an error occurs, a custom message is printed. I chose <code>NA</code>.</p></li>
+<li><p><strong>Data wrangling</strong>: This task is divided in three. The first part tries to download data for all required countries (if no country is provided it will download the <code>indicator</code> for the whole IMF data set). The second, excludes missing data, if there are any. The third, coerce the series in a time aware <code>tibble</code> in a nice tidy format.</p></li>
 </ol>
 </div>
 <div id="application" class="section level2">
@@ -179,7 +180,7 @@ end_time &lt;- Sys.time()
 ##  9 2008-12-31  43.9 Argentina
 ## 10 2009-12-31  53.8 Argentina
 ## # ... with 242 more rows</code></pre>
-<p>Once the hard part is done, let’s finish with a nice The Economist theme.</p>
+<p>Once the hard part is done, let’s finish with a plot that uses the nice “The Economist” theme.</p>
 <pre class="r"><code>debt %&gt;% 
     ggplot(aes(x = date, y = value, fill = country)) + 
     geom_rect(
@@ -209,6 +210,6 @@ end_time &lt;- Sys.time()
     ylim(0, 100) + 
     ggthemes::theme_economist()</code></pre>
 <p><img src="/post/2018-08-06-brazilian-debt_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
-<p>The highlighted blue line shows the Brazilian debt. For most of the period analysed, Brazil’s debt has been pushing LATAM average upwards. This will have important consequences as we approach the elections in October. There is a growthing number of specialists that believe the public spendig is the key for</p>
-<p>If you are interest in having a detailed picture on how the public spending should be managed I highly recomend you to read the World Bank report <a href="http://documents.worldbank.org/curated/en/643471520429223428/Volume-1-Overview">A fair adjustment: efficiency and equity of public spending in Brazil</a>.</p>
+<p>The highlighted blue line shows the Brazilian debt (as a share of GDP). For most of the period analysed, Brazil’s debt has been pushing LATAM average upwards. This will have important consequences as we approach the elections in October. There is a growing number of specialists that believe the public spending (that causes public debt) is the key driver of short-term risk premiums.</p>
+<p>If you are interest in having a detailed picture on how the public spending should be improved, I highly recommend the World Bank report <a href="http://documents.worldbank.org/curated/en/643471520429223428/Volume-1-Overview">A fair adjustment: efficiency and equity of public spending in Brazil</a>.</p>
 </div>

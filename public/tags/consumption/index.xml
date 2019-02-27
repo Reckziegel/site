@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Consumption on A Hugo website</title>
+    <title>Consumption on Bernardo Reckziegel</title>
     <link>/tags/consumption/</link>
-    <description>Recent content in Consumption on A Hugo website</description>
+    <description>Recent content in Consumption on Bernardo Reckziegel</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 29 Jan 2019 00:00:00 +0000</lastBuildDate>
@@ -17,7 +17,7 @@
       <pubDate>Tue, 29 Jan 2019 00:00:00 +0000</pubDate>
       
       <guid>/2019/01/29/a-consumtion-function-for-brazil/</guid>
-      <description>The Keynesian consumption function is one of the most famous equations in macroeconomics. This post will show how it can be estimated and how can we use a simple trick to add dynamics into the system.
+      <description>The Keynesian consumption function is one of the most famous equations in macroeconomics. This post will show how it can be estimated and how we can use a simple trick to add dynamics into the system.
 A functional form for \(C_t\)A traditional representation of consumption is
 \[ C_t = \alpha + \beta_0 Y^d_t \]
 in which, \(C_t\) is consumption at time \(t\), \(Y^d_t\) is the disposable income at \(t\) and \(\beta_0\) is the marginal propensity to consume (MPC).</description>

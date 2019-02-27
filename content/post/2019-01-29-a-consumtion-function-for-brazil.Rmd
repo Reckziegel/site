@@ -27,7 +27,7 @@ library(sandwich)    # robust stardard errors
 ```
 
 
-The Keynesian consumption function is one of the most famous equations in macroeconomics. This post will show how it can be estimated and how can we use a simple trick to add dynamics into the system.
+The Keynesian consumption function is one of the most famous equations in macroeconomics. This post will show how it can be estimated and how we can use a simple trick to add dynamics into the system.
 
 ## A functional form for $C_t$
 
@@ -37,25 +37,25 @@ $$ C_t = \alpha + \beta_0 Y^d_t $$
 
 in which, $C_t$ is consumption at time $t$,  $Y^d_t$ is the disposable income at $t$ and $\beta_0$ is the _marginal propensity to consume_ (MPC). 
 
-This last parameter has a straightforward meaning: if the disposable income increases by one unit, consumption increases by $\beta_0$ units of $Y^d$. 
+This last parameter has a straightforward interpretation: if the disposable income increases by one unit, consumption increases by $\beta_0$ units of $Y^d$. 
 
 In theory, the adjustment occurs immediately. On reality, though, it is quite probable the adjustment requires some time to occur.  
 
 A more realistic interpretation of this phenomenon would be given by the following stochastic format
 
 $$ C_t = \alpha + \beta_0 Y_t + \beta_1 Y_{t-1} + ... + \beta_k Y_{t-k} + u_t $$
-Now, we have a whole bunch of multipliers. $\beta_0$ is the short-term impact of $Y_t$ in $C_t$, $\beta_0 + \beta_1$ measures an intermediate impact in $C_t$, so on so forth. The long-run impact is given by $\sum_{i=0}^{k} B_i$, which is the sum of all the different impacts that $\beta_i$ has in $C_t$. 
+We now have a whole bunch of multipliers. $\beta_0$ is the short-term impact of $Y_t$ in $C_t$, $\beta_0 + \beta_1$ measures an intermediate impact in $C_t$, so on so forth. The long-run impact is given by $\sum_{i=0}^{k} B_i$, which is the sum of all the different impacts that $\beta_i$ has in $C_t$. 
 
-OK, we now have the dynamics... but how many lags do we choose?
+OK, we have the dynamics... but how many lags do we choose?
 
 ## A Nice Approach
 
 The trick here is to assume that $\beta's$ decline geometrically. If they do, they are tied in time by
 
 $$ \beta_k = \beta_0 \lambda ^ k $$
-for $k = 0, 1, 2, ...$, etc. 
+for $k = 0, 1, 2, ...$
 
-This equation it is just saying the more recent the data is, the more relevant is to explain the current changes in $C_t$. In finance, for example, analysts frequently use the [EWMA estimator](https://www.investopedia.com/articles/07/ewma.asp), which explores the same idea.
+The equation it is just saying the more recent the data is, the more relevant is to explain the current changes in $C_t$. In finance, for example, analysts frequently use the [EWMA estimator](https://www.investopedia.com/articles/07/ewma.asp), which explores the same idea.
 
 When 
 
@@ -159,7 +159,7 @@ From the steps derived above we have to estimate
 $$ C_t = \alpha(1 - \lambda) + \beta_0 Y_t + \lambda C_{t-1} + v_t $$
 Let's do that step-by-step using [RStudio](https://www.rstudio.com/).
 
-#### 1. Load libraries
+### 1. Load libraries
 
 The required libraries for this exercise are
 
@@ -179,7 +179,7 @@ library(strucchange) # stability tests
 
 If you don't have any of them installed yet, just run `install.packages('desired package')` into your console. All libraries are available at [CRAN](https://cran.r-project.org/).
 
-#### 2. Get the data
+### 2. Get the data
 
 The following data are needed:
 
@@ -236,7 +236,7 @@ ipca <- get_sidra(
 ```
 
 
-#### 3. Dessazonalize and Deflate
+### 3. Dessazonalize and Deflate
 
 Those are "raw" objects and, not by surprise, exhibit a strong seasonal component (evidence omitted to save space). There are different ways of dealing with this issue and I think that, at least among economists, the most used technique is X-13 ARIMA-SEATS. This is the same procedure adopted by [US Census Bureau](https://www.census.gov/srd/www/x13as/). I will cherish the tradition among my peers by using it as well. 
 
@@ -307,7 +307,7 @@ data_clean
 ```
 
 
-#### 4. Fit OLS
+### 4. Fit OLS
 
 With a clean `tibble` at hand let's jump straight to OLS estimation:
 
@@ -375,7 +375,7 @@ data_clean %>%
 ```
 
 
-#### 4. Fit IV
+### 5. Fit IV
 
 The IV estimation requires a two step procedure: (i) run $C_t = \theta_0 + \theta_1 Y^d_t$ and save $\hat{C}_{t}$; (ii) run $C_t = \alpha + \beta Y^d_t + \Theta \hat{C}_{t-1}$, in which $\hat{C}_{t}$ is now "purified" from it's improper correlation with $v_t$.
 
@@ -544,7 +544,7 @@ list(
 
 ## Conclusions
 
-In this post three different specifications were discussed to explain the brazilian consumption path. In agreement with the theory (see [Romer](https://www.amazon.com/Advanced-Macroeconomics-Mcgraw-hill-Economics-David/dp/1260185214/ref=sr_1_1?ie=UTF8&qid=1550107391&sr=8-1&keywords=advanced+macroeconomics+romer) chapter 8), the relationship between consumption and available income is flatter in the short-run and stepper for longer periods of time. There is also some uncertainty around the right parameter for $Y^d$, that lies between $\{0.27, 0.43\}$. 
+In this post three different specifications were discussed to explain the brazilian consumption path. In agreement with the theory (see [Romer](https://www.amazon.com/Advanced-Macroeconomics-Mcgraw-hill-Economics-David/dp/1260185214/ref=sr_1_1?ie=UTF8&qid=1550107391&sr=8-1&keywords=advanced+macroeconomics+romer) chapter 8), the relationship between consumption and available income is flatter in the short-run and stepper for longer periods of time. There is also some uncertainty around the right parameter for $Y^d$, that lies in between $\{0.27, 0.43\}$. 
 
 As we give time for shocks to fully accommodate, a unit change in $Y^d$ implies an impact of 1-to-1 in $C$. The average adjustment occurs relatively fast, around 2 or 3 quarters. Taken together, the results indicate there is a low propensity to forgo consumption, given increases in income. In technical terms: _the intertemporal elasticity of substituition appears to be low_.
 
