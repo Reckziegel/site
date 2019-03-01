@@ -33,6 +33,7 @@ That said, we would expect the eigenvalues of matrices of high $p$ and low $n$ t
 
 ```{r, message=FALSE, warning=FALSE}
 
+library(mvtnorm)
 library(tidyverse) 
 
 cov_dimension <- 50  # covariance matrix dimension
@@ -62,7 +63,7 @@ for (k in seq_along(n)) {
         sample_covariance <-
 
             # epsilon
-            mvtnorm::rmvnorm(n = t, mean = mu, sigma = sigma) %>%
+            rmvnorm(n = t, mean = mu, sigma = sigma) %>%
 
 
             # sample covariance
@@ -122,7 +123,7 @@ In wich I printed only the $5$ first rows and columns to save space. As we look 
 
 A 2-D distribution surface clearly shows the distortion effect caused by estimation-error. 
 
-```{r, message=FALSE, warning=FALSE, fig.align='center', fig.width=12}
+```{r, message=FALSE, warning=FALSE, fig.align='center', fig.width=14}
 
 library(gganimate)
 library(latex2exp)
@@ -141,8 +142,8 @@ plot <- lambda_fitted %>%
     ggplot(aes(x = ts_size, y = value, color = key, group = key)) +
     geom_density_2d(show.legend = FALSE) +
     scale_color_viridis_c() +
-    xlim(-200, 1300) +
-    ylim(-0.5, 4) +
+    scale_y_continuous(limits = c(-0.5, 4)) + 
+    scale_x_continuous(limits = c(-200, 1300)) + 
     labs(
         title    = "Variance-Covariance Matrix Simulation",
         subtitle = "Sorted eigenvalues: from the highest to the lowest",
@@ -168,7 +169,6 @@ The ill-behavior of covariance matrices can be corrected by shrinkage methods, a
 
 [^2]: Of course, if the model is wrong, not even with tons of data can help.
 
-[^3]: See in [Forecasting in Economics and Finance
-](https://rady.ucsd.edu/docs/faculty/timmermann/forecasting-in-economics-and-finance.pdf).
+[^3]: See in [Forecasting in Economics and Finance](https://rady.ucsd.edu/docs/faculty/timmermann/forecasting-in-economics-and-finance.pdf).
 
 [^4]: See "A Well-Conditioned Estimator For Large-Dimensional Covariance Matrices", from Oliver Ledoit and Michael Wolf. Link [here](http://ledoit.net/ole1a.pdf).
