@@ -27,7 +27,7 @@ If you are familiar with Quandl you probably heard about the Quandl.search() fun
       <pubDate>Fri, 27 Jul 2018 00:00:00 +0000</pubDate>
       
       <guid>/2018/07/27/a-random-walk/</guid>
-      <description>This is my first post. I had planned to add some comments on how I created this blog using the blogdown package, but since I was revisiting a material related to time series I decided that writing about random walks would be a nice start.
+      <description>This is my first post. I had planned to add some comments on how I created this site using the blogdown package, but since I was revisiting a material related to time series I decided that writing about random walks would be a nice start.
 1. What is a Random Walk?A random walk could be formally defined as a collection random series that are ordered in time. In a random walk (RW) the realized values of a time series are particular of that specific moment and cannot be extrapolated into the future.</description>
     </item>
     

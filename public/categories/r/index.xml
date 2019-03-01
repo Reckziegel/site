@@ -6,10 +6,20 @@
     <description>Recent content in R on Bernardo Reckziegel</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 20 Feb 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 27 Feb 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Estimation Error Visualized</title>
+      <link>/2019/02/27/estimation-error-visualized/</link>
+      <pubDate>Wed, 27 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/2019/02/27/estimation-error-visualized/</guid>
+      <description>The objective of economic models is to dress common-sense into mathematical formalism. For some economic problems, however, data is too scare to achieve good statistical analysis. This scarcity of data leads to estimation-error1 (the econometricians enemy number one).
+By estimation-error I mean: the researcher is never certain about the true data generating process (DGP) of the phenomenon at hand. As Allan Timmermann and Graham Elliott argue, economic models can be thought as a condense representation of reality, in which mispecifification flourish naturally2.</description>
+    </item>
     
     <item>
       <title>Portfolio Analytics in the Tidyverse</title>
