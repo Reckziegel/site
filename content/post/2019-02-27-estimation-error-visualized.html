@@ -104,11 +104,11 @@ for (k in seq_along(n)) {
 <p>The <code>lambda_fitted</code> object contain the estimated eigenvalues we care about:</p>
 <pre class="r"><code>lambda_fitted[1:5, 1:5]</code></pre>
 <pre><code>##         [,1]     [,2]     [,3]     [,4]     [,5]
-## 50  3.753037 3.411672 3.133738 2.889423 2.698224
-## 100 2.791635 2.582184 2.421882 2.292584 2.171201
-## 150 2.383919 2.235422 2.115662 2.019708 1.931879
-## 200 2.168220 2.046959 1.944756 1.858174 1.795628
-## 250 2.022101 1.911281 1.831120 1.762001 1.700546</code></pre>
+## 50  3.760982 3.418733 3.136979 2.905294 2.710886
+## 100 2.795685 2.576825 2.402808 2.269093 2.159951
+## 150 2.374259 2.224858 2.119207 2.020761 1.930674
+## 200 2.180811 2.047186 1.948808 1.865522 1.794770
+## 250 2.024284 1.918845 1.837133 1.769952 1.703346</code></pre>
 <p>In wich I printed only the <span class="math inline">\(5\)</span> first rows and columns to save space. As we look from the left to the right, the simulated eigenvalues start to decrease. That’s nothing wrong with that since I have ordered them this way. The problem, thought, is that they are more variable at the top-left then they are at the bottom-right.</p>
 <p>A 2-D distribution surface clearly shows the distortion effect caused by estimation-error.</p>
 <pre class="r"><code>library(gganimate)
@@ -127,7 +127,7 @@ plot &lt;- lambda_fitted %&gt;%
     # plot
     ggplot(aes(x = ts_size, y = value, color = key, group = key)) +
     geom_density_2d(show.legend = FALSE) +
-    scale_color_viridis_c() +
+    scale_color_viridis_c() + 
     scale_y_continuous(limits = c(-0.5, 4)) + 
     scale_x_continuous(limits = c(-200, 1300)) + 
     labs(
@@ -142,7 +142,7 @@ plot &lt;- lambda_fitted %&gt;%
     transition_states(key, transition_length = 1, state_length = 1)
 
 
-plot</code></pre>
+animate(plot)</code></pre>
 <p><img src="/post/2019-02-27-estimation-error-visualized_files/figure-html/unnamed-chunk-4-1.gif" style="display: block; margin: auto;" /></p>
 <p>The mean value of <span class="math inline">\(\lambda\)</span> is <span class="math inline">\(1\)</span>, which is in accordance with the multivariate process of <span class="math inline">\(\mu=0\)</span> and <span class="math inline">\(\sigma^2 = 1\)</span> generated above.</p>
 <p>The ill-behavior of covariance matrices can be corrected by shrinkage methods, as I showed in previous posts (see <a href="https://www.bernardo.codes/2018/09/05/how-much-shrinkage-does-the-stock-market-requires/">here</a> and <a href="https://www.bernardo.codes/2018/09/08/a-covariance-matrix/">here</a>).</p>

@@ -141,7 +141,7 @@ plot <- lambda_fitted %>%
     # plot
     ggplot(aes(x = ts_size, y = value, color = key, group = key)) +
     geom_density_2d(show.legend = FALSE) +
-    scale_color_viridis_c() +
+    scale_color_viridis_c() + 
     scale_y_continuous(limits = c(-0.5, 4)) + 
     scale_x_continuous(limits = c(-200, 1300)) + 
     labs(
@@ -156,7 +156,7 @@ plot <- lambda_fitted %>%
     transition_states(key, transition_length = 1, state_length = 1)
 
 
-plot
+animate(plot)
 
 ```
 
