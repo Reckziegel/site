@@ -84,19 +84,13 @@
   </url>
   
   <url>
-    <loc>/categories/estimation/</loc>
-    <lastmod>2019-02-27T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/tags/estimation/</loc>
     <lastmod>2019-02-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/categories/finance/</loc>
+    <loc>/categories/estimation/</loc>
     <lastmod>2019-02-27T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
@@ -104,6 +98,12 @@
   <url>
     <loc>/tags/finance/</loc>
     <lastmod>2018-09-05T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/categories/finance/</loc>
+    <lastmod>2019-02-27T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -132,14 +132,14 @@
   </url>
   
   <url>
-    <loc>/categories/macroeconomics/</loc>
-    <lastmod>2019-01-29T00:00:00+00:00</lastmod>
+    <loc>/tags/macroeconomics/</loc>
+    <lastmod>2019-01-10T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/macroeconomics/</loc>
-    <lastmod>2019-01-10T00:00:00+00:00</lastmod>
+    <loc>/categories/macroeconomics/</loc>
+    <lastmod>2019-01-29T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

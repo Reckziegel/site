@@ -19,9 +19,9 @@ To circumvent this problem statisticians appeal basically for two methods: _robu
 
 The idea of robust statistics is to make data less sensitive to outliers. "Robust" means that small changes in data (or in the way data is described), do not affect by much it's descriptive parameters. In that sense, the median is a robust statistic, while the mean it's not. 
 
-Shrinkage, on the other hand, is a way of averaging different estimators. In this case, practitioners often combine parametric and non-parametric estimators in attempt to keep the best of both options.
+Shrinkage, on the other hand, is a way of averaging different estimators. In this case, practitioners often combine parametric and non-parametric estimators in attempt to keep the best of both worlds
 
-One interesting application of shrinkage methods is in the estimation of variance-covariance matrices. Those matrices are required by almost any mathematical method in economics: from portfolio optimization to least squares and its strands (GLS, GMM, etc). 
+One interesting application of shrinkage methods is in the estimation of variance-covariance matrices. Those matrices are required by almost any mathematical recipes in economics: from portfolio optimization to least squares - with all its strands (GLS, GMM, etc). 
 
 A problem arises, though, if the matrix dimension, $p$, is large in comparison to the number of observations, $n$. If $p > n$ the matrix is not even invertible. A less extreme case would be given by a $p$ that approaches $n$. In these scenario, the sample covariance matrix is invertible, but numerically ill-conditioned, which means that the inverse matrix can amplify estimation error dramatically[^4]. 
 
@@ -128,11 +128,11 @@ The `lambda_fitted` object contain the estimated eigenvalues we really care abou
 lambda_fitted[1:5, 1:5]
 ```
 
-In which I printed only the first $5$ rows and columns to save space. As we look from the left to the right, the simulated eigenvalues start to decrease. That's nothing wrong with that since I have ordered them this way. The problem, thought, is that they are more variable at the top-left of the matrix then they are at the bottom-right.  
+In which I printed only the first $5$ rows and columns to save space. As we look from the left to the right, the simulated eigenvalues start to decrease. That's nothing wrong with that since I have ordered them this way. The problem, thought, is that they are more variable at the top-left of the matrix, then they are at the bottom-right.
 
 A 2-D surface clearly shows the distortion effect caused by estimation-error. 
 
-```{r, message=FALSE, warning=FALSE, fig.align='center', fig.width=14}
+```{r, message=FALSE, warning=FALSE, fig.align='center'}
 
 library(gganimate)
 library(latex2exp)
@@ -172,11 +172,11 @@ animate(plot)
 
 The mean value of $\lambda$ is $1$, which is in accordance with the multivariate process of $\mu=0$ and $\sigma^2 = 1$ generated above. 
 
-If there were no estimation error, the distribution of $\lambda$ should be essentially flat (since the DGP is the same for all $n$). But as we see, when data is short the ellipse twists dramatically. It's in this scenario that "shrinkage" comes in. The ill-behavior of covariance matrices are alleviated by exploring the bias & variance trade-off of a highly structured matrix and one with little or no structure at all. The end result is a flatter and more precise ellipse around it's _true_ eigenvalues (as it should be).
+If there were no estimation error, the distribution of $\lambda$ should be essentially flat (since the DGP is the same for all $n$). But as we see, when data is short the ellipse twists dramatically. It's in this scenario that shrinkage comes in. The ill-behavior of covariance matrices are alleviated by exploring the bias-variance trade-off of a highly structured matrix and one with little or no structure at all. The end result is a flatter and more precise ellipse around it's _true_ eigenvalues (as it should be).
 
-The simulation above reveals a fast decay in the average eigenvalues within $500$ and $750$ realizations, after when they stabilize. This give us some clue on the minimum amount of data we should have when dealing with matrices of $p = 50$.
+The simulation above reveals a fast decay in the average eigenvalues within $500$ and $750$ realizations, after when they stabilize. This give us some clue on the minimum amount of data we should have when dealing with matrices of dimension $p = 50$.
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, fig.align='center'}
 
 lambda_fitted_tidy %>% 
     group_by(ts_size) %>% 
@@ -197,7 +197,7 @@ lambda_fitted_tidy %>%
 
 This is in accordance with the empirical application I explored in previous posts (see [here](https://www.bernardo.codes/2018/09/05/how-much-shrinkage-does-the-stock-market-requires/) and [here](https://www.bernardo.codes/2018/09/08/a-covariance-matrix/)). 
 
-The lesson is: when in doubt, always shrink!
+The lesson we should keep is: when in doubt, always shrink!
 
 
 [^1]: "Economic Rules", Dani Rodrik.
@@ -208,4 +208,4 @@ The lesson is: when in doubt, always shrink!
 
 [^4]: See "A Well-Conditioned Estimator For Large-Dimensional Covariance Matrices", from Oliver Ledoit and Michael Wolf. Link [here](http://ledoit.net/ole1a.pdf).
 
-[^5]: If the eigenvalues are complex numbers than a sufficient condition is given by the real part being negative. 
+[^5]: If the eigenvalues are complex numbers than a sufficient condition is given by having negative values in the real part.  
