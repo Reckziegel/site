@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Yieldcurve on Bernardo Reckziegel</title>
-    <link>/tags/yieldcurve/</link>
+    <link>https://bernardo.codes/tags/yieldcurve/</link>
     <description>Recent content in Yieldcurve on Bernardo Reckziegel</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 14 Nov 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/yieldcurve/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://bernardo.codes/tags/yieldcurve/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>The Dance of the Yield</title>
-      <link>/2018/11/14/the-dance-of-yield/</link>
+      <link>https://bernardo.codes/2018/11/14/the-dance-of-yield/</link>
       <pubDate>Wed, 14 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/11/14/the-dance-of-yield/</guid>
+      <guid>https://bernardo.codes/2018/11/14/the-dance-of-yield/</guid>
       <description>Studying for the 2019 CFA Level III exam I came across a very interesting chapter on yield curve strategies. The content, among other things, explores the role of convexity and its importance in building custom views for expected returns.
 The code below intents to visually show that the US yields indeed change in a non-linear fashion very often.
 # load librarieslibrary(Quandl)library(tidyverse)library(gganimate)library(ggthemes)# download the yield from Quandlus_yields &amp;lt;- Quandl(&amp;quot;USTREASURY/YIELD&amp;quot;, collapse = &amp;quot;monthly&amp;quot;, order = &amp;quot;asc&amp;quot;)# express the maturity holdings in monthsmaturities &amp;lt;- c(&amp;quot;Date&amp;quot;, 1/12, 2/12, 3/12, 6/12, 1, 2, 3, 5, 7, 10, 20, 30)n &amp;lt;- nrow(us_yields)# create the plotp &amp;lt;- us_yields %&amp;gt;% as_tibble() %&amp;gt;% # change maturity names`colnames&amp;lt;-`(maturities) %&amp;gt;% # tidygather(&amp;quot;maturity&amp;quot;, &amp;quot;yields&amp;quot;, -Date) %&amp;gt;%mutate_if(is_character, as.</description>

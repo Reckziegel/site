@@ -17,7 +17,7 @@ tags:
 <hr />
 <div id="what-is-a-random-walk" class="section level3">
 <h3>1. What is a Random Walk?</h3>
-<p>A random walk (RW) could be formally defined as a collection random series that are ordered in time. In a random walk the realized values of a time series are particular of that specific moment and cannot be extrapolated into the future. This imposes a huge constraint to econometric theory.</p>
+<p>A random walk (RW) could be formally defined as a collection random series that are ordered in time. In a random walk, the realized values of a time series are particular of that specific moment and cannot be extrapolated into the future. This imposes a huge constraint to econometric theory.</p>
 <p>One immediate implication is that, if a particular series follows a random walk, no additional information can be learned from the data besides the one we already have at hand. This idea rests at the heart of the <a href="https://en.wikipedia.org/wiki/Efficient-market_hypothesis">Efficient Market Hypothesis (EMH)</a>.</p>
 <p>A general description of a random walk process could be given by:</p>
 <p><code>$$ y_t = \mu + y_{t - 1} + \epsilon_t $$</code></p>
@@ -28,12 +28,12 @@ tags:
 <p>For <code>$t - 3$</code>:</p>
 <p><code>$$ y_{t - 3} = \mu + y_{t - 4} + \epsilon_{t - 3} $$</code></p>
 <p>… and so on.</p>
-<p>Doing some algebra and substituting the second equation into the first we get</p>
+<p>Doing some algebra and substituting the second equation into the first we get:</p>
 <p><code>$$ y_t = \mu + \underbrace{\mu + y_{t - 2} + \epsilon_{t - 1}}_{\text{Second Equation}} + \epsilon_t $$</code></p>
 <p><code>$$ y_t = 2 \mu + y_{t - 2} + \epsilon_t + \epsilon_{t - 1} $$</code></p>
 <p>Repeating the same step for <code>$y_{t - 2}$</code> and <code>$y_{t - 3}$</code> (that is, putting <code>$y_{t - 2}$</code> inside <code>$y_{t - 1}$</code> and <code>$y_{t - 3}$</code> inside <code>$y_{t - 2}$</code>) we finally reach the result:</p>
 <p><code>$$ y_t = 4 \mu +y_{t - 4} + \epsilon_t + \epsilon_{t - 1} + \epsilon_{t - 2} + \epsilon_{t - 3} $$</code></p>
-<p>Hopefully you can clearly see a pattern. The <code>$\mu$</code>’s increase with <code>$t$</code> and the impact of <code>$\epsilon_t$</code> accumulates indefinitely from it’s starting point. The random walk has an infinite memory!</p>
+<p>Hopefully you can see a pattern. The <code>$\mu$</code>’s increase with <code>$t$</code> and the impact of <code>$\epsilon_t$</code> accumulates indefinitely from it’s starting point. The random walk has an infinite memory!</p>
 <p>The equations above can be divided in two different parts: deterministic and stochastic.</p>
 <p><code>$$ y_t =  \underbrace{\mu t + y_{t0}}_{\text{Deterministic}} + \underbrace{\sum{\epsilon_t}}_{\text{Stochastic}} $$</code></p>
 <p>The normal distribution is not a requirement for <code>$\epsilon$</code>, but is often used as a natural outcome of the <a href="https://en.wikipedia.org/wiki/Central_limit_theorem">Central Limit Theorem (CLT)</a>.</p>

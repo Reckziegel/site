@@ -2,30 +2,30 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Finance on Bernardo Reckziegel</title>
-    <link>/tags/finance/</link>
+    <link>https://bernardo.codes/tags/finance/</link>
     <description>Recent content in Finance on Bernardo Reckziegel</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 05 Sep 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/finance/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://bernardo.codes/tags/finance/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>How much shrinkage does the stock market requires?</title>
-      <link>/2018/09/05/how-much-shrinkage-does-the-stock-market-requires/</link>
+      <link>https://bernardo.codes/2018/09/05/how-much-shrinkage-does-the-stock-market-requires/</link>
       <pubDate>Wed, 05 Sep 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/09/05/how-much-shrinkage-does-the-stock-market-requires/</guid>
+      <guid>https://bernardo.codes/2018/09/05/how-much-shrinkage-does-the-stock-market-requires/</guid>
       <description>Shrinkage is hardly new in finance. In 1956, Charles Stein published a famous paper called Inadmissibility of the usual estimator for the mean of a multivariate normal distribution. In his work, he shows that, if the sum of the squares of the errors (SSE) is used as a loss function, then, for $ n \geq 2 $, the sample mean is not an optimal estimator. It can be improved by exploring the trade-off among bias and variance.</description>
     </item>
     
     <item>
       <title>A random walk</title>
-      <link>/2018/07/27/a-random-walk/</link>
+      <link>https://bernardo.codes/2018/07/27/a-random-walk/</link>
       <pubDate>Fri, 27 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/07/27/a-random-walk/</guid>
+      <guid>https://bernardo.codes/2018/07/27/a-random-walk/</guid>
       <description>This is my first post. I had planned to add some comments on how I created this site using the blogdown package, but since I was revisiting a material related to time series I decided that writing about random walks would be a nice start.
 1. What is a Random Walk?A random walk could be formally defined as a collection random series that are ordered in time. In a random walk (RW) the realized values of a time series are particular of that specific moment and cannot be extrapolated into the future.</description>
     </item>

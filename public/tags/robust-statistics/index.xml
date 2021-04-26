@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Robust Statistics on Bernardo Reckziegel</title>
-    <link>/tags/robust-statistics/</link>
+    <link>https://bernardo.codes/tags/robust-statistics/</link>
     <description>Recent content in Robust Statistics on Bernardo Reckziegel</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 05 Sep 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/robust-statistics/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://bernardo.codes/tags/robust-statistics/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>How much shrinkage does the stock market requires?</title>
-      <link>/2018/09/05/how-much-shrinkage-does-the-stock-market-requires/</link>
+      <link>https://bernardo.codes/2018/09/05/how-much-shrinkage-does-the-stock-market-requires/</link>
       <pubDate>Wed, 05 Sep 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/09/05/how-much-shrinkage-does-the-stock-market-requires/</guid>
+      <guid>https://bernardo.codes/2018/09/05/how-much-shrinkage-does-the-stock-market-requires/</guid>
       <description>Shrinkage is hardly new in finance. In 1956, Charles Stein published a famous paper called Inadmissibility of the usual estimator for the mean of a multivariate normal distribution. In his work, he shows that, if the sum of the squares of the errors (SSE) is used as a loss function, then, for $ n \geq 2 $, the sample mean is not an optimal estimator. It can be improved by exploring the trade-off among bias and variance.</description>
     </item>
     

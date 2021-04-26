@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Manymodels on Bernardo Reckziegel</title>
-    <link>/tags/manymodels/</link>
+    <link>https://bernardo.codes/tags/manymodels/</link>
     <description>Recent content in Manymodels on Bernardo Reckziegel</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Mon, 27 Aug 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/manymodels/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://bernardo.codes/tags/manymodels/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>How many stocks in the S&amp;P 500 do follow a random-walk?</title>
-      <link>/2018/08/27/how-many-stocks-in-the-s-p-500-do-follow-a-random-walk/</link>
+      <link>https://bernardo.codes/2018/08/27/how-many-stocks-in-the-s-p-500-do-follow-a-random-walk/</link>
       <pubDate>Mon, 27 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/08/27/how-many-stocks-in-the-s-p-500-do-follow-a-random-walk/</guid>
+      <guid>https://bernardo.codes/2018/08/27/how-many-stocks-in-the-s-p-500-do-follow-a-random-walk/</guid>
       <description>Machine Learning (ML) models are trendy and gaining popularity in finance. Practitioners noticed that little help can come from asymptotic theory if the researcher is constrained by the number of observations (in which \(n \rightarrow \infty\) do never happens).
 The solution offered by a great deal of ML models is a complete twist in econometric tradition. Forget about odd features and ugly names, like autocorrelation, multicollinearity and heteroskedasticity. Just pay attention to the forecasts: are they good or not?</description>
     </item>

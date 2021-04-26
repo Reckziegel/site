@@ -16,7 +16,7 @@ This is my first post. I had planned to add some comments on how I created this 
 
 ### 1. What is a Random Walk?
 
-A random walk (RW) could be formally defined as a collection random series that are ordered in time. In a random walk the realized values of a time series are particular of that specific moment and cannot be extrapolated into the future. This imposes a huge constraint to econometric theory. 
+A random walk (RW) could be formally defined as a collection random series that are ordered in time. In a random walk, the realized values of a time series are particular of that specific moment and cannot be extrapolated into the future. This imposes a huge constraint to econometric theory. 
 
 One immediate implication is that, if a particular series follows a random walk, no additional information can be learned from the data besides the one we already have at hand. This idea rests at the heart of the [Efficient Market Hypothesis (EMH)](https://en.wikipedia.org/wiki/Efficient-market_hypothesis). 
 
@@ -38,7 +38,7 @@ For `$t - 3$`:
 
 ... and so on. 
 
-Doing some algebra and substituting the second equation into the first we get
+Doing some algebra and substituting the second equation into the first we get:
 
 `$$ y_t = \mu + \underbrace{\mu + y_{t - 2} + \epsilon_{t - 1}}_{\text{Second Equation}} + \epsilon_t $$`
 
@@ -48,7 +48,7 @@ Repeating the same step for `$y_{t - 2}$` and `$y_{t - 3}$` (that is, putting `$
 
 `$$ y_t = 4 \mu +y_{t - 4} + \epsilon_t + \epsilon_{t - 1} + \epsilon_{t - 2} + \epsilon_{t - 3} $$`
     
-Hopefully you can clearly see a pattern. The `$\mu$`'s increase with `$t$` and the impact of `$\epsilon_t$` accumulates indefinitely from it's starting point. The random walk has an infinite memory!
+Hopefully you can see a pattern. The `$\mu$`'s increase with `$t$` and the impact of `$\epsilon_t$` accumulates indefinitely from it's starting point. The random walk has an infinite memory!
 
 The equations above can be divided in two different parts: deterministic and stochastic.
 

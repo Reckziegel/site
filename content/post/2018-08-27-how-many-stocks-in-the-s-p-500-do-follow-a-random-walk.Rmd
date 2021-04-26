@@ -14,7 +14,6 @@ tags:
 
 
 ```{r setup, include=FALSE}
-
 knitr::opts_chunk$set(
     message = FALSE, 
     warning = FALSE, 
@@ -22,28 +21,27 @@ knitr::opts_chunk$set(
     cache   = TRUE, 
     echo    = TRUE
 )
-
 ```
 
 
-Machine Learning (ML) models are trendy and gaining popularity in finance. Practitioners noticed that little help can come from asymptotic theory if the researcher is constrained by the number of observations (in which $n \rightarrow \infty$ do never happens). 
+Machine Learning (ML) models are trendy and gaining popularity in finance. Practitioners realized that little help can come from asymptotic theory if the researcher is constrained by the number of observations (in which $n \rightarrow \infty$ do never happens). 
 
-The solution offered by a great deal of ML models is a complete twist in econometric tradition. Forget about odd features and ugly names, like autocorrelation, multicollinearity and heteroskedasticity. Just pay attention to the forecasts: are they good or not? If not, _make_ them be! 
-
-Still, reality continues to show that it's hard to profit from "hidden" patterns in the stock market. In fact, only a lucky few may know how does it feels like, in the long-run.
+The solution offered by a great deal of ML models is a complete twist in econometric tradition. Still, reality continues to show that it's hard to profit from "hidden" patterns in the stock market. In fact, only a lucky few may know how does it feels like, in the long-run.
 
 As the [Nobel Prize Winner](https://www.nobelprize.org/prizes/economics/2003/granger/facts/), Clive Granger [states](http://www.forecastingprinciples.com/paperpdf/Granger-stockmarket.pdf): at some sense, the market must follow a random-walk, otherwise the it would be an unlimited source of money machine.
 
-Hard to disagree. On those grounds, I asked myself: how many stocks of the S&P 500 show any evidence of actually following a random-walk process? Is it the number high or low? Think of it: if it's low, no doubt ML models can help a great deal. If not, we are just "drying ice". So.. how do we stand?
+Hard to disagree. On those grounds, I asked myself: how many stocks of the S&P 500 show any evidence of actually following a random-walk? Is it the number high or is it low? 
 
-I will do my best to address this issue along the way.
+Think of it: if it's low, no doubt ML models can help a great deal. If not, they may be just "drying ice". 
+
+So.. how do we stand? I will do my best to address this issue along the way.
 
 ## Load Libraries
 
 The required `R` packages for this experiment are:
 
 ```{r}
-
+library(tidyverse)
 library(tidyquant)
 library(sweep)
 library(timetk)
@@ -51,78 +49,49 @@ library(tibbletime)
 library(forecast)
 library(rvest)
 library(Quandl)
-
 ```
-
 
 
 ## Download the S&P 500 tickers
 
-Once the packages are loaded, we have to start from the scratch. The first step it’s to chase after all S&P 500 tickers. They are not what we really care about, but without them it is hard to move forward. This task can easily be done by web-scraping [Wikipedia's](https://en.wikipedia.org/wiki/List_of_S%26P_500_companies) site.
+Once the packages are loaded, we have to start from the scratch. The first step its to chase after all S&P 500 tickers. They are not what we really care about, but without them it is hard to move forward. This task can easily be done by web-scraping [Wikipedia's](https://en.wikipedia.org/wiki/List_of_S%26P_500_companies) site.
 
 
 ```{r}
-
 get_sp500_tickers <- function() {
-    
     raw_get <- function() {
-        
         xml2::read_html('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies') %>% 
             rvest::html_node('table.wikitable') %>% 
             rvest::html_table() %>% 
             dplyr::as_tibble()
-        
     }
-    
     possible_get <- purrr::possibly(
         .f        = raw_get, 
         otherwise = NA
     )
-    
     possible_get() %>% 
         dplyr::rename(
-            ticker_symbol     = 'Ticker symbol', 
+            ticker_symbol     = 'Symbol', 
             security          = 'Security',
             sec_filings       = 'SEC filings', 
             gics_sector       = 'GICS Sector',
-            gics_sub_industry = 'GICS Sub Industry'
+            gics_sub_industry = 'GICS Sub-Industry'
         )
-    
 }
-
 ```
 
 
-In `R`, (i) every object is a function and (ii) every function can be used inside another function. That's why `raw_get` is part of `get_sp500_tickers`. In the `purrr` syntax, we are also allowed to write something like this, without having to same intermediary objects.
-
-```{r, eval=FALSE}
-possible_get <- purrr::possibly(
-        .f = ~ xml2::read_html('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies') %>% 
-            rvest::html_node('table.wikitable') %>% 
-            rvest::html_table() %>% 
-            dplyr::as_tibble(), 
-        otherwise = NA
-    )
-```
-
-The output is the same. `possibly()`, also from `purrr`, "guarantees" the main script will run. If any error occurs, we get a `NA`, but the code still runs. A safe bet for _loops_ with dozens of elements like this one. 
+`possibly()`, also from `purrr`, "guarantees" the main script will run. If any error occurs, we get a `NA`, but the code still runs. A safe bet for _loops_ with dozens of elements like this one. 
 
 
 ```{r}
-
 tickers <- get_sp500_tickers()
-
 tickers
-
 ```
 
-
 ```{r, eval=TRUE, echo=FALSE}
-
 load("C:/Users/Berna/Desktop/R Programming/site/rw_script_dataset.Rdata")
-
 tickers
-
 ```
 
 
@@ -131,15 +100,11 @@ tickers
 The next step is to construct a function that will allow us to use all the tickers we got to download the companies price history. The function `download_stocks_from_tickers()` will do the work.
 
 ```{r}
-
 download_stocks_from_tickers <- function(data, ...) {
-    
     # tidy eval
     dots_expr <- dplyr::quos(...)
-    
     # defensive programming
     possible_quandl <- purrr::possibly(Quandl::Quandl, NA)
-    
     # data manipulation
     data %>% 
         dplyr::mutate(possible_download = purrr::map(
@@ -147,21 +112,16 @@ download_stocks_from_tickers <- function(data, ...) {
             .f = ~ possible_quandl(., !!! dots_expr)
         )
     )
-        
 }
-
 ```
 
 
 ```{r}
-
 stocks <- tickers %>% 
-    
     # create the list columns to map over
     dplyr::mutate(wiki_tickers = str_c('WIKI/', ticker_symbol, '.11')) %>% 
     tidyr::nest(wiki_tickers) %>%
-    
-    # download data from 2009 onwards
+    # download data from 2009 onward
     dplyr::mutate(download_tickers = map(
         .x           = data, 
         .f           = download_stocks_from_tickers, # the custom function is here!
@@ -171,7 +131,6 @@ stocks <- tickers %>%
         start_date   = '2009-01-01', 
         column_index = 11) # column 11 = adjusted close price
         ) %>% 
-    
     # reorganize the data in a clean tibble format
     dplyr::select(ticker_symbol, 
                   security, 
@@ -180,10 +139,8 @@ stocks <- tickers %>%
                   download_tickers
                   ) %>% 
     tidyr::unnest(download_tickers) %>% 
-    
     # exclude all the column-lists with NA 
     dplyr::filter(!is.na(possible_download)) %>% 
-    
     # cleaning 
     tidyr::unnest(possible_download) %>% 
     dplyr::rename(prices = `Adj. Close`) %>% 
@@ -191,7 +148,6 @@ stocks <- tickers %>%
                   ticker_symbol:gics_sub_industry, 
                   prices
                   ) %>% 
-    
     # calculate returns
     dplyr::group_by(ticker_symbol) %>% 
     tidyquant::tq_mutate(
@@ -202,17 +158,12 @@ stocks <- tickers %>%
         type       = 'log'
         ) %>% 
     dplyr::ungroup()
-
 stocks
-
 ```
 
 ```{r, eval=TRUE, echo=FALSE}
-
 load("C:/Users/Berna/Desktop/R Programming/site/rw_script_dataset.Rdata")
-
 stocks
-
 ```
 
 
@@ -228,7 +179,6 @@ At this point, we have almost everything is needed to estimate the data generati
 The script bellow adds this structure into a `tibble` called `stocks_to_ts`. 
 
 ```{r}
-
 stocks_to_ts <- stocks %>% 
     dplyr::group_by(ticker_symbol, 
                     security, 
@@ -242,16 +192,12 @@ stocks_to_ts <- stocks %>%
         start     = 2009,
         frequency = 12)) %>% 
     dplyr::ungroup()
-
 ```
 
 
 ```{r, eval=TRUE, echo=FALSE}
-
 load("C:/Users/Berna/Desktop/R Programming/site/rw_script_dataset.Rdata")
-
 stocks_to_ts
-
 ```
 
 
@@ -267,10 +213,9 @@ $$ AIC = 2k - 2ln( \hat{L} ) $$
 
 in which, $k$ is the number of parameters in the model and $\hat{L}$ is the minimum value achieved in the log-likelihood function. A boost in $k$, increases the penalization and more complex models have as smaller chance of being chosen. 
 
-The number of lags in the $(p,q)$ arguments are limited to be no more than 2. As we will see, this constraint doesn't bind for most stocks, yet serves to speeds up computations greatly. Of course, you can also attach an economic meaning to it: a shock that occurs at time $t$ doesn't impact returns by more than $t + 2$ periods (at least from a probabilistic point of view).    
+The number of lags in the $(p,q)$ arguments are limited to be no more than 2. As we will see, this constraint doesn't bind for most stocks, yet serves to speeds up computations greatly.  
 
 ```{r}
-
 stocks_to_ts_modeling <- stocks_to_ts %>%
     dplyr::group_by(ticker_symbol) %>% 
     dplyr::mutate(model   = map(
@@ -287,19 +232,14 @@ stocks_to_ts_modeling <- stocks_to_ts %>%
     )) %>% 
     tidyr::unnest(glance_model) %>% 
     dplyr::ungroup() 
-
 stocks_to_ts_modeling
-
 ```
 
 The `stocks_to_ts_modeling` object have standard evaluation metrics, like AIC, BIC, ME, RMSE, MAE, MAPE, MASE, ACF1. Not for one stock, but for all in the S&P 500 index!
 
 ```{r, eval=TRUE, echo=FALSE}
-
 load("C:/Users/Berna/Desktop/R Programming/site/rw_script_dataset.Rdata")
-
 stocks_to_ts_modeling
-
 ```
 
 ## Final Manipulation and Addicional Toughts
@@ -307,7 +247,6 @@ stocks_to_ts_modeling
 After some extra manipulation we get to the following table:
 
 ```{r}
-
 stocks_to_ts_modeling %>% 
     dplyr::mutate_if(is.character, as_factor) %>% 
     dplyr::count(model.desc, sort = TRUE) %>% 
@@ -330,15 +269,11 @@ stocks_to_ts_modeling %>%
         caption = 'ARMA models selected by the AIC Criteria', 
         align   = 'c'
     )
-
-
 ```
 
 
 ```{r, echo=FALSE, eval=TRUE}
-
 load("C:/Users/Berna/Desktop/R Programming/site/rw_script_dataset.Rdata")
-
 stocks_to_ts_modeling %>% 
     dplyr::mutate_if(is.character, forcats::as_factor) %>% 
     dplyr::count(model.desc, sort = TRUE) %>% 
@@ -362,11 +297,9 @@ stocks_to_ts_modeling %>%
         align   = 'c', 
         format.args = list(width = 15)
     )
-
-
 ```
 
-For 70% of our sample, the $ARIMA(0, 0, 0)$ won the day! (ps: This is the Random-Walk!) On top of that, an additional 10% of total number of stocks are composed by $ARIMA(0, 0, 1)$, who also obeys the $E_t(y_{t + 1}) = E_t(y_{t})$ rule[^1]. The best point forecast for tomorrow is today's return.  
+For 70% of our sample, the $ARIMA(0, 0, 0)$ won the day! On top of that, an additional 10% of total number of stocks are composed by $ARIMA(0, 0, 1)$, which also obeys the $E_t(y_{t + 1}) = E_t(y_{t})$ rule[^1]. The best point forecast for tomorrow is what we see in the screen today.  
 
 Of course, a different selection criteria could yield contrasting results. But let's keep in mind that $AIC$ actually is not the toughest penalizer. As an example, take the [Bayesian Information Criterion (BIC)](https://en.wikipedia.org/wiki/Bayesian_information_criterion), that's widely known. If we calculate the partial derivatives with respect to $k$ (the number of model parameters) for both criteria, we get the following[^2]:
 
@@ -376,9 +309,7 @@ $$ \frac{\partial{BIC}}{\partial{k}} = ln(n) $$
 
 But $ln(n) > 2$, whenever $n > 7$. Our data  definitely has more than 7 observations, so we can be pretty confident that the $BIC$ criterion would hurt overparemetrized models by even more than $AIC$ actually did. That is, $BIC$ would put even more pressure to select simple parsimonious models. In this case, the percentage of random-walks would be grater than we just found. 
 
-To make it clear: returns seems to be so fluky that, for 70% of our sample, not even a single parameter (besides a constant) was worth to attaching. That's the market efficiency in which Granger was [talking about](http://www.forecastingprinciples.com/paperpdf/Granger-stockmarket.pdf). What can Machine Learning _algos_ "learn" in such a case? 
-
-The quest for accuracy may come at a high cost of a misstated reality.
+To make it clear: returns seems to be so fluky that, for 70% of our sample, not even a single parameter was worth to attaching. That's the market efficiency in which Granger was [talking about](http://www.forecastingprinciples.com/paperpdf/Granger-stockmarket.pdf). What can Machine Learning _algos_ "learn" in such a case? 
 
 
 [^1]: The variance, however, is different. This can lead to some variance-bias trade-off.

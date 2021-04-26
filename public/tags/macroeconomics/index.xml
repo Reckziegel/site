@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Macroeconomics on Bernardo Reckziegel</title>
-    <link>/tags/macroeconomics/</link>
+    <link>https://bernardo.codes/tags/macroeconomics/</link>
     <description>Recent content in Macroeconomics on Bernardo Reckziegel</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Thu, 10 Jan 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/macroeconomics/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://bernardo.codes/tags/macroeconomics/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>The IS-LM Model</title>
-      <link>/2019/01/10/the-is-lm-model/</link>
+      <link>https://bernardo.codes/2019/01/10/the-is-lm-model/</link>
       <pubDate>Thu, 10 Jan 2019 00:00:00 +0000</pubDate>
       
-      <guid>/2019/01/10/the-is-lm-model/</guid>
+      <guid>https://bernardo.codes/2019/01/10/the-is-lm-model/</guid>
       <description>A simple IS-LM model for an open economy can be defined as:
 \[ \begin{align}Y &amp;amp;= C(Y, T(Y)) + I(Y, i) + G + X(Y^W, e(i, i^W)) - M(Y, e(i, i^W)) \\M/P &amp;amp;= L(Y, i) \\-K(i, i^W) &amp;amp;= X(Y^W, e(i, i^W)) - M(Y, e(i, i^W)) \\E &amp;amp;= e(i, i^W)\end{align}\] in which \(Y\) is the local GDP; \(C\) is a consumption function that depends on the \(Y\) and \(T\) (taxes); \(I\) is the investment function that depends on \(Y\) and \(i\) (interest-rates).</description>
     </item>

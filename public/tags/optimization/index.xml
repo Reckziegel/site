@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Optimization on Bernardo Reckziegel</title>
-    <link>/tags/optimization/</link>
+    <link>https://bernardo.codes/tags/optimization/</link>
     <description>Recent content in Optimization on Bernardo Reckziegel</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 20 Feb 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/optimization/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://bernardo.codes/tags/optimization/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Portfolio Analytics in the Tidyverse</title>
-      <link>/2019/02/20/portfolio-analytics-in-the-tidyverse/</link>
+      <link>https://bernardo.codes/2019/02/20/portfolio-analytics-in-the-tidyverse/</link>
       <pubDate>Wed, 20 Feb 2019 00:00:00 +0000</pubDate>
       
-      <guid>/2019/02/20/portfolio-analytics-in-the-tidyverse/</guid>
+      <guid>https://bernardo.codes/2019/02/20/portfolio-analytics-in-the-tidyverse/</guid>
       <description>Portfolio Analytics (PA) is a well known library for portfolio optimization in R. Written before the tidyverse gain pulse, the PA package is often used in the “Base R” context. The objective of this post is to show that it can also be use inside the tidyverse (with all the power that comes with it!).
 The basic usage of portfolio Analytics can be found here. I’ll go straight to the tidy-world.</description>
     </item>
