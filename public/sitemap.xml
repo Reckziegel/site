@@ -3,232 +3,228 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/2019/02/27/estimation-error-visualized/</loc>
+    <loc>https://bernardo.codes/2019/02/27/estimation-error-visualized/</loc>
     <lastmod>2019-02-27T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/2019/02/20/portfolio-analytics-in-the-tidyverse/</loc>
+    <loc>https://bernardo.codes/2019/02/20/portfolio-analytics-in-the-tidyverse/</loc>
     <lastmod>2019-02-20T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/2019/01/29/a-consumtion-function-for-brazil/</loc>
+    <loc>https://bernardo.codes/2019/01/29/a-consumtion-function-for-brazil/</loc>
     <lastmod>2019-01-29T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/2019/01/10/the-is-lm-model/</loc>
+    <loc>https://bernardo.codes/2019/01/10/the-is-lm-model/</loc>
     <lastmod>2019-01-10T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/2019/01/10/xi-jinping-s-message/</loc>
+    <loc>https://bernardo.codes/2019/01/10/xi-jinping-s-message/</loc>
     <lastmod>2019-01-10T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/2018/11/14/the-dance-of-yield/</loc>
+    <loc>https://bernardo.codes/2018/11/14/the-dance-of-yield/</loc>
     <lastmod>2018-11-14T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/2018/09/08/a-covariance-matrix/</loc>
+    <loc>https://bernardo.codes/2018/09/08/a-covariance-matrix/</loc>
     <lastmod>2018-09-08T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/2018/09/05/how-much-shrinkage-does-the-stock-market-requires/</loc>
+    <loc>https://bernardo.codes/2018/09/05/how-much-shrinkage-does-the-stock-market-requires/</loc>
     <lastmod>2018-09-05T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/2018/08/27/how-many-stocks-in-the-s-p-500-do-follow-a-random-walk/</loc>
+    <loc>https://bernardo.codes/2018/08/27/how-many-stocks-in-the-s-p-500-do-follow-a-random-walk/</loc>
     <lastmod>2018-08-27T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/2018/08/06/brazilian-debt/</loc>
+    <loc>https://bernardo.codes/2018/08/06/brazilian-debt/</loc>
     <lastmod>2018-08-06T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/2018/07/27/a-random-walk/</loc>
+    <loc>https://bernardo.codes/2018/07/27/a-random-walk/</loc>
     <lastmod>2018-07-27T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/about/</loc>
+    <loc>https://bernardo.codes/about/</loc>
     <lastmod>2016-05-05T21:48:51-07:00</lastmod>
   </url>
   
   <url>
-    <loc>/cv/</loc>
-  </url>
-  
-  <url>
-    <loc>/</loc>
+    <loc>https://bernardo.codes/</loc>
     <lastmod>2019-02-27T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/categories/</loc>
+    <loc>https://bernardo.codes/categories/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/consumption/</loc>
+    <loc>https://bernardo.codes/tags/consumption/</loc>
     <lastmod>2019-01-29T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/estimation/</loc>
+    <loc>https://bernardo.codes/tags/estimation/</loc>
     <lastmod>2019-02-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/categories/estimation/</loc>
+    <loc>https://bernardo.codes/categories/estimation/</loc>
     <lastmod>2019-02-27T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/finance/</loc>
+    <loc>https://bernardo.codes/tags/finance/</loc>
     <lastmod>2018-09-05T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/categories/finance/</loc>
+    <loc>https://bernardo.codes/categories/finance/</loc>
     <lastmod>2019-02-27T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/ggplot2/</loc>
+    <loc>https://bernardo.codes/tags/ggplot2/</loc>
     <lastmod>2018-11-14T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/instrumental-variables/</loc>
+    <loc>https://bernardo.codes/tags/instrumental-variables/</loc>
     <lastmod>2019-01-29T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/islm/</loc>
+    <loc>https://bernardo.codes/tags/islm/</loc>
     <lastmod>2019-01-10T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/machine-learning/</loc>
+    <loc>https://bernardo.codes/tags/machine-learning/</loc>
     <lastmod>2018-08-27T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/macroeconomics/</loc>
+    <loc>https://bernardo.codes/tags/macroeconomics/</loc>
     <lastmod>2019-01-10T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/categories/macroeconomics/</loc>
+    <loc>https://bernardo.codes/categories/macroeconomics/</loc>
     <lastmod>2019-01-29T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/manymodels/</loc>
+    <loc>https://bernardo.codes/tags/manymodels/</loc>
     <lastmod>2018-08-27T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/ols/</loc>
+    <loc>https://bernardo.codes/tags/ols/</loc>
     <lastmod>2019-01-29T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/optimization/</loc>
+    <loc>https://bernardo.codes/tags/optimization/</loc>
     <lastmod>2019-02-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/post/</loc>
+    <loc>https://bernardo.codes/post/</loc>
     <lastmod>2019-02-27T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/public-sector/</loc>
+    <loc>https://bernardo.codes/tags/public-sector/</loc>
     <lastmod>2018-08-06T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/categories/r/</loc>
+    <loc>https://bernardo.codes/categories/r/</loc>
     <lastmod>2019-02-27T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/randon-walk/</loc>
+    <loc>https://bernardo.codes/tags/randon-walk/</loc>
     <lastmod>2018-08-27T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/robust-statistics/</loc>
+    <loc>https://bernardo.codes/tags/robust-statistics/</loc>
     <lastmod>2018-09-05T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/short-run/</loc>
+    <loc>https://bernardo.codes/tags/short-run/</loc>
     <lastmod>2019-01-10T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/shrinkage/</loc>
+    <loc>https://bernardo.codes/tags/shrinkage/</loc>
     <lastmod>2019-02-27T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/simulation/</loc>
+    <loc>https://bernardo.codes/tags/simulation/</loc>
     <lastmod>2018-07-27T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/</loc>
+    <loc>https://bernardo.codes/tags/</loc>
     <lastmod>2019-01-29T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/tidyverse/</loc>
+    <loc>https://bernardo.codes/tags/tidyverse/</loc>
     <lastmod>2019-02-20T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/time-series/</loc>
+    <loc>https://bernardo.codes/tags/time-series/</loc>
     <lastmod>2018-08-06T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/tags/yieldcurve/</loc>
+    <loc>https://bernardo.codes/tags/yieldcurve/</loc>
     <lastmod>2018-11-14T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>

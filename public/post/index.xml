@@ -2,41 +2,41 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on Bernardo Reckziegel</title>
-    <link>/post/</link>
+    <link>https://bernardo.codes/post/</link>
     <description>Recent content in Posts on Bernardo Reckziegel</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 27 Feb 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://bernardo.codes/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Estimation Error Visualized</title>
-      <link>/2019/02/27/estimation-error-visualized/</link>
+      <link>https://bernardo.codes/2019/02/27/estimation-error-visualized/</link>
       <pubDate>Wed, 27 Feb 2019 00:00:00 +0000</pubDate>
       
-      <guid>/2019/02/27/estimation-error-visualized/</guid>
+      <guid>https://bernardo.codes/2019/02/27/estimation-error-visualized/</guid>
       <description>The objective of economic models is to dress common-sense into mathematical formalism1. For some economic models, however, real data is too scare to achieve good statistical analysis. This scarcity of data leads to estimation-error2 (the econometricians enemy number one).
 By estimation-error I mean: the researcher is never certain about the true data generating process (DGP) of the phenomenon at hand. As Allan Timmermann and Graham Elliott argue, economic models can be thought as a condense representation of reality, in which mispecifification flourish naturally3.</description>
     </item>
     
     <item>
       <title>Portfolio Analytics in the Tidyverse</title>
-      <link>/2019/02/20/portfolio-analytics-in-the-tidyverse/</link>
+      <link>https://bernardo.codes/2019/02/20/portfolio-analytics-in-the-tidyverse/</link>
       <pubDate>Wed, 20 Feb 2019 00:00:00 +0000</pubDate>
       
-      <guid>/2019/02/20/portfolio-analytics-in-the-tidyverse/</guid>
+      <guid>https://bernardo.codes/2019/02/20/portfolio-analytics-in-the-tidyverse/</guid>
       <description>Portfolio Analytics (PA) is a well known library for portfolio optimization in R. Written before the tidyverse gain pulse, the PA package is often used in the “Base R” context. The objective of this post is to show that it can also be use inside the tidyverse (with all the power that comes with it!).
 The basic usage of portfolio Analytics can be found here. I’ll go straight to the tidy-world.</description>
     </item>
     
     <item>
       <title>A consumption function for Brazil</title>
-      <link>/2019/01/29/a-consumtion-function-for-brazil/</link>
+      <link>https://bernardo.codes/2019/01/29/a-consumtion-function-for-brazil/</link>
       <pubDate>Tue, 29 Jan 2019 00:00:00 +0000</pubDate>
       
-      <guid>/2019/01/29/a-consumtion-function-for-brazil/</guid>
+      <guid>https://bernardo.codes/2019/01/29/a-consumtion-function-for-brazil/</guid>
       <description>The Keynesian consumption function is one of the most famous equations in macroeconomics. This post will show how it can be estimated and how we can use a simple trick to add dynamics into the system.
 A functional form for \(C_t\)A traditional representation of consumption is
 \[ C_t = \alpha + \beta_0 Y^d_t \]
@@ -45,30 +45,30 @@ in which, \(C_t\) is consumption at time \(t\), \(Y^d_t\) is the disposable inco
     
     <item>
       <title>The IS-LM Model</title>
-      <link>/2019/01/10/the-is-lm-model/</link>
+      <link>https://bernardo.codes/2019/01/10/the-is-lm-model/</link>
       <pubDate>Thu, 10 Jan 2019 00:00:00 +0000</pubDate>
       
-      <guid>/2019/01/10/the-is-lm-model/</guid>
+      <guid>https://bernardo.codes/2019/01/10/the-is-lm-model/</guid>
       <description>A simple IS-LM model for an open economy can be defined as:
 \[ \begin{align}Y &amp;amp;= C(Y, T(Y)) + I(Y, i) + G + X(Y^W, e(i, i^W)) - M(Y, e(i, i^W)) \\M/P &amp;amp;= L(Y, i) \\-K(i, i^W) &amp;amp;= X(Y^W, e(i, i^W)) - M(Y, e(i, i^W)) \\E &amp;amp;= e(i, i^W)\end{align}\] in which \(Y\) is the local GDP; \(C\) is a consumption function that depends on the \(Y\) and \(T\) (taxes); \(I\) is the investment function that depends on \(Y\) and \(i\) (interest-rates).</description>
     </item>
     
     <item>
       <title>Xi Jinping&#39;s Message</title>
-      <link>/2019/01/10/xi-jinping-s-message/</link>
+      <link>https://bernardo.codes/2019/01/10/xi-jinping-s-message/</link>
       <pubDate>Thu, 10 Jan 2019 00:00:00 +0000</pubDate>
       
-      <guid>/2019/01/10/xi-jinping-s-message/</guid>
+      <guid>https://bernardo.codes/2019/01/10/xi-jinping-s-message/</guid>
       <description>I have a wall. You don’t!
 LOL!</description>
     </item>
     
     <item>
       <title>The Dance of the Yield</title>
-      <link>/2018/11/14/the-dance-of-yield/</link>
+      <link>https://bernardo.codes/2018/11/14/the-dance-of-yield/</link>
       <pubDate>Wed, 14 Nov 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/11/14/the-dance-of-yield/</guid>
+      <guid>https://bernardo.codes/2018/11/14/the-dance-of-yield/</guid>
       <description>Studying for the 2019 CFA Level III exam I came across a very interesting chapter on yield curve strategies. The content, among other things, explores the role of convexity and its importance in building custom views for expected returns.
 The code below intents to visually show that the US yields indeed change in a non-linear fashion very often.
 # load librarieslibrary(Quandl)library(tidyverse)library(gganimate)library(ggthemes)# download the yield from Quandlus_yields &amp;lt;- Quandl(&amp;quot;USTREASURY/YIELD&amp;quot;, collapse = &amp;quot;monthly&amp;quot;, order = &amp;quot;asc&amp;quot;)# express the maturity holdings in monthsmaturities &amp;lt;- c(&amp;quot;Date&amp;quot;, 1/12, 2/12, 3/12, 6/12, 1, 2, 3, 5, 7, 10, 20, 30)n &amp;lt;- nrow(us_yields)# create the plotp &amp;lt;- us_yields %&amp;gt;% as_tibble() %&amp;gt;% # change maturity names`colnames&amp;lt;-`(maturities) %&amp;gt;% # tidygather(&amp;quot;maturity&amp;quot;, &amp;quot;yields&amp;quot;, -Date) %&amp;gt;%mutate_if(is_character, as.</description>
@@ -76,10 +76,10 @@ The code below intents to visually show that the US yields indeed change in a no
     
     <item>
       <title>A Covariance Matrix</title>
-      <link>/2018/09/08/a-covariance-matrix/</link>
+      <link>https://bernardo.codes/2018/09/08/a-covariance-matrix/</link>
       <pubDate>Sat, 08 Sep 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/09/08/a-covariance-matrix/</guid>
+      <guid>https://bernardo.codes/2018/09/08/a-covariance-matrix/</guid>
       <description>The function bellow is a transcription from the MATLAB code done by Ledoit&amp;amp;Wolf in their work: Improved estimation of the covariance matrix of stock returns with an application to portfolio selection, which can be found here.
 If you also want to take a look on the original programming source, check the Michael’s Wolf website.
 covMarket &amp;lt;- function(x, shrink = TRUE) {# some operations work better with the matrix classif (is.</description>
@@ -87,39 +87,39 @@ covMarket &amp;lt;- function(x, shrink = TRUE) {# some operations work better w
     
     <item>
       <title>How much shrinkage does the stock market requires?</title>
-      <link>/2018/09/05/how-much-shrinkage-does-the-stock-market-requires/</link>
+      <link>https://bernardo.codes/2018/09/05/how-much-shrinkage-does-the-stock-market-requires/</link>
       <pubDate>Wed, 05 Sep 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/09/05/how-much-shrinkage-does-the-stock-market-requires/</guid>
+      <guid>https://bernardo.codes/2018/09/05/how-much-shrinkage-does-the-stock-market-requires/</guid>
       <description>Shrinkage is hardly new in finance. In 1956, Charles Stein published a famous paper called Inadmissibility of the usual estimator for the mean of a multivariate normal distribution. In his work, he shows that, if the sum of the squares of the errors (SSE) is used as a loss function, then, for $ n \geq 2 $, the sample mean is not an optimal estimator. It can be improved by exploring the trade-off among bias and variance.</description>
     </item>
     
     <item>
       <title>How many stocks in the S&amp;P 500 do follow a random-walk?</title>
-      <link>/2018/08/27/how-many-stocks-in-the-s-p-500-do-follow-a-random-walk/</link>
+      <link>https://bernardo.codes/2018/08/27/how-many-stocks-in-the-s-p-500-do-follow-a-random-walk/</link>
       <pubDate>Mon, 27 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/08/27/how-many-stocks-in-the-s-p-500-do-follow-a-random-walk/</guid>
+      <guid>https://bernardo.codes/2018/08/27/how-many-stocks-in-the-s-p-500-do-follow-a-random-walk/</guid>
       <description>Machine Learning (ML) models are trendy and gaining popularity in finance. Practitioners noticed that little help can come from asymptotic theory if the researcher is constrained by the number of observations (in which \(n \rightarrow \infty\) do never happens).
 The solution offered by a great deal of ML models is a complete twist in econometric tradition. Forget about odd features and ugly names, like autocorrelation, multicollinearity and heteroskedasticity. Just pay attention to the forecasts: are they good or not?</description>
     </item>
     
     <item>
       <title>The Brazilian Debt</title>
-      <link>/2018/08/06/brazilian-debt/</link>
+      <link>https://bernardo.codes/2018/08/06/brazilian-debt/</link>
       <pubDate>Mon, 06 Aug 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/08/06/brazilian-debt/</guid>
+      <guid>https://bernardo.codes/2018/08/06/brazilian-debt/</guid>
       <description>In this post I will show how you can recursively download macroeconomic data covered by the IMF using the Quandl package. To motivate the application, the Brazilian public debt will be used as a variable of interest.
 If you are familiar with Quandl you probably heard about the Quandl.search() function. What it does is try to look for a database that matches a specific pattern that you may have interest in, like “oil”, or “GDP”, for example.</description>
     </item>
     
     <item>
       <title>A random walk</title>
-      <link>/2018/07/27/a-random-walk/</link>
+      <link>https://bernardo.codes/2018/07/27/a-random-walk/</link>
       <pubDate>Fri, 27 Jul 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/07/27/a-random-walk/</guid>
+      <guid>https://bernardo.codes/2018/07/27/a-random-walk/</guid>
       <description>This is my first post. I had planned to add some comments on how I created this site using the blogdown package, but since I was revisiting a material related to time series I decided that writing about random walks would be a nice start.
 1. What is a Random Walk?A random walk could be formally defined as a collection random series that are ordered in time. In a random walk (RW) the realized values of a time series are particular of that specific moment and cannot be extrapolated into the future.</description>
     </item>
