@@ -34,7 +34,7 @@ Hard to disagree. On those grounds, I asked myself: how many stocks of the S&P 5
 
 Think of it: if it's low, no doubt ML models can help a great deal. If not, they may be just "drying ice". 
 
-So.. how do we stand? I will do my best to address this issue along the way.
+So.. how do we stand? 
 
 ## Load Libraries
 
@@ -81,7 +81,7 @@ get_sp500_tickers <- function() {
 ```
 
 
-`possibly()`, also from `purrr`, "guarantees" the main script will run. If any error occurs, we get a `NA`, but the code still runs. A safe bet for _loops_ with dozens of elements like this one. 
+`possibly()`, from `purrr`, "guarantees" the main script will run. If any error occurs, we get a `NA`, but the code still runs. A safe bet for _loops_ with dozens of elements like this one. 
 
 
 ```{r}
@@ -232,7 +232,6 @@ stocks_to_ts_modeling <- stocks_to_ts %>%
     )) %>% 
     tidyr::unnest(glance_model) %>% 
     dplyr::ungroup() 
-stocks_to_ts_modeling
 ```
 
 The `stocks_to_ts_modeling` object have standard evaluation metrics, like AIC, BIC, ME, RMSE, MAE, MAPE, MASE, ACF1. Not for one stock, but for all in the S&P 500 index!
@@ -299,7 +298,7 @@ stocks_to_ts_modeling %>%
     )
 ```
 
-For 70% of our sample, the $ARIMA(0, 0, 0)$ won the day! On top of that, an additional 10% of total number of stocks are composed by $ARIMA(0, 0, 1)$, which also obeys the $E_t(y_{t + 1}) = E_t(y_{t})$ rule[^1]. The best point forecast for tomorrow is what we see in the screen today.  
+For 70% of our sample, the $ARIMA(0, 0, 0)$ won the day! On top of that, an additional 10% of total number of stocks are composed by $ARIMA(0, 0, 1)$, which also obeys the $E_t(y_{t + 1}) = E_t(y_{t})$ rule[^1]. The best point forecast for tomorrow is what we see on the screen today.  
 
 Of course, a different selection criteria could yield contrasting results. But let's keep in mind that $AIC$ actually is not the toughest penalizer. As an example, take the [Bayesian Information Criterion (BIC)](https://en.wikipedia.org/wiki/Bayesian_information_criterion), that's widely known. If we calculate the partial derivatives with respect to $k$ (the number of model parameters) for both criteria, we get the following[^2]:
 
@@ -311,6 +310,7 @@ But $ln(n) > 2$, whenever $n > 7$. Our data  definitely has more than 7 observat
 
 To make it clear: returns seems to be so fluky that, for 70% of our sample, not even a single parameter was worth to attaching. That's the market efficiency in which Granger was [talking about](http://www.forecastingprinciples.com/paperpdf/Granger-stockmarket.pdf). What can Machine Learning _algos_ "learn" in such a case? 
 
+I'm still trying to figure it out.
 
 [^1]: The variance, however, is different. This can lead to some variance-bias trade-off.
 

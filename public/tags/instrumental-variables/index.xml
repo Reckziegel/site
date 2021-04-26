@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Instrumental Variables on Bernardo Reckziegel</title>
-    <link>/tags/instrumental-variables/</link>
+    <link>https://bernardo.codes/tags/instrumental-variables/</link>
     <description>Recent content in Instrumental Variables on Bernardo Reckziegel</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 29 Jan 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/instrumental-variables/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://bernardo.codes/tags/instrumental-variables/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>A consumption function for Brazil</title>
-      <link>/2019/01/29/a-consumtion-function-for-brazil/</link>
+      <link>https://bernardo.codes/2019/01/29/a-consumtion-function-for-brazil/</link>
       <pubDate>Tue, 29 Jan 2019 00:00:00 +0000</pubDate>
       
-      <guid>/2019/01/29/a-consumtion-function-for-brazil/</guid>
+      <guid>https://bernardo.codes/2019/01/29/a-consumtion-function-for-brazil/</guid>
       <description>The Keynesian consumption function is one of the most famous equations in macroeconomics. This post will show how it can be estimated and how we can use a simple trick to add dynamics into the system.
 A functional form for \(C_t\)A traditional representation of consumption is
 \[ C_t = \alpha + \beta_0 Y^d_t \]

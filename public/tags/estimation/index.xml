@@ -2,31 +2,31 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Estimation on Bernardo Reckziegel</title>
-    <link>/tags/estimation/</link>
+    <link>https://bernardo.codes/tags/estimation/</link>
     <description>Recent content in Estimation on Bernardo Reckziegel</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 20 Feb 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/tags/estimation/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://bernardo.codes/tags/estimation/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Portfolio Analytics in the Tidyverse</title>
-      <link>/2019/02/20/portfolio-analytics-in-the-tidyverse/</link>
+      <link>https://bernardo.codes/2019/02/20/portfolio-analytics-in-the-tidyverse/</link>
       <pubDate>Wed, 20 Feb 2019 00:00:00 +0000</pubDate>
       
-      <guid>/2019/02/20/portfolio-analytics-in-the-tidyverse/</guid>
+      <guid>https://bernardo.codes/2019/02/20/portfolio-analytics-in-the-tidyverse/</guid>
       <description>Portfolio Analytics (PA) is a well known library for portfolio optimization in R. Written before the tidyverse gain pulse, the PA package is often used in the “Base R” context. The objective of this post is to show that it can also be use inside the tidyverse (with all the power that comes with it!).
 The basic usage of portfolio Analytics can be found here. I’ll go straight to the tidy-world.</description>
     </item>
     
     <item>
       <title>A Covariance Matrix</title>
-      <link>/2018/09/08/a-covariance-matrix/</link>
+      <link>https://bernardo.codes/2018/09/08/a-covariance-matrix/</link>
       <pubDate>Sat, 08 Sep 2018 00:00:00 +0000</pubDate>
       
-      <guid>/2018/09/08/a-covariance-matrix/</guid>
+      <guid>https://bernardo.codes/2018/09/08/a-covariance-matrix/</guid>
       <description>The function bellow is a transcription from the MATLAB code done by Ledoit&amp;amp;Wolf in their work: Improved estimation of the covariance matrix of stock returns with an application to portfolio selection, which can be found here.
 If you also want to take a look on the original programming source, check the Michael’s Wolf website.
 covMarket &amp;lt;- function(x, shrink = TRUE) {# some operations work better with the matrix classif (is.</description>

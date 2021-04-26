@@ -20,7 +20,7 @@ tags:
 <p>As the <a href="https://www.nobelprize.org/prizes/economics/2003/granger/facts/">Nobel Prize Winner</a>, Clive Granger <a href="http://www.forecastingprinciples.com/paperpdf/Granger-stockmarket.pdf">states</a>: at some sense, the market must follow a random-walk, otherwise the it would be an unlimited source of money machine.</p>
 <p>Hard to disagree. On those grounds, I asked myself: how many stocks of the S&amp;P 500 show any evidence of actually following a random-walk? Is it the number high or is it low?</p>
 <p>Think of it: if it’s low, no doubt ML models can help a great deal. If not, they may be just “drying ice”.</p>
-<p>So.. how do we stand? I will do my best to address this issue along the way.</p>
+<p>So.. how do we stand?</p>
 <div id="load-libraries" class="section level2">
 <h2>Load Libraries</h2>
 <p>The required <code>R</code> packages for this experiment are:</p>
@@ -56,7 +56,7 @@ library(Quandl)</code></pre>
             gics_sub_industry = &#39;GICS Sub-Industry&#39;
         )
 }</code></pre>
-<p><code>possibly()</code>, also from <code>purrr</code>, “guarantees” the main script will run. If any error occurs, we get a <code>NA</code>, but the code still runs. A safe bet for <em>loops</em> with dozens of elements like this one.</p>
+<p><code>possibly()</code>, from <code>purrr</code>, “guarantees” the main script will run. If any error occurs, we get a <code>NA</code>, but the code still runs. A safe bet for <em>loops</em> with dozens of elements like this one.</p>
 <pre class="r"><code>tickers &lt;- get_sp500_tickers()
 tickers</code></pre>
 <pre><code>## # A tibble: 505 x 9
@@ -205,8 +205,7 @@ stocks</code></pre>
         .f = sweep::sw_glance
     )) %&gt;% 
     tidyr::unnest(glance_model) %&gt;% 
-    dplyr::ungroup() 
-stocks_to_ts_modeling</code></pre>
+    dplyr::ungroup() </code></pre>
 <p>The <code>stocks_to_ts_modeling</code> object have standard evaluation metrics, like AIC, BIC, ME, RMSE, MAE, MAPE, MASE, ACF1. Not for one stock, but for all in the S&amp;P 500 index!</p>
 <pre><code>## # A tibble: 501 x 19
 ##    ticker_symbol security   gics_sector  gics_sub_industry   data   ts     model
@@ -342,12 +341,13 @@ stocks_to_ts_modeling</code></pre>
 </tr>
 </tbody>
 </table>
-<p>For 70% of our sample, the <span class="math inline">\(ARIMA(0, 0, 0)\)</span> won the day! On top of that, an additional 10% of total number of stocks are composed by <span class="math inline">\(ARIMA(0, 0, 1)\)</span>, which also obeys the <span class="math inline">\(E_t(y_{t + 1}) = E_t(y_{t})\)</span> rule<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. The best point forecast for tomorrow is what we see in the screen today.</p>
+<p>For 70% of our sample, the <span class="math inline">\(ARIMA(0, 0, 0)\)</span> won the day! On top of that, an additional 10% of total number of stocks are composed by <span class="math inline">\(ARIMA(0, 0, 1)\)</span>, which also obeys the <span class="math inline">\(E_t(y_{t + 1}) = E_t(y_{t})\)</span> rule<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. The best point forecast for tomorrow is what we see on the screen today.</p>
 <p>Of course, a different selection criteria could yield contrasting results. But let’s keep in mind that <span class="math inline">\(AIC\)</span> actually is not the toughest penalizer. As an example, take the <a href="https://en.wikipedia.org/wiki/Bayesian_information_criterion">Bayesian Information Criterion (BIC)</a>, that’s widely known. If we calculate the partial derivatives with respect to <span class="math inline">\(k\)</span> (the number of model parameters) for both criteria, we get the following<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>:</p>
 <p><span class="math display">\[ \frac{\partial{AIC}}{\partial{k}} = 2 \]</span></p>
 <p><span class="math display">\[ \frac{\partial{BIC}}{\partial{k}} = ln(n) \]</span></p>
 <p>But <span class="math inline">\(ln(n) &gt; 2\)</span>, whenever <span class="math inline">\(n &gt; 7\)</span>. Our data definitely has more than 7 observations, so we can be pretty confident that the <span class="math inline">\(BIC\)</span> criterion would hurt overparemetrized models by even more than <span class="math inline">\(AIC\)</span> actually did. That is, <span class="math inline">\(BIC\)</span> would put even more pressure to select simple parsimonious models. In this case, the percentage of random-walks would be grater than we just found.</p>
 <p>To make it clear: returns seems to be so fluky that, for 70% of our sample, not even a single parameter was worth to attaching. That’s the market efficiency in which Granger was <a href="http://www.forecastingprinciples.com/paperpdf/Granger-stockmarket.pdf">talking about</a>. What can Machine Learning <em>algos</em> “learn” in such a case?</p>
+<p>I’m still trying to figure it out.</p>
 </div>
 <div class="footnotes">
 <hr />
