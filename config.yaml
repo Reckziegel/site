@@ -1,0 +1,47 @@
+baseurl: https://bernardo.codes/
+title: Hugo Tanka 
+author: Bernardo Reckziegel
+canonifyurls: yes
+languagecode: en
+theme: hugo-tanka
+enableEmoji: yes
+hasCJKLanguage: no
+pygmentsstyle: vs
+pygmentscodefences: yes
+ignoreFiles:
+  - \.Rmd$
+  - \.Rmarkdown$
+  - _cache$
+  - \.knit\.md$
+  - \.utf8\.md$
+params:
+  faviconfile: images/eu_favicon.png
+  highlightjs: yes
+  highlightjslanguages:
+    - r
+    - python
+    - stan
+  progressively: no
+  sitename: Bernardo Reckziegel
+  uselatex: yes
+markup:
+  goldmark:
+    renderer:
+      unsafe: yes
+menu:
+  primary:
+    - name: Home
+      url: /
+      weight: 1
+    - name: About
+      url: /about/
+      weight: 2
+    - name: GitHub
+      url: https://github.com/Reckziegel
+      weight: 3
+    - name: LinkedIn
+      url: https://www.linkedin.com/in/bernardoreckziegel/
+      weight: 4
+    - name: Twitter
+      url: https://twitter.com/ReckziegelB
+      weight: 5
