@@ -30,7 +30,7 @@ markup:
       unsafe: yes
 menu:
   primary:
-    - name: Home
+    - name: Blog
       url: /
       weight: 1
     - name: About
