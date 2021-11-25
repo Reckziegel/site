@@ -1,0 +1,108 @@
+---
+title: 'Baixando dados financeiros com "YahooTickers"'
+author: Bernardo Reckziegel
+date: '2021-11-25'
+slug: []
+categories:
+  - R package
+tags:
+  - R
+  - tidydata
+meta_img: images/tickers.png
+description: Baixe dados de diferentes bolsas mundiais de maneira rápida e eficiente
+---
+
+Hoje o meu primeiro pacote - `YahooTickers`- completa 3 anos. Nada mais justo que o post inaugural desse blog seja dedicado a ele. 
+
+Essa biblioteca foi contruida porque me dei conta que perdia muito tempo repetindo sempre as 
+mesmas tarefas. Assim, resolvi sistematizar o acesso ao API do YahooFinance. Esse API não 
+é perfeito, mas é de fácil acesso e funciona razoavelmente bem na maioria das vezes. 
+
+Se você não tem acesso a Bloomberg, Economatica ou Refinitiv é possível que esse pacote
+interesse a você.
+
+
+Para baixar a biblioteca no seu RStudio você deve utilizar o seguinte comando no console: 
+
+```{r}
+# install.packages("devtools")
+# devtools::install_github("Reckziegel/YahooTickers")
+```
+
+> OBS: O download de pacotes que não estão no [CRAN](https://cran.r-project.org/) pode ser realizado como o auxílio  do `devtools`. 
+
+Para demonstrar algumas das principais funcionalidades do `YahooTickers` utilizarei 
+como exemplo o índice Dow Jones:[^1].  
+
+```{r, message=FALSE,warning=FALSE}
+# bibliotecas necessárias
+library(YahooTickers)
+library(forecast)
+library(ggplot2)
+```
+
+Inicie selecionando os tickers do índice de referência:
+
+```{r}
+ticks <- get_tickers(dow)
+ticks
+```
+
+O próximo passo é baixarmos a ações que compôem o índice DJI:
+
+```{r, message=FALSE, warning=FALSE}
+stocks <- get_stocks(tickers = dplyr::slice_head(ticks, n = 2), periodicity = "monthly")
+stocks
+```
+
+Os dados já vem no formato `tidy` (longo), de modo a potencializar a iteratividade com o `ggplot2` e o todo o ecossistema do `tidyverse`:
+
+```{r}
+stocks |> 
+  ggplot(aes(x = date, y = adjusted, color = tickers)) + 
+  geom_line() + 
+  facet_wrap(~tickers, scales = "free_y") + 
+  scale_y_log10()
+```
+
+Caso haja interesse em levar a adiante a modelagem econométrica, o usuário pode utilizar `get_returns()` e `get_models()` em sequência:
+
+```{r}
+models <- stocks |> 
+  get_returns(.group   = tickers, 
+              .type    = arithmetic, 
+              .omit_na = TRUE, 
+              adjusted) |> 
+  get_models(.group      = tickers, 
+             .col        = adjusted, 
+             .initial    = 60, 
+             .assess     = 1, 
+             .cumulative = FALSE, 
+             .fun        = Arima, 
+             c(1, 0, 0))
+models
+```
+
+Seguindo esse workflow, o acesso das principais métricas _in-sample_ do modelo escolhido fica extremamente fácil e, assim como no gráfico de preços, a iteração com `ggplot2` é imediata:
+
+```{r, message=FALSE, warning=FALSE}
+models |> 
+  dplyr::filter(term == "ar1") |> 
+  ggplot(aes(x = date, y = estimate, color = tickers)) + 
+  geom_smooth(span = 0.10) + 
+  labs(title    = "Coeficiente Autoregressivo de Ordem 1", 
+       subtitle = "Estimação para uma janela móvel de 60 períodos")
+```
+
+É possível levar a análise ainda mais adiante analisando o a acurácia referente ao modelo adotado para cada ação individualmente. Essa operação deve ser realizada com `get_forcasts()` e `get_metrics()` em sequência: 
+
+```{r}
+models |> 
+  get_forecasts() |> 
+  get_metrics(.group = tickers, .truth = adjusted, .forecast = point_forecast)
+```
+
+
+
+[^1]: Esse índice possui apenas 30 ações e com isso os downlaods são mais rápidos. 
+Na prática, poderia ser qualquer índice que apareça aqui: https://github.com/Reckziegel/YahooTickers.
