@@ -12,7 +12,7 @@ meta_img: images/tickers.png
 description: Baixe e modele dados de diferentes bolsas mundiais de maneira rápida e eficiente
 ---
 
-Meu primeiro pacote - `YahooTickers`- recentemente completou 3 anos. Por esse motivo, o post inaugural será sobre ele. 
+Meu primeiro pacote - `YahooTickers`- recentemente completou 3 anos. Por esse motivo, o post inaugural desse blog será sobre ele. 
 
 Quando comecei a usar o R, não demorou muito para que me desse conta que estava sempre repetindo as mesmas tarefas. Assim, decidi sistematizar o acesso ao API do [YahooFinance](https://finance.yahoo.com/), o que resultou na construção do `YahooTickers`. 
 
@@ -28,7 +28,7 @@ Para baixar o`YahooTickers` no RStudio você deve utilizar o seguinte comando no
 
 <!-- > OBS: O download de pacotes que não estão no [CRAN](https://cran.r-project.org/) pode ser realizado como o auxílio  do `devtools`.  -->
 
-Demonstrarei suas principais funcionalidades usando algumas ações do índice Dow Jones.  
+Suas principais funcionalidades serão demonstradas utilizando algumas das ações do índice Dow Jones como referência:  
 
 
 ```r
@@ -38,7 +38,7 @@ library(forecast)
 library(ggplot2)
 ```
 
-Primeiro, selecione um índice (em nosso caso `dow`):
+O primeiro passo é dado com a função `get_tickers()`: 
 
 
 ```r
@@ -67,9 +67,11 @@ ticks
 ## # ... with 19 more rows
 ```
 
+O pacote (atualmente) aceita tickers de 23 índices mundiais ([aqui](https://reckziegel.github.io/YahooTickers/reference/get_tickers.html) você consegue a lista com todas opções disponíveis).
+
 <!-- Perceba que no comando acima não é necessario usar `strings` "com aspas" na função `get_tickers()`, pois toda estrutura é construída sob o conceito de `tidy eval`, o mecanismo de _data masking_ que turbina o [tidyverse](https://www.tidyverse.org/).  -->
 
-O próximo passo é fazer o download das ações que compôem esse índice de referência com `get_stocks()`:
+Com os tickers em mãos é possível se conectar ao Yahoo com a função `get_stocks()`:
 
 
 ```r
@@ -81,7 +83,7 @@ stocks
 ```
 
 ```
-## # A tibble: 1,728 x 8
+## # A tibble: 1,716 x 8
 ##    date       tickers  open  high   low close    volume adjusted
 ##    <date>     <fct>   <dbl> <dbl> <dbl> <dbl>     <dbl>    <dbl>
 ##  1 2010-01-01 MMM      83.1  85.2  79.1  80.5  75208100     58.1
@@ -94,10 +96,10 @@ stocks
 ##  8 2010-08-01 MMM      86.8  88.4  78.4  78.6  74721100     57.4
 ##  9 2010-09-01 MMM      79.5  88    79.3  86.7  64059700     63.8
 ## 10 2010-10-01 MMM      87.4  91.5  83.8  84.2  82038100     61.9
-## # ... with 1,718 more rows
+## # ... with 1,706 more rows
 ```
 
-Os dados já vem no formato `tidy` (formato-longo), de modo a potencializar a iteratividade com o `ggplot2` e o todo o ecossistema do `tidyverse`. Veja:
+Os dados já vem no formato `tidy` (longo), de modo a potencializar a iteratividade com o `ggplot2` e o todo o ecossistema do `tidyverse`. Veja:
 
 
 ```r
@@ -126,13 +128,13 @@ models <- stocks |>
              .initial    = 60, 
              .assess     = 1, 
              .cumulative = FALSE, 
-             .fun        = Arima, 
+             .fun        = Arima, # Função Arima do pacote `forecast`
              c(1, 0, 0)) # modelo auto-regressivo
 models
 ```
 
 ```
-## # A tibble: 1,992 x 17
+## # A tibble: 1,968 x 17
 ##    date       tickers data   term  estimate model.desc  sigma logLik   AIC   BIC
 ##    <date>     <fct>   <list> <fct>    <dbl> <fct>       <dbl>  <dbl> <dbl> <dbl>
 ##  1 2015-02-01 MMM     <tibb~ ar1    -0.217  ARIMA(1,0~ 0.0489   97.0 -188. -182.
@@ -145,7 +147,7 @@ models
 ##  8 2015-05-01 MMM     <tibb~ inte~   0.0133 ARIMA(1,0~ 0.0495   96.2 -186. -180.
 ##  9 2015-06-01 MMM     <tibb~ ar1    -0.209  ARIMA(1,0~ 0.0469   99.5 -193. -187.
 ## 10 2015-06-01 MMM     <tibb~ inte~   0.0149 ARIMA(1,0~ 0.0469   99.5 -193. -187.
-## # ... with 1,982 more rows, and 7 more variables: ME <dbl>, RMSE <dbl>,
+## # ... with 1,958 more rows, and 7 more variables: ME <dbl>, RMSE <dbl>,
 ## #   MAE <dbl>, MPE <dbl>, MAPE <dbl>, MASE <dbl>, ACF1 <dbl>
 ```
 
@@ -178,7 +180,7 @@ models |>
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-8-1.png" width="672" />
 
-Em alguns casos, as métricas _in sample_ não são tão relevantes. Nessas ocasiões, é necessário analisar a qualidade do modelo de outras formas.  Se o objetivo da análise for previsão, `Yahootickers` oferece a dobradinha `get_forecast()` e `get_metrics()` para avaliação dos erros _pseudo-fora da amostra_:   
+Em alguns casos, as métricas _in sample_ não são tão relevantes. Nessas ocasiões, é necessário analisar a qualidade do modelo de outras maneiras.  Se o objetivo da análise estiver associado a previsão, `Yahootickers` oferece a dobradinha `get_forecast()` e `get_metrics()` para avaliação dos erros _pseudo-fora da amostra_:   
 
 
 ```r
@@ -192,20 +194,20 @@ metrics
 
 ```
 ## # A tibble: 12 x 6
-##    tickers     mse   rmse    mae  mape    mase
-##    <fct>     <dbl>  <dbl>  <dbl> <dbl>   <dbl>
-##  1 MMM     0.00300 0.0548 0.0411  121.  0.0853
-##  2 AXP     0.00499 0.0706 0.0467  Inf   0.223 
-##  3 AMGN    0.00472 0.0687 0.0530  130.  0.0924
-##  4 AAPL    0.00665 0.0816 0.0680  378.  0.198 
-##  5 BA      0.0121  0.110  0.0755  Inf   0.142 
-##  6 CAT     0.00557 0.0746 0.0607  Inf   0.127 
-##  7 CVX     0.00588 0.0767 0.0543  171.  0.240 
-##  8 CSCO    0.00465 0.0682 0.0529  Inf   1.97  
-##  9 KO      0.00214 0.0463 0.0347  Inf   2.57  
-## 10 GS      0.00679 0.0824 0.0634  Inf   0.168 
-## 11 HD      0.00363 0.0602 0.0470  Inf  16.3   
-## 12 HON     0.00311 0.0557 0.0397  615.  0.355
+##    tickers     mse   rmse    mae  mape   mase
+##    <fct>     <dbl>  <dbl>  <dbl> <dbl>  <dbl>
+##  1 MMM     0.00304 0.0551 0.0416  122. 0.0857
+##  2 AXP     0.00505 0.0710 0.0470  138. 0.206 
+##  3 AMGN    0.00478 0.0691 0.0537  131. 0.0938
+##  4 AAPL    0.00672 0.0820 0.0684  354. 0.182 
+##  5 BA      0.0123  0.111  0.0763  224. 0.148 
+##  6 CAT     0.00563 0.0750 0.0612  118. 0.123 
+##  7 CVX     0.00595 0.0771 0.0549  173. 0.247 
+##  8 CSCO    0.00470 0.0686 0.0534  133. 1.26  
+##  9 KO      0.00217 0.0466 0.0350  114. 1.53  
+## 10 GS      0.00687 0.0829 0.0640  108. 0.163 
+## 11 HD      0.00367 0.0606 0.0473  514. 2.31  
+## 12 HON     0.00314 0.0561 0.0401  621. 0.394
 ```
 
 Perceba que, mais uma vez, a utilização do `ggplot2` é imediata:
@@ -234,12 +236,14 @@ Enfim, o pacote possui uma estrutura bem delineada que funciona da seguinte form
 #   get_metrics()
 ```
 
-Obviamente, ele não foi desenvolvido para análises muito complexas, __a principal função é coletar dados e fazer a "coisa acontecer" rápido__, sem `for loops` e de maneira que as pessoas entendam o que está acontecendo (_human readable_).
+Obviamente, não foi desenvolvido para análises muito complexas, __a principal função é coletar dados e fazer a coisa acontecer "rápido"__, sem `for loops` e em um formato _human readable_.
 
-Atualmente, o pacote suporta até 26 bolsas mundiais. Mas... como nem tudo é perfeito, a detecção de quais ações compôem quais índices é um processo relativamente complicado, que envolve _web scrapping_ de sites públicos, em constante transformação. 
+Como mencionado anteriormente, o pacote _atualmente_ suporta até 23 bolsas mundiais, mas como nem tudo é perfeito, a detecção de quais ações compôem quais índices é um processo relativamente complicado, que envolve _web scrapping_ de sites públicos, em constante transformação. Com isso, o código as vezes quebra. 
 
-Faço meu melhor para manter aquilo que já foi produzido sempre funcionando e foi assim que essa bibiliteca sobreviveu ao longo dos últimos 3 anos. 
+Faço o melhor para manter aquilo que já foi produzido sempre funcionando e foi assim que essa bibiliteca sobreviveu ao longo dos últimos 3 anos. Em relação a esse ponto, não há segredo: quanto mais pessoas utilizarem o API, maior o _accountability_ e mais rápido futuros erros poderão ser corrigidos.
 
-Por fim, se você chegou até aqui, talvez tenha interesse em olhar a página de referência, onde encontrará documentação detalhada das funções de utilizadas nesse post: https://reckziegel.github.io/YahooTickers/. 
+Por fim, se você chegou até aqui, talvez tenha interesse em olhar a documentação, onde é possível checar com mais detalhe todas as funções de utilizadas nesse post: https://reckziegel.github.io/YahooTickers/. 
+
+
 
 Por hoje é isso e _happy-modeling_!

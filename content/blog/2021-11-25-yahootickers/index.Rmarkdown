@@ -12,7 +12,7 @@ meta_img: images/tickers.png
 description: Baixe e modele dados de diferentes bolsas mundiais de maneira rápida e eficiente
 ---
 
-Meu primeiro pacote - `YahooTickers`- recentemente completou 3 anos. Por esse motivo, o post inaugural será sobre ele. 
+Meu primeiro pacote - `YahooTickers`- recentemente completou 3 anos. Por esse motivo, o post inaugural desse blog será sobre ele. 
 
 Quando comecei a usar o R, não demorou muito para que me desse conta que estava sempre repetindo as mesmas tarefas. Assim, decidi sistematizar o acesso ao API do [YahooFinance](https://finance.yahoo.com/), o que resultou na construção do `YahooTickers`. 
 
@@ -27,7 +27,7 @@ Para baixar o`YahooTickers` no RStudio você deve utilizar o seguinte comando no
 
 <!-- > OBS: O download de pacotes que não estão no [CRAN](https://cran.r-project.org/) pode ser realizado como o auxílio  do `devtools`.  -->
 
-Demonstrarei suas principais funcionalidades usando algumas ações do índice Dow Jones.  
+Suas principais funcionalidades serão demonstradas utilizando algumas das ações do índice Dow Jones como referência:  
 
 ```{r, message=FALSE,warning=FALSE}
 # bibliotecas necessárias
@@ -36,7 +36,7 @@ library(forecast)
 library(ggplot2)
 ```
 
-Primeiro, selecione um índice (em nosso caso `dow`):
+O primeiro passo é dado com a função `get_tickers()`: 
 
 ```{r}
 ticks <- get_tickers(dow)
@@ -47,9 +47,11 @@ ticks <- ticks |>
 ticks
 ```
 
+O pacote (atualmente) aceita tickers de 23 índices mundiais ([aqui](https://reckziegel.github.io/YahooTickers/reference/get_tickers.html) você consegue a lista com todas opções disponíveis).
+
 <!-- Perceba que no comando acima não é necessario usar `strings` "com aspas" na função `get_tickers()`, pois toda estrutura é construída sob o conceito de `tidy eval`, o mecanismo de _data masking_ que turbina o [tidyverse](https://www.tidyverse.org/).  -->
 
-O próximo passo é fazer o download das ações que compôem esse índice de referência com `get_stocks()`:
+Com os tickers em mãos é possível se conectar ao Yahoo com a função `get_stocks()`:
 
 ```{r, message=FALSE, warning=FALSE}
 stocks <- ticks |> 
@@ -59,7 +61,7 @@ stocks <- ticks |>
 stocks
 ```
 
-Os dados já vem no formato `tidy` (formato-longo), de modo a potencializar a iteratividade com o `ggplot2` e o todo o ecossistema do `tidyverse`. Veja:
+Os dados já vem no formato `tidy` (longo), de modo a potencializar a iteratividade com o `ggplot2` e o todo o ecossistema do `tidyverse`. Veja:
 
 ```{r, fig.align='center'}
 stocks |> 
@@ -84,7 +86,7 @@ models <- stocks |>
              .initial    = 60, 
              .assess     = 1, 
              .cumulative = FALSE, 
-             .fun        = Arima, 
+             .fun        = Arima, # Função Arima do pacote `forecast`
              c(1, 0, 0)) # modelo auto-regressivo
 models
 ```
@@ -112,7 +114,7 @@ models |>
        subtitle = "Estimação para dados mensais em uma janela móvel de 60 períodos")
 ```
 
-Em alguns casos, as métricas _in sample_ não são tão relevantes. Nessas ocasiões, é necessário analisar a qualidade do modelo de outras formas.  Se o objetivo da análise for previsão, `Yahootickers` oferece a dobradinha `get_forecast()` e `get_metrics()` para avaliação dos erros _pseudo-fora da amostra_:   
+Em alguns casos, as métricas _in sample_ não são tão relevantes. Nessas ocasiões, é necessário analisar a qualidade do modelo de outras maneiras.  Se o objetivo da análise estiver associado a previsão, `Yahootickers` oferece a dobradinha `get_forecast()` e `get_metrics()` para avaliação dos erros _pseudo-fora da amostra_:   
 
 ```{r}
 metrics <- models |> 
@@ -145,12 +147,14 @@ Enfim, o pacote possui uma estrutura bem delineada que funciona da seguinte form
 #   get_metrics()
 ```
 
-Obviamente, ele não foi desenvolvido para análises muito complexas, __a principal função é coletar dados e fazer a "coisa acontecer" rápido__, sem `for loops` e de maneira que as pessoas entendam o que está acontecendo (_human readable_).
+Obviamente, não foi desenvolvido para análises muito complexas, __a principal função é coletar dados e fazer a coisa acontecer "rápido"__, sem `for loops` e em um formato _human readable_.
 
-Atualmente, o pacote suporta até 26 bolsas mundiais. Mas... como nem tudo é perfeito, a detecção de quais ações compôem quais índices é um processo relativamente complicado, que envolve _web scrapping_ de sites públicos, em constante transformação. 
+Como mencionado anteriormente, o pacote _atualmente_ suporta até 23 bolsas mundiais, mas como nem tudo é perfeito, a detecção de quais ações compôem quais índices é um processo relativamente complicado, que envolve _web scrapping_ de sites públicos, em constante transformação. Com isso, o código as vezes quebra. 
 
-Faço meu melhor para manter aquilo que já foi produzido sempre funcionando e foi assim que essa bibiliteca sobreviveu ao longo dos últimos 3 anos. 
+Faço o melhor para manter aquilo que já foi produzido sempre funcionando e foi assim que essa bibiliteca sobreviveu ao longo dos últimos 3 anos. Em relação a esse ponto, não há segredo: quanto mais pessoas utilizarem o API, maior o _accountability_ e mais rápido futuros erros poderão ser corrigidos.
 
-Por fim, se você chegou até aqui, talvez tenha interesse em olhar a página de referência, onde encontrará documentação detalhada das funções de utilizadas nesse post: https://reckziegel.github.io/YahooTickers/. 
+Por fim, se você chegou até aqui, talvez tenha interesse em olhar a documentação, onde é possível checar com mais detalhe todas as funções de utilizadas nesse post: https://reckziegel.github.io/YahooTickers/. 
+
+
 
 Por hoje é isso e _happy-modeling_!
