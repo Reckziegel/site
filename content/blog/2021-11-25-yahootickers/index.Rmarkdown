@@ -16,7 +16,7 @@ Meu primeiro pacote - `YahooTickers`- recentemente completou 3 anos. Por esse mo
 
 Quando comecei a usar o R, não demorou muito para que me desse conta que estava sempre repetindo as mesmas tarefas. Assim, decidi sistematizar o acesso ao API do [YahooFinance](https://finance.yahoo.com/), o que resultou na construção do `YahooTickers`. 
 
-O API do Yahoo não é perfeito, mas é simples e funciona razoavelmente bem. Se você programa com frequência e não tem acesso a Bloomberg, Economatica ou Refinitiv é possível que esse pacote interesse a você.
+O API do Yahoo não é perfeito, mas funciona bem e é razoavelmente simples. Se você programa com frequência e não tem acesso a Bloomberg, Economatica ou Refinitiv é possível que esse pacote interesse a você.
 
 Para baixar o`YahooTickers` no RStudio você deve utilizar o seguinte comando no console: 
 
@@ -27,18 +27,14 @@ Para baixar o`YahooTickers` no RStudio você deve utilizar o seguinte comando no
 
 <!-- > OBS: O download de pacotes que não estão no [CRAN](https://cran.r-project.org/) pode ser realizado como o auxílio  do `devtools`.  -->
 
-Suas principais funcionalidades serão demonstradas utilizando algumas das ações do índice Dow Jones como referência:  
+Suas principais funcionalidades serão demonstradas utilizando algumas ações do índice Dow Jones como referência:  
 
 ```{r, message=FALSE,warning=FALSE}
 # bibliotecas necessárias
 library(YahooTickers)
 library(forecast)
 library(ggplot2)
-```
 
-O primeiro passo é dado com a função `get_tickers()`: 
-
-```{r}
 ticks <- get_tickers(dow)
 ticks <- ticks |> 
   dplyr::filter(tickers != "DOW") # essa ação possui histórico relativamente curto
@@ -114,7 +110,7 @@ models |>
        subtitle = "Estimação para dados mensais em uma janela móvel de 60 períodos")
 ```
 
-Em alguns casos, as métricas _in sample_ não são tão relevantes. Nessas ocasiões, é necessário analisar a qualidade do modelo de outras maneiras.  Se o objetivo da análise estiver associado a previsão, `Yahootickers` oferece a dobradinha `get_forecast()` e `get_metrics()` para avaliação dos erros _pseudo-fora da amostra_:   
+Em alguns casos, as métricas _in sample_ não são tão relevantes. Nessas ocasiões, é necessário analisar a qualidade do modelo de outras maneiras.  Se o objetivo da análise for previsão, `Yahootickers` oferece a dobradinha `get_forecast()` e `get_metrics()` para avaliação dos erros _pseudo-fora da amostra_:   
 
 ```{r}
 metrics <- models |> 
@@ -147,13 +143,13 @@ Enfim, o pacote possui uma estrutura bem delineada que funciona da seguinte form
 #   get_metrics()
 ```
 
-Obviamente, não foi desenvolvido para análises muito complexas, __a principal função é coletar dados e fazer a coisa acontecer "rápido"__, sem `for loops` e em um formato _human readable_.
+Obviamente, o API não foi desenvolvido para análises muito complexas, __a principal função é coletar dados e fazer a coisa acontecer rápidamente__, sem `for loops` e em um formato _human readable_.
 
-Como mencionado anteriormente, o pacote _atualmente_ suporta até 23 bolsas mundiais, mas como nem tudo é perfeito, a detecção de quais ações compôem quais índices é um processo relativamente complicado, que envolve _web scrapping_ de sites públicos, em constante transformação. Com isso, o código as vezes quebra. 
+Como mencionado anteriormente, o pacote _atualmente_ suporta até 23 bolsas mundiais, mas como nem tudo é perfeito, a detecção de quais ações compôem quais índices é um processo complicado, que envolve _web scrapping_ de sites públicos, em constante transformação. Com isso, o código as vezes quebra. 
 
-Faço o melhor para manter aquilo que já foi produzido sempre funcionando e foi assim que essa bibiliteca sobreviveu ao longo dos últimos 3 anos. Em relação a esse ponto, não há segredo: quanto mais pessoas utilizarem o API, maior o _accountability_ e mais rápido futuros erros poderão ser corrigidos.
+Sobre esse ponto, gostaria de mencionar que faço meu melhor para manter aquilo que já foi produzido sempre funcionando e foi assim que essa bibiliteca sobreviveu ao longo dos últimos 3 anos. Não há segredo: quanto mais pessoas utilizarem o API, maior o _accountability_ e mais rápido futuros erros poderão ser corrigidos.
 
-Por fim, se você chegou até aqui, talvez tenha interesse em olhar a documentação, onde é possível checar com mais detalhe todas as funções de utilizadas nesse post: https://reckziegel.github.io/YahooTickers/. 
+Por fim, se você chegou até aqui, talvez tenha interesse em olhar a documentação, onde é possível checar em maior nível de detalhe as funções de utilizadas nesse post: https://reckziegel.github.io/YahooTickers/. 
 
 
 

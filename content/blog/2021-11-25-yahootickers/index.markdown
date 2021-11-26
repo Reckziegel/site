@@ -16,7 +16,7 @@ Meu primeiro pacote - `YahooTickers`- recentemente completou 3 anos. Por esse mo
 
 Quando comecei a usar o R, não demorou muito para que me desse conta que estava sempre repetindo as mesmas tarefas. Assim, decidi sistematizar o acesso ao API do [YahooFinance](https://finance.yahoo.com/), o que resultou na construção do `YahooTickers`. 
 
-O API do Yahoo não é perfeito, mas é simples e funciona razoavelmente bem. Se você programa com frequência e não tem acesso a Bloomberg, Economatica ou Refinitiv é possível que esse pacote interesse a você.
+O API do Yahoo não é perfeito, mas funciona bem e é razoavelmente simples. Se você programa com frequência e não tem acesso a Bloomberg, Economatica ou Refinitiv é possível que esse pacote interesse a você.
 
 Para baixar o`YahooTickers` no RStudio você deve utilizar o seguinte comando no console: 
 
@@ -28,7 +28,7 @@ Para baixar o`YahooTickers` no RStudio você deve utilizar o seguinte comando no
 
 <!-- > OBS: O download de pacotes que não estão no [CRAN](https://cran.r-project.org/) pode ser realizado como o auxílio  do `devtools`.  -->
 
-Suas principais funcionalidades serão demonstradas utilizando algumas das ações do índice Dow Jones como referência:  
+Suas principais funcionalidades serão demonstradas utilizando algumas ações do índice Dow Jones como referência:  
 
 
 ```r
@@ -36,12 +36,7 @@ Suas principais funcionalidades serão demonstradas utilizando algumas das açõ
 library(YahooTickers)
 library(forecast)
 library(ggplot2)
-```
 
-O primeiro passo é dado com a função `get_tickers()`: 
-
-
-```r
 ticks <- get_tickers(dow)
 ticks <- ticks |> 
   dplyr::filter(tickers != "DOW") # essa ação possui histórico relativamente curto
@@ -112,7 +107,7 @@ stocks |>
        subtitle = "2010-2021")
 ```
 
-<img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" />
+<img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" />
 
 Caso haja interesse em levar a adiante a modelagem econométrica, o usuário tem a opção de utilizar `get_returns()` e `get_models()` em sequência:
 
@@ -164,7 +159,7 @@ models |>
        subtitle = "Estimação para dados mensais em uma janela móvel de 60 períodos")
 ```
 
-<img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" />
+<img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" />
 
 Para analisar o comportamento de outras métricas, o processo é semelhante. Por exemplo, o ponto de ótimo da máxima verossimilhança em cada instante do tempo pode ser visto com o comando:
 
@@ -178,9 +173,9 @@ models |>
        subtitle = "Estimação para dados mensais em uma janela móvel de 60 períodos")
 ```
 
-<img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-8-1.png" width="672" />
+<img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-7-1.png" width="672" />
 
-Em alguns casos, as métricas _in sample_ não são tão relevantes. Nessas ocasiões, é necessário analisar a qualidade do modelo de outras maneiras.  Se o objetivo da análise estiver associado a previsão, `Yahootickers` oferece a dobradinha `get_forecast()` e `get_metrics()` para avaliação dos erros _pseudo-fora da amostra_:   
+Em alguns casos, as métricas _in sample_ não são tão relevantes. Nessas ocasiões, é necessário analisar a qualidade do modelo de outras maneiras.  Se o objetivo da análise for previsão, `Yahootickers` oferece a dobradinha `get_forecast()` e `get_metrics()` para avaliação dos erros _pseudo-fora da amostra_:   
 
 
 ```r
@@ -199,7 +194,7 @@ metrics
 ##  1 MMM     0.00304 0.0551 0.0416  122. 0.0857
 ##  2 AXP     0.00505 0.0710 0.0470  138. 0.206 
 ##  3 AMGN    0.00478 0.0691 0.0537  131. 0.0938
-##  4 AAPL    0.00672 0.0820 0.0684  354. 0.182 
+##  4 AAPL    0.00672 0.0820 0.0684  355. 0.182 
 ##  5 BA      0.0123  0.111  0.0763  224. 0.148 
 ##  6 CAT     0.00563 0.0750 0.0612  118. 0.123 
 ##  7 CVX     0.00595 0.0771 0.0549  173. 0.247 
@@ -207,7 +202,7 @@ metrics
 ##  9 KO      0.00217 0.0466 0.0350  114. 1.53  
 ## 10 GS      0.00687 0.0829 0.0640  108. 0.163 
 ## 11 HD      0.00367 0.0606 0.0473  514. 2.31  
-## 12 HON     0.00314 0.0561 0.0401  621. 0.394
+## 12 HON     0.00314 0.0561 0.0401  620. 0.394
 ```
 
 Perceba que, mais uma vez, a utilização do `ggplot2` é imediata:
@@ -222,7 +217,7 @@ metrics |>
        subtitle = "Estimação para dados mensais em uma janela móvel de 60 períodos")
 ```
 
-<img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-10-1.png" width="672" />
+<img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-9-1.png" width="672" />
 
 Enfim, o pacote possui uma estrutura bem delineada que funciona da seguinte forma:
 
@@ -236,13 +231,13 @@ Enfim, o pacote possui uma estrutura bem delineada que funciona da seguinte form
 #   get_metrics()
 ```
 
-Obviamente, não foi desenvolvido para análises muito complexas, __a principal função é coletar dados e fazer a coisa acontecer "rápido"__, sem `for loops` e em um formato _human readable_.
+Obviamente, o API não foi desenvolvido para análises muito complexas, __a principal função é coletar dados e fazer a coisa acontecer rápidamente__, sem `for loops` e em um formato _human readable_.
 
-Como mencionado anteriormente, o pacote _atualmente_ suporta até 23 bolsas mundiais, mas como nem tudo é perfeito, a detecção de quais ações compôem quais índices é um processo relativamente complicado, que envolve _web scrapping_ de sites públicos, em constante transformação. Com isso, o código as vezes quebra. 
+Como mencionado anteriormente, o pacote _atualmente_ suporta até 23 bolsas mundiais, mas como nem tudo é perfeito, a detecção de quais ações compôem quais índices é um processo complicado, que envolve _web scrapping_ de sites públicos, em constante transformação. Com isso, o código as vezes quebra. 
 
-Faço o melhor para manter aquilo que já foi produzido sempre funcionando e foi assim que essa bibiliteca sobreviveu ao longo dos últimos 3 anos. Em relação a esse ponto, não há segredo: quanto mais pessoas utilizarem o API, maior o _accountability_ e mais rápido futuros erros poderão ser corrigidos.
+Sobre esse ponto, gostaria de mencionar que faço meu melhor para manter aquilo que já foi produzido sempre funcionando e foi assim que essa bibiliteca sobreviveu ao longo dos últimos 3 anos. Não há segredo: quanto mais pessoas utilizarem o API, maior o _accountability_ e mais rápido futuros erros poderão ser corrigidos.
 
-Por fim, se você chegou até aqui, talvez tenha interesse em olhar a documentação, onde é possível checar com mais detalhe todas as funções de utilizadas nesse post: https://reckziegel.github.io/YahooTickers/. 
+Por fim, se você chegou até aqui, talvez tenha interesse em olhar a documentação, onde é possível checar em maior nível de detalhe as funções de utilizadas nesse post: https://reckziegel.github.io/YahooTickers/. 
 
 
 

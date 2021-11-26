@@ -23,7 +23,7 @@ Projetos _estáveis_ no [Github](https://github.com/):
 
 - [tcopula](https://reckziegel.github.io/tcopula/): Um algoritmo para estimação via Máxima Verossimilhança de estruturas de correlação isotrópicas. 
 
-- [ShadowRates](https://reckziegel.github.io/ShadowRates/): Uma transformação _a la Merton_ para que econometristas trabalhem com taxas de juros negativas. 
+- [ShadowRates](https://reckziegel.github.io/ShadowRates/): Uma transformação _a la Merton_ para que econometristas consigam trabalhar com taxas de juros negativas. 
 
 <hr/>
 
