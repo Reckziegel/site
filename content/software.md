@@ -29,6 +29,6 @@ Projetos _estáveis_ no [Github](https://github.com/):
 
 Projetos em _desenvolvimento_: 
 
-- [DynamicStrategies](https://reckziegel.github.io/DynamicStrategies/): Simulações de estratégias dinâmicas para construção de portfólios côncavos e convexos. 
+- [DynamicStrategies](https://reckziegel.github.io/DynamicStrategies/): Simulações de estratégias dinâmicas para que portfolio managers adicionem concavidade e convexidade ao P&L.
 
 - [aqqr](https://reckziegel.github.io/aqrr/): Download dos dados gentilmente disponibilizados pela [AQR Capital Management](https://www.aqr.com/) direto para o R. 
