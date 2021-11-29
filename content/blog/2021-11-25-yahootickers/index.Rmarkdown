@@ -1,5 +1,5 @@
 ---
-title: 'Baixando dados financeiros com YahooTickers'
+title: 'Download de dados financeiros com YahooTickers'
 author: Bernardo Reckziegel
 date: '2021-11-25'
 slug: []
@@ -149,8 +149,6 @@ Como mencionado anteriormente, o pacote _atualmente_ suporta até 23 bolsas mund
 
 Sobre esse ponto, gostaria de mencionar que faço meu melhor para manter aquilo que já foi produzido sempre funcionando e foi assim que essa bibiliteca sobreviveu ao longo dos últimos 3 anos. Não há segredo: quanto mais pessoas utilizarem o API, maior o _accountability_ e mais rápido futuros erros poderão ser corrigidos.
 
-Por fim, se você chegou até aqui, talvez tenha interesse em olhar a documentação, onde é possível checar em maior nível de detalhe as funções de utilizadas nesse post: https://reckziegel.github.io/YahooTickers/. 
-
-
+Por fim, se você chegou até aqui, talvez tenha interesse em olhar a documentação, onde é possível checar em maior nível de detalhe as funções utilizadas nesse post: https://reckziegel.github.io/YahooTickers/. 
 
 Por hoje é isso e _happy-modeling_!

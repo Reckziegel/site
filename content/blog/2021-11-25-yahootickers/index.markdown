@@ -1,5 +1,5 @@
 ---
-title: 'Baixando dados financeiros com YahooTickers'
+title: 'Download de dados financeiros com YahooTickers'
 author: Bernardo Reckziegel
 date: '2021-11-25'
 slug: []
@@ -78,7 +78,7 @@ stocks
 ```
 
 ```
-## # A tibble: 1,716 x 8
+## # A tibble: 1,728 x 8
 ##    date       tickers  open  high   low close    volume adjusted
 ##    <date>     <fct>   <dbl> <dbl> <dbl> <dbl>     <dbl>    <dbl>
 ##  1 2010-01-01 MMM      83.1  85.2  79.1  80.5  75208100     58.1
@@ -91,7 +91,7 @@ stocks
 ##  8 2010-08-01 MMM      86.8  88.4  78.4  78.6  74721100     57.4
 ##  9 2010-09-01 MMM      79.5  88    79.3  86.7  64059700     63.8
 ## 10 2010-10-01 MMM      87.4  91.5  83.8  84.2  82038100     61.9
-## # ... with 1,706 more rows
+## # ... with 1,718 more rows
 ```
 
 Os dados já vem no formato `tidy` (longo), de modo a potencializar a iteratividade com o `ggplot2` e o todo o ecossistema do `tidyverse`. Veja:
@@ -129,7 +129,7 @@ models
 ```
 
 ```
-## # A tibble: 1,968 x 17
+## # A tibble: 1,992 x 17
 ##    date       tickers data   term  estimate model.desc  sigma logLik   AIC   BIC
 ##    <date>     <fct>   <list> <fct>    <dbl> <fct>       <dbl>  <dbl> <dbl> <dbl>
 ##  1 2015-02-01 MMM     <tibb~ ar1    -0.217  ARIMA(1,0~ 0.0489   97.0 -188. -182.
@@ -142,7 +142,7 @@ models
 ##  8 2015-05-01 MMM     <tibb~ inte~   0.0133 ARIMA(1,0~ 0.0495   96.2 -186. -180.
 ##  9 2015-06-01 MMM     <tibb~ ar1    -0.209  ARIMA(1,0~ 0.0469   99.5 -193. -187.
 ## 10 2015-06-01 MMM     <tibb~ inte~   0.0149 ARIMA(1,0~ 0.0469   99.5 -193. -187.
-## # ... with 1,958 more rows, and 7 more variables: ME <dbl>, RMSE <dbl>,
+## # ... with 1,982 more rows, and 7 more variables: ME <dbl>, RMSE <dbl>,
 ## #   MAE <dbl>, MPE <dbl>, MAPE <dbl>, MASE <dbl>, ACF1 <dbl>
 ```
 
@@ -191,18 +191,18 @@ metrics
 ## # A tibble: 12 x 6
 ##    tickers     mse   rmse    mae  mape   mase
 ##    <fct>     <dbl>  <dbl>  <dbl> <dbl>  <dbl>
-##  1 MMM     0.00304 0.0551 0.0416  122. 0.0857
-##  2 AXP     0.00505 0.0710 0.0470  138. 0.206 
-##  3 AMGN    0.00478 0.0691 0.0537  131. 0.0938
-##  4 AAPL    0.00672 0.0820 0.0684  355. 0.182 
-##  5 BA      0.0123  0.111  0.0763  224. 0.148 
-##  6 CAT     0.00563 0.0750 0.0612  118. 0.123 
-##  7 CVX     0.00595 0.0771 0.0549  173. 0.247 
-##  8 CSCO    0.00470 0.0686 0.0534  133. 1.26  
-##  9 KO      0.00217 0.0466 0.0350  114. 1.53  
-## 10 GS      0.00687 0.0829 0.0640  108. 0.163 
-## 11 HD      0.00367 0.0606 0.0473  514. 2.31  
-## 12 HON     0.00314 0.0561 0.0401  620. 0.394
+##  1 MMM     0.00301 0.0549 0.0412  120. 0.0836
+##  2 AXP     0.00514 0.0717 0.0477  Inf  0.380 
+##  3 AMGN    0.00473 0.0688 0.0532  129. 0.0905
+##  4 AAPL    0.00662 0.0814 0.0675  377. 0.218 
+##  5 BA      0.0122  0.110  0.0762  Inf  0.130 
+##  6 CAT     0.00559 0.0747 0.0612  Inf  0.140 
+##  7 CVX     0.00588 0.0767 0.0542  225. 0.267 
+##  8 CSCO    0.00466 0.0682 0.0531  Inf  4.63  
+##  9 KO      0.00217 0.0466 0.0350  Inf  2.16  
+## 10 GS      0.00683 0.0826 0.0637  Inf  0.180 
+## 11 HD      0.00358 0.0599 0.0467  Inf  1.68  
+## 12 HON     0.00313 0.0560 0.0399  616. 0.307
 ```
 
 Perceba que, mais uma vez, a utilização do `ggplot2` é imediata:
@@ -231,14 +231,12 @@ Enfim, o pacote possui uma estrutura bem delineada que funciona da seguinte form
 #   get_metrics()
 ```
 
-Obviamente, o API não foi desenvolvido para análises muito complexas, __a principal função é coletar dados e fazer a coisa acontecer rápidamente__, sem `for loops` e em um formato _human readable_.
+Obviamente, o API não foi desenvolvido para análises muito complexas, __a principal função é coletar dados e fazer a coisa acontecer rapidamente__, sem `for loops` e em um formato _human readable_.
 
 Como mencionado anteriormente, o pacote _atualmente_ suporta até 23 bolsas mundiais, mas como nem tudo é perfeito, a detecção de quais ações compôem quais índices é um processo complicado, que envolve _web scrapping_ de sites públicos, em constante transformação. Com isso, o código as vezes quebra. 
 
 Sobre esse ponto, gostaria de mencionar que faço meu melhor para manter aquilo que já foi produzido sempre funcionando e foi assim que essa bibiliteca sobreviveu ao longo dos últimos 3 anos. Não há segredo: quanto mais pessoas utilizarem o API, maior o _accountability_ e mais rápido futuros erros poderão ser corrigidos.
 
-Por fim, se você chegou até aqui, talvez tenha interesse em olhar a documentação, onde é possível checar em maior nível de detalhe as funções de utilizadas nesse post: https://reckziegel.github.io/YahooTickers/. 
-
-
+Por fim, se você chegou até aqui, talvez tenha interesse em olhar a documentação, onde é possível checar em maior nível de detalhe as funções utilizadas nesse post: https://reckziegel.github.io/YahooTickers/. 
 
 Por hoje é isso e _happy-modeling_!
