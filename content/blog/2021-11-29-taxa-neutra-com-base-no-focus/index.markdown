@@ -14,7 +14,7 @@ meta_img: images/image.png
 description: Description for the page
 ---
 
-O post de hoje é relativamente simples. O objetivo é _aproximar_ o resultado apresentado pelo BC no box [Proxy da taxa de juros estrutural implícita nas expectativas da pesquisa Focus](https://www.bcb.gov.br/content/ri/relatorioinflacao/201912/ri201912b9p.pdf) do RTI de 2019.
+O post de hoje é simples. O objetivo é _aproximar_ o resultado apresentado pelo BC no box [Proxy da taxa de juros estrutural implícita nas expectativas da pesquisa Focus](https://www.bcb.gov.br/content/ri/relatorioinflacao/201912/ri201912b9p.pdf) (RTI de 2019).
 
 Abaixo os pacotes utilizados:
 
@@ -27,7 +27,7 @@ library(rbcb)
 library(tidyverse)
 ```
 
-> Como o `rbcb` não está no [CRAN](https://cran.r-project.org/) você deve usar o pacote `devtools` para baixá-lo via github.
+> Como o `rbcb` não está no [CRAN](https://cran.r-project.org/) você deve usar o pacote `devtools` realizar o download diretamente do github.
 
 Começamos coletando as expectativas para o IPCA 12 meses à frente e também a SELIC projetada pelos players TOP5 do relatório Focus: 
 
@@ -54,7 +54,7 @@ selic_filtered <- selic |>
     select(date, selic_median = median)
 ```
 
-Em seguida, junta-se ambas pela data e consolida-se a mediana das expectativas para taxa de juros real _em cada ponto do tempo_ com `summarise()`:
+Em seguida, junta-se ambas pela data e consolida-se a mediana das expectativas para taxa de juros real _em cada ponto do tempo_:
 
 
 ```r
@@ -104,7 +104,5 @@ real_rate_expectations |>
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-5-1.png" width="672" />
 
 As últimas informações disponíveis apontam para uma taxa de juros real de médio-prazo em torno de `\(3.50\%\)`. Adicionando-se a inflação esperada para 2022 (atualmente em volta de `\(5\%\)`) chega-se a uma SELIC neutra de `\(8.50\%\)`. 
-
-Acho que é mais um menos por ai. Um pouco para mais, um pouco para menos.
 
 Eu disse que era simples!
