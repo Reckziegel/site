@@ -32,7 +32,7 @@ Nesse post, implemento a equação (2) que aparece em LW:
 
 O principal objetivo é estimar `$\hat{\delta^*}$`, o nível de encolhimento ótimo para o índice Dow Jones usando uma base de dados diária. 
 
-Também analiso se `$\hat{\delta^*}$` é constante no longo do tempo e se o erro de estimação implícito por esse modelo vem aumentando ou diminuindo.
+Também analiso se `$\hat{\delta^*}$` é constante ao longo do tempo e se o erro de estimação implícito por esse modelo vem aumentando ou diminuindo.
 
 Vamos começar!
 
@@ -71,7 +71,7 @@ stocks
 ## # ... with 157,663 more rows
 ```
 
-O objeto `stocks` contém dados financeiros desde o início do ano 2000. Contudo, nem todas as empresas negociavam nessa data: 
+O objeto `stocks` contém dados financeiros desde o início do ano 2000. Contudo, nem todas as empresas do índice negociavam nessa data: 
 
 
 ```r
@@ -243,7 +243,7 @@ O output dessa função é uma lista com os seguintes objetos:
 
 Para responder a questão inicial - "Quanto encolhimento o mercado de ações requer?" - utilizo a função `honey_shrunk()` repetidamente em uma janela de tempo móvel (_rolling window_). 
 
-Para manter a estrutura simples, a estimação ocorre em janelas de 3 meses, 1 ano, 3 anos e 5 anos.
+Para manter a estrutura simples, a estimação ocorre em janelas de 3 meses, 1 ano, 3 anos e 5 anos:
 
 
 ```r
@@ -345,7 +345,7 @@ intensity_fit
 
 ## Visualização
 
-Como esperado, o aumento do número de realizações diminui a necessidade de encolhimento. 
+Como esperado, o aumento do número de realizações diminui a necessidade de encolhimento:
 
 
 ```r
@@ -357,7 +357,7 @@ intensity_fit |>
   labs(
     title    = "Intensidade de Encolhimento Requerida para Diferentes Janelas Temporais", 
     subtitle = "Ações do Índice Dow Jones - 2000-2021 - estimação em janelas móveis", 
-    caption  = "Fonte: Yahoo Finance / Pacote Yahoo Tickers"
+    caption  = "Fonte: Yahoo Finance / Pacote `YahooTickers`"
     )
 ```
 
@@ -385,7 +385,7 @@ intensity_fit |>
   labs(
     title    = "Taxa Marginal de Substituição: Erro de Estimação vs. Erro de Especificação", 
     subtitle = "Ações do Índice Dow Jones - 2000-2021 - estimação em janelas móveis",
-    caption  = "Fonte: Yahoo Finance / Pacote Yahoo Tickers", 
+    caption  = "Fonte: Yahoo Finance / Pacote `YahooTickers`", 
     y        = NULL
     )
 ```
