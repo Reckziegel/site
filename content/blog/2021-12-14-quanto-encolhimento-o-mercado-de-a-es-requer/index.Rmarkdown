@@ -238,7 +238,7 @@ intensity_fit |>
 
 O nível de _shrinkage_ aumenta significativamente após períodos de crises (2008 e 2020). Quando o pânico se instaura, as correlações quebram e a qualidade da informação embutida nos retornos históricos diminui. Nesses momentos, justifica-se a adoção de um estimador estruturado. 
 
-Em relação a evolução dessa estimativa, não parece haver uma tendência clara de alta (ou baixa), exceto os saltos causados por eventos de pânico.
+Em relação a evolução dessa estimativa, não parece haver uma tendência nítida de alta (ou baixa), exceto os saltos causados por eventos de pânico.
 
 Por fim, é possível interpretar a razão entre `$\delta$` e `$1 - \delta$` como uma taxa de troca (taxa marginal de substituição) entre erro de estimação vs. erro de especificação existentes no mercado: 
 
@@ -264,6 +264,6 @@ Sempre que a fração `$ \frac{\delta}{1-\delta}$` for maior do que `$1$` há pe
 
 Monitorar essa taxa de troca pode ajudar o gestor a identificar quando adicionar mais estrutura ou dar aquele toque bayesiano na análise econométrica.
 
-[^1]: Assume-se que a soma dos erros ao quadrado (SEQ) seja utlizada como função de perda.
+[^1]: Assume-se que a soma dos erros ao quadrado (SEQ) seja utlizada como função de perda para determinar o "melhor" estimador.
 [^2]: Você pode fazer o download do código original [aqui](https://www.econ.uzh.ch/dam/jcr:ffffffff-935a-b0d6-ffff-ffffde5e2d4e/covCor.m.zip). 
 [^3]: Se essa estrutura parece estranha para você, dê uma olhada na documentação da função `rolling_origin`: https://rsample.tidymodels.org/reference/rolling_origin.html.
