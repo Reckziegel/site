@@ -26,7 +26,7 @@ library(rbcb)
 library(tidyverse)
 ```
 
-> Como o `rbcb` não está no [CRAN](https://cran.r-project.org/) você deve usar o pacote `devtools` realizar o download diretamente do github.
+> Como o `rbcb` não está no [CRAN](https://cran.r-project.org/) você deve usar o pacote `devtools` para realizar o download diretamente do github.
 
 Começamos coletando as expectativas para o IPCA 12 meses à frente e também a SELIC projetada pelos players TOP5 do relatório Focus: 
 
@@ -80,5 +80,9 @@ real_rate_expectations |>
 ```
 
 As últimas informações disponíveis apontam para uma taxa de juros real de médio-prazo em torno de $3.50\%$. Adicionando-se a inflação esperada para 2022 (atualmente em volta de $5\%$) chega-se a uma SELIC neutra de $8.50\%$. 
+
+Obviamente, presume-se que as expectativas não irão escapar do controle do BC, hipótese que pode se concretizar, ou não.
+
+Veremos!
 
 Eu disse que era simples!
