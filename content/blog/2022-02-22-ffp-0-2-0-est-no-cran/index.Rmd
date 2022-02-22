@@ -41,5 +41,8 @@ bind_probs(x, y) |>
 
 4) Uma vez que o novo vetor de probabilidades tenha sido calculado, o próximo passo é computar os momentos compatíveis com esse novo vetor. Essa missão pode ser facilmente atingida com a função `ffp_moments()`. Os momentos preditivos disponibilizados por essa função podem ser utilizados em um otimizador para construção de uma fronteira eficiente _condicional_ as opiniões do usuário.
 
-Mais sobre essa técnica estraordinária chamada _entropy-pooling_ nos próximos posts. 
+Mais sobre essa técnica extraordinária chamada _entropy-pooling_ nos próximos posts. 
+
+
+
 

@@ -43,11 +43,11 @@ bind_probs(x, y)</code></pre>
 <pre class="r"><code>bind_probs(x, y) |&gt; 
   ggplot(aes(x = rowid, y = probs, color = fn)) +
   geom_line() +
-  scale_color_viridis_d() +
   theme(legend.position = &quot;bottom&quot;)</code></pre>
 <p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <ol start="2" style="list-style-type: decimal">
-<li><p>A função <code>entropy_pooling()</code>, o carro chefe por trás das probabilidades totalmente flexíveis, agora é uma função exportada. O objetivo com essa mudança é facilitar a criação de “opiniões” por parte do usuário, de modo a não limitar sua utilização apenas as alternativas atualmente propostas pelo pacote. A função agora também suporta três solvers: <code>nlminb</code>, <code>solnl</code> e <code>nloptr</code> (anteriormente todas as otimizações aconteciam utilizando <code>solnl</code>.)</p></li>
-<li><p>A principal feature desse lançamento é a criação da classe <code>ffp_views</code>. Essa classe torna mais fácil para o usuário sistematizar a geração de “opiniões” em praticamente qualquer característica de uma distribuição multivariada (retornos, volatilidades, correlações, copulas, etc.). Veja a família de funções <code>view_*()</code>;</p></li>
-<li><p>Uma vez que o novo vetor de probabilidades tenha sido calculado, o próximo passo é computar os momentos compatíveis com esse novo vetor. <code>ffp_moments()</code></p></li>
+<li><p>A função <code>entropy_pooling()</code>, o carro chefe por trás das “probabilidades totalmente flexíveis”, agora é uma função exportável. O objetivo com essa mudança é facilitar a criação de opiniões por parte do usuário, de modo a não limitar sua utilização apenas as alternativas propostas pelo pacote. A função agora também suporta três solvers: <code>nlminb</code>, <code>solnl</code> e <code>nloptr</code> (anteriormente todas as otimizações aconteciam utilizando <code>solnl</code>.)</p></li>
+<li><p>A principal feature desse lançamento é a criação da classe <code>ffp_views</code>. Essa classe torna mais fácil para o usuário sistematizar a geração de opiniões em praticamente qualquer característica de uma distribuição multivariada (retornos, volatilidades, correlações, copulas, etc.). Veja a família de funções <code>view_*()</code>;</p></li>
+<li><p>Uma vez que o novo vetor de probabilidades tenha sido calculado, o próximo passo é computar os momentos compatíveis com esse novo vetor. Essa missão pode ser facilmente atingida com a função <code>ffp_moments()</code>. Os momentos preditivos disponibilizados por essa função podem ser utilizados em um otimizador para construção de uma fronteira eficiente <em>condicional</em> as opiniões do usuário.</p></li>
 </ol>
+<p>Mais sobre essa técnica extraordinária chamada <em>entropy-pooling</em> nos próximos posts.</p>
