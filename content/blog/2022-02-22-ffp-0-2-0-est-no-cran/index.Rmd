@@ -1,0 +1,45 @@
+---
+title: 'ffp 0.2.0 está no CRAN'
+author: Bernardo Reckziegel
+date: '2022-02-22'
+slug: []
+categories: []
+tags:
+  - entropy-pooling
+  - views
+meta_img: images/image.png
+description: Description for the page
+---
+
+A versão 0.2.0 do `ffp` finalmente está no [CRAN](https://cran.r-project.org/web/packages/ffp/index.html).
+
+Já fazia algum tempo que gostaria de ter lançado essa atualização, que possui algumas melhorias importantes em relação a versão anterior:
+
+1) A função `bind_probs()` agora adiciona a call do usuário como identificador em uma tidy-tibble:
+
+```{r}
+library(ffp)
+library(ggplot2)
+
+x <- exp_decay(EuStockMarkets, lambda = 0.001)
+y <- exp_decay(EuStockMarkets, lambda = 0.002)
+bind_probs(x, y)
+```
+
+Como os dados estão no formato "longo" - _tidy_ - é fácil usar o `ggplot2`:
+
+```{r, warning=FALSE, message=FALSE}
+bind_probs(x, y) |> 
+  ggplot(aes(x = rowid, y = probs, color = fn)) +
+  geom_line() +
+  theme(legend.position = "bottom")
+```
+
+2) A função `entropy_pooling()`, o carro chefe por trás das "probabilidades totalmente flexíveis", agora é uma função exportável. O objetivo com essa mudança é facilitar a criação de opiniões por parte do usuário, de modo a não limitar sua utilização apenas as alternativas propostas pelo pacote. A função agora também suporta três solvers: `nlminb`, `solnl` e `nloptr` (anteriormente todas as otimizações aconteciam utilizando `solnl`.)
+
+3) A principal feature desse lançamento é a criação da classe `ffp_views`. Essa classe torna mais fácil para o usuário sistematizar a geração de opiniões em praticamente qualquer característica de uma distribuição multivariada (retornos, volatilidades, correlações, copulas, etc.). Veja a família de funções `view_*()`;
+
+4) Uma vez que o novo vetor de probabilidades tenha sido calculado, o próximo passo é computar os momentos compatíveis com esse novo vetor. Essa missão pode ser facilmente atingida com a função `ffp_moments()`. Os momentos preditivos disponibilizados por essa função podem ser utilizados em um otimizador para construção de uma fronteira eficiente _condicional_ as opiniões do usuário.
+
+Mais sobre essa técnica estraordinária chamada _entropy-pooling_ nos próximos posts. 
+

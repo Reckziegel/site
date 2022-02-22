@@ -1,0 +1,53 @@
+---
+title: 'ffp 0.2.0 está no CRAN'
+author: Bernardo Reckziegel
+date: '2022-02-22'
+slug: []
+categories: []
+tags:
+  - entropy-pooling
+  - views
+meta_img: images/image.png
+description: Description for the page
+---
+
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
+
+
+<p>A versão 0.2.0 do <code>ffp</code> finalmente está no <a href="https://cran.r-project.org/web/packages/ffp/index.html">CRAN</a>.</p>
+<p>Já fazia algum tempo que gostaria de ter lançado essa atualização, que possui algumas melhorias importantes em relação a versão anterior:</p>
+<ol style="list-style-type: decimal">
+<li>A função <code>bind_probs()</code> agora adiciona a call do usuário como identificador em uma tidy-tibble:</li>
+</ol>
+<pre class="r"><code>library(ffp)
+library(ggplot2)
+
+x &lt;- exp_decay(EuStockMarkets, lambda = 0.001)
+y &lt;- exp_decay(EuStockMarkets, lambda = 0.002)
+bind_probs(x, y)</code></pre>
+<pre><code>## # A tibble: 3,720 x 3
+##    rowid        probs fn                                           
+##    &lt;int&gt;        &lt;ffp&gt; &lt;fct&gt;                                        
+##  1     1 0.0001844669 exp_decay(x = EuStockMarkets, lambda = 0.001)
+##  2     2 0.0001846515 exp_decay(x = EuStockMarkets, lambda = 0.001)
+##  3     3 0.0001848363 exp_decay(x = EuStockMarkets, lambda = 0.001)
+##  4     4 0.0001850212 exp_decay(x = EuStockMarkets, lambda = 0.001)
+##  5     5 0.0001852063 exp_decay(x = EuStockMarkets, lambda = 0.001)
+##  6     6 0.0001853916 exp_decay(x = EuStockMarkets, lambda = 0.001)
+##  7     7 0.0001855771 exp_decay(x = EuStockMarkets, lambda = 0.001)
+##  8     8 0.0001857627 exp_decay(x = EuStockMarkets, lambda = 0.001)
+##  9     9 0.0001859486 exp_decay(x = EuStockMarkets, lambda = 0.001)
+## 10    10 0.0001861346 exp_decay(x = EuStockMarkets, lambda = 0.001)
+## # ... with 3,710 more rows</code></pre>
+<p>Como os dados estão no formato “longo” - <em>tidy</em> - é fácil usar o <code>ggplot2</code>:</p>
+<pre class="r"><code>bind_probs(x, y) |&gt; 
+  ggplot(aes(x = rowid, y = probs, color = fn)) +
+  geom_line() +
+  scale_color_viridis_d() +
+  theme(legend.position = &quot;bottom&quot;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<ol start="2" style="list-style-type: decimal">
+<li><p>A função <code>entropy_pooling()</code>, o carro chefe por trás das probabilidades totalmente flexíveis, agora é uma função exportada. O objetivo com essa mudança é facilitar a criação de “opiniões” por parte do usuário, de modo a não limitar sua utilização apenas as alternativas atualmente propostas pelo pacote. A função agora também suporta três solvers: <code>nlminb</code>, <code>solnl</code> e <code>nloptr</code> (anteriormente todas as otimizações aconteciam utilizando <code>solnl</code>.)</p></li>
+<li><p>A principal feature desse lançamento é a criação da classe <code>ffp_views</code>. Essa classe torna mais fácil para o usuário sistematizar a geração de “opiniões” em praticamente qualquer característica de uma distribuição multivariada (retornos, volatilidades, correlações, copulas, etc.). Veja a família de funções <code>view_*()</code>;</p></li>
+<li><p>Uma vez que o novo vetor de probabilidades tenha sido calculado, o próximo passo é computar os momentos compatíveis com esse novo vetor. <code>ffp_moments()</code></p></li>
+</ol>
