@@ -1,0 +1,99 @@
+---
+title: Prêmio da NTN-B 2045 sobre a Taxa de Juros Neutra
+author: Bernardo Reckziegel
+date: '2022-03-24'
+slug: []
+categories:
+  - Fixed-Income
+tags:
+  - interest-rates
+  - rbcb
+  - focus
+meta_img: images/image.png
+description: Description for the page
+---
+
+A ideia desse post é mostrar a evolução do prêmio da NTN-B 2045 sobre a taxa de juros neutra da economia, calculada com base em dados extraídos do relatório focus (veja esse [post](https://www.bernardo.codes/blog/2021-11-29-taxa-neutra-com-base-no-focus/)).
+
+Replico aqui parte do código do post anterior apenas para deixar registrado o ponto de largada:
+
+```{r,message=FALSE, warning=FALSE}
+library(rbcb)
+library(tidyverse)
+
+inflation <- get_annual_market_expectations(indic = "IPCA")
+selic     <- get_top5s_annual_market_expectations(indic = "Selic")
+
+inflation_filtered <- inflation |> 
+    mutate(reference_date = as.numeric(reference_date),
+           n_ahead = reference_date - lubridate::year(date)) |> 
+    filter(n_ahead == 3) |> 
+    select(date, ipca_median = median)
+
+selic_filtered <- selic |> 
+    mutate(reference_date = as.numeric(reference_date),
+           n_ahead = reference_date - lubridate::year(date)) |> 
+    filter(n_ahead == 3) |> 
+    select(date, selic_median = median)
+
+real_rate_expectations <- left_join(selic_filtered, inflation_filtered, by = "date") |> 
+    mutate(real_rate_median = selic_median - ipca_median) |> 
+  
+    group_by(date) |> 
+    summarise(median = median(real_rate_median)) |> 
+    ungroup()
+
+real_rate_expectations
+```
+
+Os dados da NTN-B em excel podem ser encontrados [aqui](https://github.com/Reckziegel/site/tree/master/data).
+
+```{r, message=FALSE, warning=FALSE}
+# import data
+b45 <- readxl::read_excel(
+  path      = "/Meu Drive/site/data/b45.xlsx",
+  col_types = c("date", "numeric"),
+  skip      = 1)
+names(b45)[[1]] <- "date"
+names(b45)[[2]] <- "B45"
+b45 <- b45 |>
+  mutate(date = lubridate::as_date(date)) |>
+  na.omit()
+b45
+```
+
+> Quando for importar os dados na sua máquina lembre de alterar o caminho de busca. No meu PC é `/Meu Drive/site/data/b45.xlsx`, mas no seu poderá ser diferente, dependendo em que pasta você salvar os dados.
+
+É fácil combinar os dois datasets pela data com a função `left_joint()` do pacote `dplyr`:
+
+```{r}
+data_for_plot <- real_rate_expectations |>
+  left_join(b45, by = "date") |>
+  mutate(premium = B45 - median) |>
+  filter(date >= "2005-01-02") 
+data_for_plot
+```
+
+Nesse caso, o prêmio é calculado como a diferença entre o [Yield to Maturity (YTM)](https://www.investopedia.com/terms/y/yieldtomaturity.asp) das NTN-B's e a taxa neutra da economia.
+
+```{r}
+data_for_plot |> 
+  ggplot(aes(x = date, y = premium / 100, color = premium)) +
+  geom_line(show.legend = FALSE) +
+  geom_hline(yintercept = 0.00, size = 2, alpha = 0.5, color = "grey") + 
+  geom_hline(yintercept = 0.02, size = 2, alpha = 0.5, color = "grey") + 
+  scale_y_continuous(labels = scales::percent_format()) + 
+  scale_color_viridis_c() + 
+  labs(
+    title    = "NTN-B 2045 vs. Taxa Neutra",
+    subtitle = "Prêmio sobre a taxa de equilíbrio (2005-2022)",
+    x        = NULL, 
+    y        = "Prêmio"
+)
+```
+
+Na maior parte do tempo o prêmio se situa entre $0\%$ a $2\%$. 
+
+Quanto maior o prêmio, maior a expectativa de retornos futuros. Nesse sentido, o último grande momento de compra foi em novembro de 2021. 
+
+Quem pegou, pegou!
