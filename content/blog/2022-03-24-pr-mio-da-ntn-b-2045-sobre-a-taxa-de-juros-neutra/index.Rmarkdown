@@ -74,7 +74,7 @@ data_for_plot <- real_rate_expectations |>
 data_for_plot
 ```
 
-Nesse caso, o prêmio é calculado como a diferença entre o [Yield to Maturity (YTM)](https://www.investopedia.com/terms/y/yieldtomaturity.asp) das NTN-B's e a taxa neutra da economia.
+Nesse caso, o prêmio é calculado como a diferença entre o [Yield to Maturity (YTM)](https://www.investopedia.com/terms/y/yieldtomaturity.asp) das NTN-B's sobre a taxa neutra da economia.
 
 ```{r}
 data_for_plot |> 
