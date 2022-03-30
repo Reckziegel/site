@@ -1,0 +1,94 @@
+---
+title: Opiniões - uma breve introdução
+author: Bernardo Reckziegel
+date: '2022-03-28'
+slug: []
+categories:
+  - views
+tags:
+  - entropy-pooling
+  - bayesian inference
+meta_img: images/image.png
+description: Description for the page
+---
+
+Passados 70 anos da publicação de [Portfolio Selection](https://www.math.hkust.edu.hk/~maykwok/courses/ma362/07F/markowitz_JF.pdf), parte significativa das gestoras de recursos ainda têm dificuldade de aceitar que o processo de construção de carteiras seja implementado com o auxílio de um otimizador.
+
+Existem motivos legítimos para esse ceticísmo, especialmente quando os resultados não são intuitivos do ponto de vista teórico. 
+
+Vejamos abaixo um exemplo:
+
+
+```r
+library(quadprog)
+
+# Invariance Quest
+x <- diff(log(EuStockMarkets))
+colnames(x) <- colnames(EuStockMarkets)
+num_assets <- ncol(x)
+
+# Full Investment Constraint
+Aeq  <- matrix(1, 1, num_assets)
+beq  <- 1
+
+# Non Negativity Constraint
+A <- rbind(-diag(num_assets), diag(num_assets))
+b <- c(-rep(1, num_assets), rep(0, num_assets))
+
+# Optimization
+optimization <- solve.QP(
+  Dmat = 2 * cov(x), 
+  dvec = colMeans(x), 
+  Amat = t(rbind(Aeq, A)), 
+  bvec = c(beq, b), 
+  meq  = length(beq)
+)
+
+round(optimization$solution, 2)
+```
+
+```
+## [1] 0 1 0 0
+```
+
+O famoso dataset `EuStockMarkets` que acompanha a instalação do `R` é utilizado para a construção de um portfolio "ótimo" com base no trade-off entre média e variância. O otimizador recomenda que o portfolio seja `\(100\%\)` alocado no mercado francês (CAC). 
+
+Ainda que o universo de ativos disponíveis estivesse inteiramente representado nesse dataset, nenhum gestor sério seguiria essa recomendação. Por outro lado, se as decisões não são micro-fundamentadas, são baseadas em quê? Heurística? 
+
+<!-- Soa como se o time de gestão vivesse na década de 30 do século passado. -->
+
+É ai que entra a análise bayesiana e, em especial, uma técnica quase desconhecida no Brasil chamada "entropy-pooling". 
+
+Entropy-pooling permite que _qualquer_ opinião subjetiva seja convertida em uma afirmação quantitativa _precisa_ por meio dos momentos condicionais de uma distribuição de probabilidade. Esse resultado é válido para qualquer distribuição!
+
+Permita-me detalhar esse tema um pouco mais. No framework bayesiano tradicional o gestor (ou risk manager) impôe suas visões de mundo por meio de uma distribuição que chamammos de _prior_. A _prior_ é construída com base na experiência pessoal levando em conta os cenários considerados mais prováveis. A distribuição que resulta da combinação da _prior_ com os dados históricos é o que chamamos de _posterior_, uma PDF que acomoda o mundo quantitativo (dos dados) com o mundo subjetivo (do gestor).
+
+<img src="images/bayesian_analysis.jpg" alt="" width="90%" height="70%"/>
+
+Até ai nenhuma novidade. A questão é que o approach tradicional requer um conhecimento profundo sobre como as variáveis macroeconômicas impactam os parâmetros de diferentes distribuições de probabilidade. Infelizmente, não há garantia de que esses parâmetros sejam estáveis ou sequer conhecidos, mesmo por profissionais experientes em suas áreas de atuação.
+
+<!-- Em muitos casos, a escolha dos parâmetros pode parecer tão _ad hoc_ a ponto de enfraquecer a análise. Em outros casos, o exato formato da _posterior_ não é conhecido _ex ante_, de modo que o problema deve ser solucionado numericamente via [Markov-Chain Monte-Carlo (MCMC)](https://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo), uma técnica computacionalmente demandante. -->
+
+Entropy-pooling contorna esse problema ao reinterpretar o approach bayesiano via [teoria da informação](https://en.wikipedia.org/wiki/Information_theory). O foco é transferido das funções de densidade de probabilidade para o conceito de [entropia](https://en.wikipedia.org/wiki/Entropy_(information_theory)). Em particular, a entropia mínima relativa (EMR), o vetor `\(p\)` de probabilidades que minimiza:
+
+$$ p^* = argmin \sum_{j=1}^J x_j(ln(x_j) - ln(p_j)) $$
+
+sujeito as restrições: 
+
+$$ Fx \leq f $$
+$$ Hx = h $$  
+
+Essa solução é engenhosa: __agora as variáveis aleatórias são as probabilidades de cada evento ocorrer e não os eventos em si__. Os eventos estão dados!
+
+As _priors_ (matrizes `\(F\)` e `\(H\)`) apenas atuam como restrições lineares no problema da EMR e o vetor `\(p^*\)` se ajusta de modo a distorcer ao mínimo as probabilidades originais. 
+
+Entropy-pooling contrói a ponte entre os mundos sistemático e o idiossincrático tornando mais fácil para gestores e risk managers conciliarem suas opiniões com os resultados de modelos micro-fundamentados.
+
+Nos próximos posts demonstrei como implementar essa ideia na prática, abrindo os códigos e mostrando sugestões de aplicação. 
+
+Enquanto isso, se você quiser saber mais sobre a técnica fantástica, recomendo a leitura do paper [Fully Flexible Views: Theory and Practice](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1213325) e da documentação do pacote [ffp](https://reckziegel.github.io/FFP/).
+
+
+
+
+
