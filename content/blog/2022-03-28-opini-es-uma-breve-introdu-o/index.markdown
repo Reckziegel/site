@@ -59,7 +59,9 @@ Ainda que o universo de ativos disponíveis estivesse inteiramente representado 
 
 É ai que entra a análise bayesiana e, em especial, uma técnica quase desconhecida no Brasil chamada "entropy-pooling". 
 
-Entropy-pooling permite que _qualquer_ opinião subjetiva seja convertida em uma afirmação quantitativa _precisa_ por meio dos momentos condicionais de uma distribuição de probabilidade. Esse resultado é válido para qualquer distribuição!
+Entropy-pooling permite que _qualquer_ opinião subjetiva seja convertida em uma afirmação quantitativa _precisa_ por meio dos momentos condicionais de uma distribuição de probabilidade. Entropy-pooling contrói a ponte entre os mundos sistemático e o idiossincrático tornando mais fácil para gestores e risk managers conciliarem suas opiniões com os resultados de modelos micro-fundamentados.
+
+<!-- Esse resultado é válido para qualquer distribuição! -->
 
 Permita-me detalhar esse tema um pouco mais. No framework bayesiano tradicional o gestor (ou risk manager) impôe suas visões de mundo por meio de uma distribuição que chamammos de _prior_. A _prior_ é construída com base na experiência pessoal levando em conta os cenários considerados mais prováveis. A distribuição que resulta da combinação da _prior_ com os dados históricos é o que chamamos de _posterior_, uma PDF que acomoda o mundo quantitativo (dos dados) com o mundo subjetivo (do gestor).
 
@@ -78,11 +80,9 @@ sujeito as restrições:
 $$ Fx \leq f $$
 $$ Hx = h $$  
 
-Essa solução é engenhosa: __agora são as probabilidades de cada evento ocorrer que são consideradas variáveis aleatórias, não os eventos em si__. Os eventos estão dados!
-
-As _priors_ (matrizes `\(F\)` e `\(H\)`) atuam como restrições lineares e o vetor `\(p^*\)` se ajusta de modo a distorcer ao mínimo as probabilidades originais. 
-
-Entropy-pooling contrói a ponte entre os mundos sistemático e o idiossincrático tornando mais fácil para gestores e risk managers conciliarem suas opiniões com os resultados de modelos micro-fundamentados.
+Essa formulação é engenhosa: __agora são as probabilidades de cada evento ocorrer que são consideradas variáveis aleatórias, não os eventos em si__. Os eventos estão dados!
+    
+As _priors_ (matrizes `\(F\)` e `\(H\)`) atuam como restrições lineares e o vetor `\(p^*\)` se ajusta de modo a distorcer ao mínimo as probabilidades originais.
 
 Nos próximos posts demonstrei como implementar essa ideia na prática, abrindo os códigos e mostrando sugestões de aplicação. 
 
