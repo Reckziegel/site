@@ -12,9 +12,9 @@ meta_img: images/image.png
 description: Description for the page
 ---
 
-Passados 70 anos da publicação de [Portfolio Selection](https://www.math.hkust.edu.hk/~maykwok/courses/ma362/07F/markowitz_JF.pdf), parte significativa das gestoras de recursos ainda têm dificuldade de aceitar que o processo de construção de carteiras seja implementado com o auxílio de um otimizador.
+Passados 70 anos da publicação de [Portfolio Selection](https://www.math.hkust.edu.hk/~maykwok/courses/ma362/07F/markowitz_JF.pdf), parte significativa das gestoras de recursos ainda não incorporou a adoção de um otimizador no processo de construção de portfolios.
 
-Existem motivos legítimos para esse ceticísmo, especialmente quando os resultados não são intuitivos do ponto de vista teórico. 
+Existem motivos legítimos para o ceticismo, especialmente quando os resultados não são intuitivos do ponto de vista teórico. 
 
 Vejamos abaixo um exemplo:
 
@@ -60,7 +60,7 @@ Permita-me detalhar esse tema um pouco mais. No framework bayesiano tradicional 
 
 <img src="images/bayesian_analysis.jpg" alt="" width="90%" height="70%"/>
 
-Até ai nenhuma novidade. A questão é que o approach tradicional requer um conhecimento profundo sobre como as variáveis macroeconômicas impactam os parâmetros de diferentes distribuições de probabilidade. Infelizmente, não há garantia de que esses parâmetros sejam estáveis ou sequer conhecidos, mesmo por profissionais experientes em suas áreas de atuação.
+Até ai nenhuma novidade. A questão é que o approach tradicional requer um conhecimento profundo sobre como as variáveis macroeconômicas impactam os parâmetros de diferentes distribuições. Infelizmente, não há garantia de que esses parâmetros sejam estáveis ou sequer conhecidos, mesmo por profissionais experientes em suas áreas de atuação.
 
 <!-- Em muitos casos, a escolha dos parâmetros pode parecer tão _ad hoc_ a ponto de enfraquecer a análise. Em outros casos, o exato formato da _posterior_ não é conhecido _ex ante_, de modo que o problema deve ser solucionado numericamente via [Markov-Chain Monte-Carlo (MCMC)](https://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo), uma técnica computacionalmente demandante. -->
 
@@ -73,9 +73,9 @@ sujeito as restrições:
 $$ Fx \leq f $$
 $$ Hx = h $$  
 
-Essa solução é engenhosa: __agora as variáveis aleatórias são as probabilidades de cada evento ocorrer e não os eventos em si__. Os eventos estão dados!
+Essa solução é engenhosa: __agora são as probabilidades de cada evento ocorrer que são consideradas variáveis aleatórias, não os eventos em si__. Os eventos estão dados!
 
-As _priors_ (matrizes $F$ e $H$) apenas atuam como restrições lineares no problema da EMR e o vetor $p^*$ se ajusta de modo a distorcer ao mínimo as probabilidades originais. 
+As _priors_ (matrizes $F$ e $H$) atuam como restrições lineares e o vetor $p^*$ se ajusta de modo a distorcer ao mínimo as probabilidades originais. 
 
 Entropy-pooling contrói a ponte entre os mundos sistemático e o idiossincrático tornando mais fácil para gestores e risk managers conciliarem suas opiniões com os resultados de modelos micro-fundamentados.
 

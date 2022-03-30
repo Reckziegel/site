@@ -76,7 +76,7 @@ data_for_plot
 
 Nesse caso, o prêmio é calculado como a diferença entre o [Yield to Maturity (YTM)](https://www.investopedia.com/terms/y/yieldtomaturity.asp) das NTN-B's sobre a taxa neutra da economia.
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 data_for_plot |> 
   ggplot(aes(x = date, y = premium / 100, color = premium)) +
   geom_line(show.legend = FALSE) +

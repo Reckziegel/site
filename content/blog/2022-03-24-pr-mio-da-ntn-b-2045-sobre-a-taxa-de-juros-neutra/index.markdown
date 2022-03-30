@@ -48,7 +48,7 @@ real_rate_expectations
 ```
 
 ```
-## # A tibble: 5,110 x 2
+## # A tibble: 5,115 x 2
 ##    date       median
 ##    <date>      <dbl>
 ##  1 2001-11-06   NA  
@@ -61,7 +61,7 @@ real_rate_expectations
 ##  8 2001-11-16    7.5
 ##  9 2001-11-19    7.5
 ## 10 2001-11-20    7.5
-## # ... with 5,100 more rows
+## # ... with 5,105 more rows
 ```
 
 Os dados da NTN-B em excel podem ser encontrados [aqui](https://github.com/Reckziegel/site/tree/master/data).
@@ -112,7 +112,7 @@ data_for_plot
 ```
 
 ```
-## # A tibble: 4,321 x 4
+## # A tibble: 4,326 x 4
 ##    date       median   B45 premium
 ##    <date>      <dbl> <dbl>   <dbl>
 ##  1 2005-01-03    8.5  9.10   0.598
@@ -125,10 +125,10 @@ data_for_plot
 ##  8 2005-01-12    8.5  9.07   0.570
 ##  9 2005-01-13    8.5  9.07   0.572
 ## 10 2005-01-14    8.5  9.08   0.575
-## # ... with 4,311 more rows
+## # ... with 4,316 more rows
 ```
 
-Nesse caso, o prêmio é calculado como a diferença entre o [Yield to Maturity (YTM)](https://www.investopedia.com/terms/y/yieldtomaturity.asp) das NTN-B's e a taxa neutra da economia.
+Nesse caso, o prêmio é calculado como a diferença entre o [Yield to Maturity (YTM)](https://www.investopedia.com/terms/y/yieldtomaturity.asp) das NTN-B's sobre a taxa neutra da economia.
 
 
 ```r
@@ -151,6 +151,6 @@ data_for_plot |>
 
 Na maior parte do tempo o prêmio se situa entre `\(0\%\)` a `\(2\%\)`. 
 
-Quanto maior o prêmio, maior a expectativa de retornos futuros. Nesse sentido, o último grande momento de compra foi em novembro de 2021. 
+Quanto maior o prêmio, maior a expectativa de retornos futuros (tudo ou mais constante). Nesse sentido, o último grande momento de compra foi em novembro de 2021. 
 
 Quem pegou, pegou!
