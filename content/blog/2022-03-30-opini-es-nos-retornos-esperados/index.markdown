@@ -164,6 +164,6 @@ round(ep_moments[["mu"]] / colMeans(x) - 1, 2)
 ##  0.0  0.0  0.0  0.2
 ```
 
-Agora as divergências sumiram e a e apenas os retornos do índice `FTSE` são afetados pelas opiniões.
+Agora as divergências sumiram e a e apenas o retorno do índice `FTSE` é afetado pelas opiniões.
 
 [^1]: `Aeq` e `beq` de "__eq__ uality", pois esses elementos estão presentes em uma restrição que deve ser satisfeita com igualdade.
