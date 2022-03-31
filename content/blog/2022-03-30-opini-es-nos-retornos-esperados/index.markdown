@@ -20,27 +20,29 @@ Utilizo o dataset `EuStockMarkets` que acompanha o `R` para facilitar a reprodu�
 
 
 ```r
-library(tidyverse)
-
 # Invariance
 x <- diff(log(EuStockMarkets))
 
-# Plot
-as_tibble(x) |> 
-  mutate(id = 1:nrow(x)) |> 
-  pivot_longer(cols = -id) |> 
-  ggplot(aes(x = id, y = value, color = name)) + 
-  geom_line(show.legend = FALSE) +
-  scale_color_viridis_d(option = "E", end = 0.75) + 
-  facet_wrap(~name) + 
-  labs(x = NULL, y = NULL)
+head(x)
 ```
 
-<img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-1-1.png" width="672" />
+```
+##               DAX          SMI          CAC         FTSE
+## [1,] -0.009326550  0.006178360 -0.012658756  0.006770286
+## [2,] -0.004422175 -0.005880448 -0.018740638 -0.004889587
+## [3,]  0.009003794  0.003271184 -0.005779182  0.009027020
+## [4,] -0.001778217  0.001483372  0.008743353  0.005771847
+## [5,] -0.004676712 -0.008933417 -0.005120160 -0.007230164
+## [6,]  0.012427042  0.006737244  0.011714353  0.008517217
+```
 
 ***
 
-Digamos que o time de análise acredite que os retornos do índice `FTSE` serão `\(20\%\)` superiores a média histórica e que não haja opinião formada em relação aos demais ativos. 
+> Para reproduzir os scripts abaixo você precisará instalar o pacote `ffp` com o comando `install.packages("ffp")`.
+
+***
+
+Digamos que o time de gestão acredite que os retornos do índice `FTSE` serão `\(20\%\)` superiores a média histórica e que não haja opinião formada em relação aos demais ativos. 
 
 No pacote [ffp](https://reckziegel.github.io/FFP/index.html) as opiniões são contruídas com a família de funções `view_on_*()`:
 
@@ -63,9 +65,14 @@ views
 ## beq :  Dim 1 x 1
 ```
 
-O output da função `view_on_mean()` sempre retorna uma lista com dois elementos[^1]: `Aeq` e `beq`[^2]. Essas são as matrizes `\(H\)` e `\(h\)` das equações do [post anterior](https://www.bernardo.codes/blog/2022-03-28-opini-es-uma-breve-introdu-o/).
+O output da função `view_on_mean()` sempre retorna uma lista com dois elementos: `Aeq` e `beq`[^1] que entram como restrições lineares no problema da entropia mínima relativa, como demonstrado abaixo:
 
-Com as restrições em mãos, o problema da entropia mínima relativa (EMR) pode ser resolvido com `entropy_pooling`:
+$$ argmin \sum_{j=1}^J x_j(ln(x_j) - ln(p_j)) $$
+$$ s.t. Hx = h $$  
+
+Os elementos `Aeq` e `beq` correspondem as matrizes `\(H\)` e `\(h\)`, respectivamente.
+
+Essa otimização é solucionada com a função `entropy_pooling`:
 
 
 ```r
@@ -80,19 +87,24 @@ ep
 ## <ffp[1859]>
 ## 0.0005425631 0.0005340012 0.000544236 0.0005418246 0.0005322989 ... 0.0005451271
 ```
-O vetor `ep` contém as probabilidades que satisfazem a visão do time de análise e que distorcem ao mínimo o vetor de probabilidades uniforme, que chamamos de `prior`. 
+
+O vetor `ep` contém as probabilidades que satisfazem a visão do time de gestão e que distorcem ao mínimo o vetor de probabilidades uniforme, que chamamos de `prior`. 
 
 Abaixo a vizualização dessa distorção: 
 
 
 ```r
+library(ggplot2)
+
 autoplot(ep) + 
   scale_color_viridis_c(option = "E", end = 0.75)
 ```
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-4-1.png" width="672" />
 
-É por meio do vetor `ep` que é possível computar as estatísticas de locação e dispersão _condicionais_, aquelas que absorvem as opiniões subjetivas do time de análise. Esse cálculo é facilmente implementado com a função `ffp_moments`: 
+É por meio do vetor `ep` que é possível computar as estatísticas de locação e dispersão _condicionais_, aquelas que absorvem as opiniões subjetivas do gestor. 
+
+Esse cálculo é facilmente implementado com a função `ffp_moments`: 
 
 
 ```r
@@ -113,11 +125,11 @@ ep_moments
 ## FTSE 5.217276e-05 4.282438e-05 5.677744e-05 6.341068e-05
 ```
 
-> __Atenção__: Não confunda o resultado da função `ffp_moments()` - momentos condicionais - com aquele que você obteria utilizando as funções `colMeans()` e `cov()` - momentos incondicionais.
+__Atenção__: Não confunda o resultado da função `ffp_moments()`, que calcula os momentos _condicionais_, com aquele que você obteria utilizando as funções `colMeans()` e `cov()`, que computam os momentos _incondicionais_.
 
 <!-- Esses novos momentos podem  então, finalmente ser utlizados em um otimizador, no estilo média-variância, risk-parity, etc. Obviamente, os resultados do otimizador, serão tão bons quanto as opiniões (trash in, trash out). -->
 
-Abaixo a divergência entre esses métodos:
+Abaixo a divergência entre esses métodos (expressa em variação percentual):
 
 
 ```r
@@ -129,9 +141,11 @@ round(ep_moments[["mu"]] / colMeans(x) - 1, 2)
 ## 0.11 0.07 0.18 0.20
 ```
 
-Para o `FTSE` a divergência bate exatamente com a expectativa do time de análise. Todavia, os outros ativos também acabaram sendo afetados. A expectativa de retorno do `DAX` aumentou `\(9\%\)`, `SMI`, `\(7\%\)` e `CAC`, `\(17\%\)`. Se o time de análise se sentir confortável com esses resultados, jogue o output de `ep_moments` para um otimizador e bola pra frente. Se houver restrições, a análise precisa ser refeita. 
+Para o índice inglês (`FTSE`) a divergência bate exatamente com a opinião imputada. Entretanto, os outros ativos também foram afetados. A expectativa de retorno para o `DAX` aumentou em `\(11\%\)`, `SMI` em `\(7\%\)` e `CAC` em `\(17\%\)`. 
 
-Por exemplo, vamos refazer as opiniões assumindo que o retorno do `FTSE` será `\(20\%\)` superior a média e o restante dos ativos manterão os retornos em linha com a média histórica de cada série:
+Se o time de análise se sentir confortável com esses resultados, o output de `ep_moments` está pronto para ir para um otimizador (mean-variance, risk-parity, etc). Se houver restrições, a análise precisa ser refeita. 
+
+Por exemplo, vamos refazer as opiniões assumindo que o retorno do `FTSE` será `\(20\%\)` superior a média enquanto o restante dos ativos terão retornos idênticos a suas médias amostrais: 
 
 
 ```r
@@ -150,13 +164,9 @@ round(ep_moments[["mu"]] / colMeans(x) - 1, 2)
 ##  0.0  0.0  0.0  0.2
 ```
 
-Agora as divergências sumiram e a razão entre as médias condicionais e incodicionais afetam apenas o `FTSE`.
+Agora as divergências sumiram e a e apenas os retornos do índice `FTSE` são afetados pelas opiniões. 
+
+Esse approach é extremamente geral. Pense em entropy-pooling como uma técnica mais poderosa do que [Black-Litterman](https://en.wikipedia.org/wiki/Black%E2%80%93Litterman_model), pois as opiniões podem tomar qualquer forma, não estão restritas ao mundo linear e nem requerem a normalidade.
 
 
-
-
-
-
-
-[^1]: Dado que construímos a opinião em apenas `\(1\)` ativo, o vetor `views` contém apenas uma linha em `Aeq` e um elementro em `beq`.  
-[^2]: `Aeq` e `beq` de "__eq__ uality", pois esses elementos estão presentes em uma restrição que deve ser satisfeita com igualdade.
+[^1]: `Aeq` e `beq` de "__eq__ uality", pois esses elementos estão presentes em uma restrição que deve ser satisfeita com igualdade.

@@ -14,7 +14,7 @@ description: Description for the page
 
 Passados 70 anos da publicação de [Portfolio Selection](https://www.math.hkust.edu.hk/~maykwok/courses/ma362/07F/markowitz_JF.pdf), parte significativa das gestoras de recursos ainda não incorporou a adoção de um otimizador no processo de construção de portfolios.
 
-Existem motivos legítimos para o ceticismo, especialmente quando os resultados não são intuitivos do ponto de vista teórico. 
+Existem motivos legítimos para esse ceticismo, especialmente quando os resultados não são intuitivos do ponto de vista teórico. 
 
 Vejamos abaixo um exemplo:
 
@@ -48,13 +48,15 @@ round(optimization$solution, 2)
 
 O famoso dataset `EuStockMarkets` que acompanha a instalação do `R` é utilizado para a construção de um portfolio "ótimo" com base no trade-off entre média e variância. O otimizador recomenda que o portfolio seja $100\%$ alocado no mercado francês (CAC). 
 
-Ainda que o universo de ativos disponíveis estivesse inteiramente representado nesse dataset, nenhum gestor sério seguiria essa recomendação. Por outro lado, se as decisões não são micro-fundamentadas, são baseadas em quê? Heurística? 
+Ainda que o universo de ativos disponíveis estivesse inteiramente representado nesses dados, nenhum gestor sério seguiria essa recomendação. Por outro lado, se as decisões não são micro-fundamentadas, são baseadas em quê? Heurística? 
 
 <!-- Soa como se o time de gestão vivesse na década de 30 do século passado. -->
 
 É ai que entra a análise bayesiana e, em especial, uma técnica quase desconhecida no Brasil chamada "entropy-pooling". 
 
-Entropy-pooling permite que _qualquer_ opinião subjetiva seja convertida em uma afirmação quantitativa _precisa_ por meio dos momentos condicionais de uma distribuição de probabilidade. Entropy-pooling contrói a ponte entre os mundos sistemático e o idiossincrático tornando mais fácil para gestores e risk managers conciliarem suas opiniões com os resultados de modelos micro-fundamentados.
+Entropy-pooling permite que _qualquer_ opinião subjetiva seja convertida em uma afirmação quantitativa _precisa_ por meio dos momentos condicionais de uma distribuição de probabilidade. Entropy-pooling contrói a ponte entre os mundos sistemático e o idiossincrático tornando mais fácil para gestores conciliarem suas opiniões com os resultados de modelos micro-fundamentados. 
+
+Pense em entropy-pooling como uma técnica mais poderosa do que [Black-Litterman](https://en.wikipedia.org/wiki/Black%E2%80%93Litterman_model), pois as opiniões podem tomar qualquer forma, não estão restritas ao mundo linear e nem requerem normalidade.
 
 <!-- Esse resultado é válido para qualquer distribuição! -->
 
