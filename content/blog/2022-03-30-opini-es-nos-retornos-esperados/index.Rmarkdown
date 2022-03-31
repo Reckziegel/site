@@ -1,7 +1,7 @@
 ---
 title: Opiniões nos retornos esperados
 author: Bernardo Reckziegel
-date: '2022-03-30'
+date: '2022-03-31'
 slug: []
 categories:
   - R

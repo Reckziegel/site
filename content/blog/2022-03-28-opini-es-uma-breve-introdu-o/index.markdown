@@ -59,7 +59,7 @@ Ainda que o universo de ativos disponíveis estivesse inteiramente representado 
 
 É ai que entra a análise bayesiana e, em especial, uma técnica quase desconhecida no Brasil chamada "entropy-pooling". 
 
-Entropy-pooling permite que _qualquer_ opinião subjetiva seja convertida em uma afirmação quantitativa _precisa_ por meio dos momentos condicionais de uma distribuição de probabilidade. Entropy-pooling contrói a ponte entre os mundos sistemático e o idiossincrático tornando mais fácil para gestores conciliarem suas opiniões com os resultados de modelos micro-fundamentados. 
+Entropy-pooling permite que _qualquer_ opinião subjetiva seja convertida em uma afirmação quantitativa _precisa_ por meio dos momentos condicionais de uma distribuição de probabilidade. Entropy-pooling contrói a ponte entre o mundo sistemático e o idiossincrático tornando mais fácil para gestores conciliarem suas opiniões com os resultados de modelos micro-fundamentados. 
 
 Pense em entropy-pooling como uma técnica mais poderosa do que [Black-Litterman](https://en.wikipedia.org/wiki/Black%E2%80%93Litterman_model), pois as opiniões podem tomar qualquer forma, não estão restritas ao mundo linear e nem requerem normalidade.
 
