@@ -141,7 +141,7 @@ round(ep_moments[["mu"]] / colMeans(x) - 1, 2)
 ## 0.11 0.07 0.18 0.20
 ```
 
-Para o índice inglês (`FTSE`) a divergência bate exatamente com a opinião imputada. Entretanto, os outros ativos também foram afetados. A expectativa de retorno para o `DAX` aumentou em `\(11\%\)`, `SMI` em `\(7\%\)` e `CAC` em `\(17\%\)`. 
+Para o índice inglês (`FTSE`) a divergência bate exatamente com as expectativas. Entretanto, os outros ativos também foram afetados. A expectativa de retorno para o `DAX` aumentou em `\(11\%\)`, `SMI` em `\(7\%\)` e `CAC` em `\(18\%\)`. 
 
 Se o time de análise se sentir confortável com esses resultados, o output de `ep_moments` está pronto para ir para um otimizador (mean-variance, risk-parity, etc). Se houver restrições, a análise precisa ser refeita. 
 
@@ -164,9 +164,6 @@ round(ep_moments[["mu"]] / colMeans(x) - 1, 2)
 ##  0.0  0.0  0.0  0.2
 ```
 
-Agora as divergências sumiram e a e apenas os retornos do índice `FTSE` são afetados pelas opiniões. 
-
-Esse approach é extremamente geral. Pense em entropy-pooling como uma técnica mais poderosa do que [Black-Litterman](https://en.wikipedia.org/wiki/Black%E2%80%93Litterman_model), pois as opiniões podem tomar qualquer forma, não estão restritas ao mundo linear e nem requerem a normalidade.
-
+Agora as divergências sumiram e a e apenas os retornos do índice `FTSE` são afetados pelas opiniões.
 
 [^1]: `Aeq` e `beq` de "__eq__ uality", pois esses elementos estão presentes em uma restrição que deve ser satisfeita com igualdade.
