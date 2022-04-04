@@ -12,8 +12,6 @@ meta_img: images/tickers.png
 description: Baixe e modele dados de diferentes bolsas mundiais de maneira rápida e eficiente
 ---
 
-Meu primeiro pacote - `YahooTickers`- recentemente completou 3 anos. Por esse motivo, o post inaugural desse blog será sobre ele. 
-
 Quando comecei a usar o R, não demorou muito para que me desse conta que estava sempre repetindo as mesmas tarefas. Assim, decidi sistematizar o acesso ao API do [YahooFinance](https://finance.yahoo.com/), o que resultou na construção do `YahooTickers`. 
 
 O API do Yahoo não é perfeito, mas funciona bem e é razoavelmente simples. Se você programa com frequência e não tem acesso a Bloomberg, Economatica ou Refinitiv é possível que esse pacote interesse a você.

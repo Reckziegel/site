@@ -12,8 +12,6 @@ meta_img: images/tickers.png
 description: Baixe e modele dados de diferentes bolsas mundiais de maneira rápida e eficiente
 ---
 
-Meu primeiro pacote - `YahooTickers`- recentemente completou 3 anos. Por esse motivo, o post inaugural desse blog será sobre ele. 
-
 Quando comecei a usar o R, não demorou muito para que me desse conta que estava sempre repetindo as mesmas tarefas. Assim, decidi sistematizar o acesso ao API do [YahooFinance](https://finance.yahoo.com/), o que resultou na construção do `YahooTickers`. 
 
 O API do Yahoo não é perfeito, mas funciona bem e é razoavelmente simples. Se você programa com frequência e não tem acesso a Bloomberg, Economatica ou Refinitiv é possível que esse pacote interesse a você.
@@ -78,20 +76,20 @@ stocks
 ```
 
 ```
-## # A tibble: 1,728 x 8
+## # A tibble: 1,776 x 8
 ##    date       tickers  open  high   low close    volume adjusted
 ##    <date>     <fct>   <dbl> <dbl> <dbl> <dbl>     <dbl>    <dbl>
-##  1 2010-01-01 MMM      83.1  85.2  79.1  80.5  75208100     58.1
-##  2 2010-02-01 MMM      80.8  81.8  77.2  80.2  75020400     57.8
-##  3 2010-03-01 MMM      80.6  84.5  80.3  83.6  91066100     60.7
-##  4 2010-04-01 MMM      83.9  90.2  82.7  88.7  96407000     64.4
-##  5 2010-05-01 MMM      89.2  90.5  69.0  79.3 109573600     57.6
-##  6 2010-06-01 MMM      78.7  83    72.7  79.0 114407500     57.7
-##  7 2010-07-01 MMM      79.1  87.5  77.0  85.5  89556700     62.5
-##  8 2010-08-01 MMM      86.8  88.4  78.4  78.6  74721100     57.4
-##  9 2010-09-01 MMM      79.5  88    79.3  86.7  64059700     63.8
-## 10 2010-10-01 MMM      87.4  91.5  83.8  84.2  82038100     61.9
-## # ... with 1,718 more rows
+##  1 2010-01-01 MMM      83.1  85.2  79.1  80.5  75208100     57.5
+##  2 2010-02-01 MMM      80.8  81.8  77.2  80.2  75020400     57.3
+##  3 2010-03-01 MMM      80.6  84.5  80.3  83.6  91066100     60.1
+##  4 2010-04-01 MMM      83.9  90.2  82.7  88.7  96407000     63.8
+##  5 2010-05-01 MMM      89.2  90.5  69.0  79.3 109573600     57.0
+##  6 2010-06-01 MMM      78.7  83    72.7  79.0 114407500     57.2
+##  7 2010-07-01 MMM      79.1  87.5  77.0  85.5  89556700     61.9
+##  8 2010-08-01 MMM      86.8  88.4  78.4  78.6  74721100     56.8
+##  9 2010-09-01 MMM      79.5  88    79.3  86.7  64059700     63.1
+## 10 2010-10-01 MMM      87.4  91.5  83.8  84.2  82038100     61.3
+## # ... with 1,766 more rows
 ```
 
 Os dados já vem no formato `tidy` (longo), de modo a potencializar a iteratividade com o `ggplot2` e o todo o ecossistema do `tidyverse`. Veja:
@@ -129,21 +127,21 @@ models
 ```
 
 ```
-## # A tibble: 1,992 x 17
-##    date       tickers data   term  estimate model.desc  sigma logLik   AIC   BIC
-##    <date>     <fct>   <list> <fct>    <dbl> <fct>       <dbl>  <dbl> <dbl> <dbl>
-##  1 2015-02-01 MMM     <tibb~ ar1    -0.217  ARIMA(1,0~ 0.0489   97.0 -188. -182.
-##  2 2015-02-01 MMM     <tibb~ inte~   0.0152 ARIMA(1,0~ 0.0489   97.0 -188. -182.
-##  3 2015-03-01 MMM     <tibb~ ar1    -0.218  ARIMA(1,0~ 0.0489   96.9 -188. -182.
-##  4 2015-03-01 MMM     <tibb~ inte~   0.0156 ARIMA(1,0~ 0.0489   96.9 -188. -182.
-##  5 2015-04-01 MMM     <tibb~ ar1    -0.236  ARIMA(1,0~ 0.0487   97.2 -188. -182.
-##  6 2015-04-01 MMM     <tibb~ inte~   0.0147 ARIMA(1,0~ 0.0487   97.2 -188. -182.
-##  7 2015-05-01 MMM     <tibb~ ar1    -0.202  ARIMA(1,0~ 0.0495   96.2 -186. -180.
-##  8 2015-05-01 MMM     <tibb~ inte~   0.0133 ARIMA(1,0~ 0.0495   96.2 -186. -180.
-##  9 2015-06-01 MMM     <tibb~ ar1    -0.209  ARIMA(1,0~ 0.0469   99.5 -193. -187.
-## 10 2015-06-01 MMM     <tibb~ inte~   0.0149 ARIMA(1,0~ 0.0469   99.5 -193. -187.
-## # ... with 1,982 more rows, and 7 more variables: ME <dbl>, RMSE <dbl>,
-## #   MAE <dbl>, MPE <dbl>, MAPE <dbl>, MASE <dbl>, ACF1 <dbl>
+## # A tibble: 2,088 x 17
+##    date       tickers data     term      estimate model.desc  sigma logLik   AIC
+##    <date>     <fct>   <list>   <fct>        <dbl> <fct>       <dbl>  <dbl> <dbl>
+##  1 2015-02-01 MMM     <tibble> ar1        -0.217  ARIMA(1,0~ 0.0489   97.0 -188.
+##  2 2015-02-01 MMM     <tibble> intercept   0.0152 ARIMA(1,0~ 0.0489   97.0 -188.
+##  3 2015-03-01 MMM     <tibble> ar1        -0.218  ARIMA(1,0~ 0.0489   96.9 -188.
+##  4 2015-03-01 MMM     <tibble> intercept   0.0156 ARIMA(1,0~ 0.0489   96.9 -188.
+##  5 2015-04-01 MMM     <tibble> ar1        -0.236  ARIMA(1,0~ 0.0487   97.2 -188.
+##  6 2015-04-01 MMM     <tibble> intercept   0.0147 ARIMA(1,0~ 0.0487   97.2 -188.
+##  7 2015-05-01 MMM     <tibble> ar1        -0.202  ARIMA(1,0~ 0.0495   96.2 -186.
+##  8 2015-05-01 MMM     <tibble> intercept   0.0133 ARIMA(1,0~ 0.0495   96.2 -186.
+##  9 2015-06-01 MMM     <tibble> ar1        -0.209  ARIMA(1,0~ 0.0469   99.5 -193.
+## 10 2015-06-01 MMM     <tibble> intercept   0.0149 ARIMA(1,0~ 0.0469   99.5 -193.
+## # ... with 2,078 more rows, and 8 more variables: BIC <dbl>, ME <dbl>,
+## #   RMSE <dbl>, MAE <dbl>, MPE <dbl>, MAPE <dbl>, MASE <dbl>, ACF1 <dbl>
 ```
 
 Seguindo esse workflow, as principais métricas _in-sample_ do modelo escolhido ficam acessíveis imediatamente e, assim como no gráfico anterior, o `ggplot2` cai como uma luva:
@@ -189,20 +187,20 @@ metrics
 
 ```
 ## # A tibble: 12 x 6
-##    tickers     mse   rmse    mae  mape   mase
-##    <fct>     <dbl>  <dbl>  <dbl> <dbl>  <dbl>
-##  1 MMM     0.00301 0.0549 0.0412  120. 0.0836
-##  2 AXP     0.00514 0.0717 0.0477  Inf  0.380 
-##  3 AMGN    0.00473 0.0688 0.0532  129. 0.0905
-##  4 AAPL    0.00662 0.0814 0.0675  377. 0.218 
-##  5 BA      0.0122  0.110  0.0762  Inf  0.130 
-##  6 CAT     0.00559 0.0747 0.0612  Inf  0.140 
-##  7 CVX     0.00588 0.0767 0.0542  225. 0.267 
-##  8 CSCO    0.00466 0.0682 0.0531  Inf  4.63  
-##  9 KO      0.00217 0.0466 0.0350  Inf  2.16  
-## 10 GS      0.00683 0.0826 0.0637  Inf  0.180 
-## 11 HD      0.00358 0.0599 0.0467  Inf  1.68  
-## 12 HON     0.00313 0.0560 0.0399  616. 0.307
+##    tickers     mse   rmse    mae  mape    mase
+##    <fct>     <dbl>  <dbl>  <dbl> <dbl>   <dbl>
+##  1 MMM     0.00312 0.0558 0.0424  119.  0.0663
+##  2 AXP     0.00518 0.0720 0.0489  155.  0.198 
+##  3 AMGN    0.00478 0.0691 0.0534  132.  0.128 
+##  4 AAPL    0.00653 0.0808 0.0675  364.  0.229 
+##  5 BA      0.0117  0.108  0.0740  223.  0.110 
+##  6 CAT     0.00584 0.0764 0.0629  121.  0.127 
+##  7 CVX     0.00607 0.0779 0.0562  169.  0.101 
+##  8 CSCO    0.00489 0.0699 0.0541  209. 10.0   
+##  9 KO      0.00231 0.0481 0.0357  114.  0.283 
+## 10 GS      0.00668 0.0817 0.0630  109.  0.394 
+## 11 HD      0.00397 0.0630 0.0486  489.  0.134 
+## 12 HON     0.00314 0.0561 0.0402  591.  0.173
 ```
 
 Perceba que, mais uma vez, a utilização do `ggplot2` é imediata:

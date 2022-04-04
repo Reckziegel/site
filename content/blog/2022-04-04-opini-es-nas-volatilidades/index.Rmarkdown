@@ -1,0 +1,110 @@
+---
+title: Opiniões nas Volatilidades
+author: Bernardo Reckziegel
+date: '2022-04-04'
+slug: []
+categories:
+  - R
+  - views
+tags:
+  - entropy-pooling
+  - bayesian inference
+  - ffp
+meta_img: images/image.png
+description: Description for the page
+---
+
+Dando sequência aos posts anteriores, hoje mostro como adicionar opiniões nas volatilidades esperadas. 
+
+Continuo utilizando o dataset `EuStockMarkets` (que acompanha o `R`) para facilitar a replicação dos códigos utilizados: 
+
+```{r}
+x <- diff(log(EuStockMarkets))
+head(x)
+```
+
+***
+
+Vamos assumir que um dos modelos proprietários do time de gestão aponte para os seguintes retornos projetados: `DAX`, $+15\%$; `SMI`, $+10\%$; `CAC`, $+10\%$ e `FTSE`, $+5\%$. 
+
+A gestora gostaria de construir um portfolio que leve em conta essas informações - _subjetivas_ - mas sem deixar de lado o controle de risco, em particular, da volatilidade. Nesse caso, vamos supor que a gestora deseje utilizar a volatilidade um portfolio _equal-weighted_ como referência:
+
+```{r}
+ref_vol_model <- x %*% rep(0.25, 4)
+vol_model <- stats::sd(ref_vol_model) * sqrt(252) 
+paste0(round(100 * vol_model, 2), "%")
+```
+
+Ou seja, um dos objetivos é "ancorar" a volatilidade em torno de $13\%$ ao ano.
+
+Para incorporar essas visões de mundo, é necessário criar opiniões nos retornos esperados e nas volatilidades. Esse processo é realizado com a família de funções `view_on_*()` que fazem parte do pacote `ffp`:
+
+```{r}
+library(ffp)
+
+# Subjective Valuation
+valuation <- {(1 + c(0.15, 0.1, 0.1, 0.05)) ^ (1 / 252)} - 1
+
+# Views Constructor
+view_return     <- view_on_mean(x = x, mean = valuation)
+view_volatility <- view_on_volatility(x = ref_vol_model, vol = stats::sd(ref_vol_model))
+```
+
+Para combinar múltiplas opiniões, o pacote `ffp` disponibiliza a função `bind_views`:
+
+```{r}
+views <- bind_views(view_return, view_volatility)
+views
+```
+
+Lembre-se que em entropy-pooling, cada opinião entra como uma restrição linear no problema da Entropia Mínima Relativa (EMR). Em nosso caso, temos $4$ opiniões para os retornos esperados e $1$ opinião para volatilidade. Assim, as matrizes `Aeq` e `beq` contêm $5$ linhas cada, uma para cada restrição.
+
+O vetor de probabilidades ótimo - $p^*$ - que cria a menor distorção possível em relação as probabilidades _equal-weighted_ (uma _prior_ que emerge naturalmente) é calculado com a função `entropy_pooling`:
+
+```{r}
+prior <- rep(1 / nrow(x), nrow(x))
+ep <- entropy_pooling(p = prior, Aeq = views$Aeq, beq = views$beq, solver = "nlminb")
+```
+
+O método `autoplot` está disponível para visualização de objetos da classe `ffp`: 
+
+```{r}
+library(ggplot2)
+
+autoplot(ep) + 
+  scale_color_viridis_c(option = "C", end = 0.75) + 
+  labs(title    = "Probabilidades Posteriores", 
+       subtitle = "Opiniões na Volitidade e Retornos Esperados", 
+       x        = NULL, 
+       y        = NULL)
+```
+
+Os momentos _condicionais_ - que acomodam as visões da gestora - são calculados com `ffp_moments`: 
+
+```{r}
+cond_moments <- ffp_moments(x = x, p = ep)
+cond_moments
+```
+
+Um teste rápido mostra que as opiniões para os retornos esperados foram respeitados durante o processo de otimização:
+
+```{r}
+(1 + cond_moments$mu) ^ 252 - 1
+```
+
+Assim como as expectativas em relação a volatilidade:
+
+```{r}
+vol_results <- c(stats::sd(ref_vol_model), sqrt(ffp_moments(x = ref_vol_model, ep)$sigma))
+names(vol_results) <- c("Prior", "Posterior")
+vol_results * sqrt(252)
+```
+
+Obviamente, a gestora poderia utilizar outros modelos para estimar a volatilidade, ao invés de `stats::sd`: GARCH, TVPVAR, FAVAR, ... seriam igualmente válidos e provavelmente se sairíam melhores _out-of-sample_. 
+
+Uma vez que os momentos _condicionais_ tenham sido computados, o impacto _ex-ante_ das opiniões na fronteira-eficiente são estimados num piscar de olhos via programação quadrática e/ou cônica. 
+
+Chegaremos lá...
+
+
+
