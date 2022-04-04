@@ -97,7 +97,11 @@ Abaixo a vizualização dessa distorção:
 library(ggplot2)
 
 autoplot(ep) + 
-  scale_color_viridis_c(option = "E", end = 0.75)
+  scale_color_viridis_c(option = "E", end = 0.75) + 
+  labs(title    = "Probabilidades Posteriores", 
+       subtitle = "Opiniões nos Retornos Esperados", 
+       x        = NULL, 
+       y        = NULL)
 ```
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-4-1.png" width="672" />
@@ -129,7 +133,7 @@ __Atenção__: Não confunda o resultado da função `ffp_moments()`, que calcul
 
 <!-- Esses novos momentos podem  então, finalmente ser utlizados em um otimizador, no estilo média-variância, risk-parity, etc. Obviamente, os resultados do otimizador, serão tão bons quanto as opiniões (trash in, trash out). -->
 
-Abaixo a divergência entre esses métodos (expressa em variação percentual):
+Abaixo a divergência entre esses dois métodos (expressa em variação percentual):
 
 
 ```r
@@ -165,5 +169,7 @@ round(ep_moments[["mu"]] / colMeans(x) - 1, 2)
 ```
 
 Agora as divergências sumiram e apenas o retorno do índice `FTSE` é afetado pelas opiniões.
+
+No próximo post mostro como adicionar _views_ nas volatilidades.
 
 [^1]: `Aeq` e `beq` de "__eq__ uality", pois esses elementos estão presentes em uma restrição que deve ser satisfeita com igualdade.

@@ -53,7 +53,7 @@ round(optimization$solution, 2)
 
 O famoso dataset `EuStockMarkets` que acompanha a instalação do `R` é utilizado para a construção de um portfolio "ótimo" com base no trade-off entre média e variância. O otimizador recomenda que o portfolio seja `\(100\%\)` alocado no mercado francês (CAC). 
 
-Ainda que o universo de ativos disponíveis estivesse inteiramente representado nesses ativos, nenhum gestor sério seguiria essa recomendação. Por outro lado, se as decisões não são micro-fundamentadas, são baseadas em quê? Heurística? 
+Ainda que o universo de ativos disponíveis estivesse inteiramente representado nesses `\(4\)` índices, dificilmente um gestor sério seguiria essa recomendação. Por outro lado, se as decisões não são micro-fundamentadas, são baseadas em quê? Heurística? 
 
 <!-- Soa como se o time de gestão vivesse na década de 30 do século passado. -->
 
@@ -69,7 +69,7 @@ Permita-me detalhar esse tema um pouco mais. No framework bayesiano tradicional 
 
 <img src="images/bayesian_analysis.jpg" alt="" width="90%" height="70%"/>
 
-Até ai nenhuma novidade. A questão é que o approach tradicional requer um conhecimento profundo sobre como as variáveis macroeconômicas impactam os parâmetros de diferentes distribuições. Infelizmente, não há garantia de que esses parâmetros sejam estáveis ou sequer conhecidos, mesmo por profissionais experientes em suas áreas de atuação.
+Até ai nenhuma novidade. A questão é que o approach tradicional requer um conhecimento profundo sobre como as variáveis macroeconômicas impactam os parâmetros de diferentes distribuições. Infelizmente, não há garantia de que os coeficientes de informação desses desses parâmetros sejam conhecidos, mesmo por profissionais experientes em suas áreas de atuação.
 
 <!-- Em muitos casos, a escolha dos parâmetros pode parecer tão _ad hoc_ a ponto de enfraquecer a análise. Em outros casos, o exato formato da _posterior_ não é conhecido _ex ante_, de modo que o problema deve ser solucionado numericamente via [Markov-Chain Monte-Carlo (MCMC)](https://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo), uma técnica computacionalmente demandante. -->
 
@@ -82,7 +82,7 @@ sujeito as restrições:
 $$ Fx \leq f $$
 $$ Hx = h $$  
 
-Essa formulação é engenhosa: __agora são as probabilidades de cada evento ocorrer que são consideradas variáveis aleatórias, não os eventos em si__. Os eventos estão dados!
+Essa formulação é engenhosa: __agora são as probabilidades de cada evento ocorrer que são consideradas como variáveis aleatórias, não os eventos em si__. Os eventos estão dados!
     
 As _priors_ (matrizes `\(F\)` e `\(H\)`) atuam como restrições lineares e o vetor `\(p^*\)` se ajusta de modo a distorcer ao mínimo as probabilidades originais.
 
