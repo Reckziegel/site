@@ -20,7 +20,7 @@ A distribuição _posterior_ é comparada com uma _prior_ oriunda do processo $X
 ```{r, echo=FALSE}
 knitr::include_app(
   url    = "https://reckziegel.shinyapps.io/Entropy_Pooling", 
-  height = "2050px"
+  height = "600px"
 )
 ```
 

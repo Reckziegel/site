@@ -17,6 +17,6 @@ Ao usuário é permitido escolher o tamanho da amostra, `\(n\)`, os parâmetros 
 
 A distribuição _posterior_ é comparada com uma _prior_ oriunda do processo `\(X \sim \mathcal{N}(0,\ 0.2)\)`.
 
-<iframe src="https://reckziegel.shinyapps.io/Entropy_Pooling?showcase=0" width="672" height="2050px" data-external="1"></iframe>
+<iframe src="https://reckziegel.shinyapps.io/Entropy_Pooling?showcase=0" width="672" height="600px" data-external="1"></iframe>
 
 No próximo post continuaremos explorando o fantástico mundo bayesiano, em particular as correlações.
