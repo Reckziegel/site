@@ -170,6 +170,6 @@ round(ep_moments[["mu"]] / colMeans(x) - 1, 2)
 
 Agora as divergências sumiram e apenas o retorno do índice `FTSE` é afetado pelas opiniões.
 
-No próximo post mostro como adicionar _views_ nas volatilidades.
+No próximo post mostrarei como adicionar _views_ nas volatilidades.
 
 [^1]: `Aeq` e `beq` de "__eq__ uality", pois esses elementos estão presentes em uma restrição que deve ser satisfeita com igualdade.

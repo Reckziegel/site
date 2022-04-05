@@ -69,7 +69,7 @@ Permita-me detalhar esse tema um pouco mais. No framework bayesiano tradicional 
 
 <img src="images/bayesian_analysis.jpg" alt="" width="90%" height="70%"/>
 
-Até ai nenhuma novidade. A questão é que o approach tradicional requer um conhecimento profundo sobre como as variáveis macroeconômicas impactam os parâmetros de diferentes distribuições. Infelizmente, não há garantia de que os coeficientes de informação desses desses parâmetros sejam conhecidos, mesmo por profissionais experientes em suas áreas de atuação.
+Até ai nenhuma novidade. A questão é que o approach tradicional requer um conhecimento profundo sobre como as variáveis macroeconômicas impactam os parâmetros de diferentes distribuições. Infelizmente, não há garantia de que os coeficientes de informação desses parâmetros sejam conhecidos, mesmo por profissionais experientes em suas áreas de atuação.
 
 <!-- Em muitos casos, a escolha dos parâmetros pode parecer tão _ad hoc_ a ponto de enfraquecer a análise. Em outros casos, o exato formato da _posterior_ não é conhecido _ex ante_, de modo que o problema deve ser solucionado numericamente via [Markov-Chain Monte-Carlo (MCMC)](https://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo), uma técnica computacionalmente demandante. -->
 

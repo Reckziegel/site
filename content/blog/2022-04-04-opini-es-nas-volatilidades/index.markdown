@@ -36,14 +36,15 @@ head(x)
 
 ***
 
-Vamos assumir que um dos modelos proprietários do time de gestão aponte para os seguintes retornos projetados: `DAX`, `\(+15\%\)`; `SMI`, `\(+10\%\)`; `CAC`, `\(+10\%\)` e `FTSE`, `\(+5\%\)`. 
+Vamos assumir que um dos modelos proprietários do time de gestão aponte para os seguintes retornos esperados: `DAX`, `\(+15\%\)`; `SMI`, `\(+10\%\)`; `CAC`, `\(+10\%\)` e `FTSE`, `\(+5\%\)`. 
 
-A gestora gostaria de construir um portfolio que leve em conta essas informações - _subjetivas_ - mas sem deixar de lado o controle de risco, em particular, da volatilidade. Nesse caso, vamos supor que a gestora deseje utilizar a volatilidade um portfolio _equal-weighted_ como referência:
+A gestora gostaria de construir um portfolio que leve em conta essas informações - _subjetivas_ - mas sem deixar de lado o controle de risco, em particular, da volatilidade. Nesse caso, assumo que a gestora deseje utilizar a volatilidade um portfolio _equal-weighted_ como referência:
 
 
 ```r
 ref_vol_model <- x %*% rep(0.25, 4)
 vol_model <- stats::sd(ref_vol_model) * sqrt(252) 
+
 paste0(round(100 * vol_model, 2), "%")
 ```
 
@@ -102,8 +103,8 @@ library(ggplot2)
 
 autoplot(ep) + 
   scale_color_viridis_c(option = "C", end = 0.75) + 
-  labs(title    = "Probabilidades Posteriores", 
-       subtitle = "Opiniões na Volitidade e Retornos Esperados", 
+  labs(title    = "Distribuição de Probabilidades Posteriores", 
+       subtitle = "Opiniões na Volatilidade e Retornos Esperados", 
        x        = NULL, 
        y        = NULL)
 ```
@@ -157,9 +158,9 @@ vol_results * sqrt(252)
 ## 0.1321068 0.1323336
 ```
 
-Obviamente, a gestora poderia utilizar outros modelos para estimar a volatilidade, ao invés de `stats::sd`: GARCH, TVPVAR, FAVAR, ... seriam igualmente válidos e provavelmente se sairíam melhores _out-of-sample_. 
+Obviamente, a gestora poderia utilizar outros modelos para estimar a volatilidade, ao invés de `stats::sd`: GARCH, TVPVAR, FAVAR, etc. seriam igualmente válidos e provavelmente se sairíam melhores _out-of-sample_. 
 
-Uma vez que os momentos _condicionais_ tenham sido computados, o impacto _ex-ante_ das opiniões na fronteira-eficiente são estimados num piscar de olhos via programação quadrática e/ou cônica. 
+Uma vez que os momentos _condicionais_ tenham sido computados, o impacto _ex-ante_ das opiniões no ponto de ótimo é estimado num piscar de olhos via programação quadrática e/ou cônica. 
 
 Chegaremos lá...
 
