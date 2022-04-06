@@ -1,0 +1,225 @@
+---
+title: Opinião nas Correlações
+author: Bernardo Reckziegel
+date: '2022-04-06'
+slug: []
+categories:
+  - R
+  - views
+tags:
+  - bayesian inference
+  - entropy-pooling
+  - ffp
+meta_img: images/image.png
+description: Description for the page
+---
+
+Hoje mostro como adicionar opiniões nas correlações dos ativos com [ffp](https://reckziegel.github.io/FFP/). Como de praxe, a análise é conduzida utilizando o dataset `EuStockMarkets`: 
+
+```{r}
+# invariance
+x <- diff(log(EuStockMarkets))
+cor(x)
+```
+
+Vamos assumir que o time de gestão acredite que a correlação entre os índices `FTSE` e `DAX` aumentará em $30\%$ (de $0.64$ para $0.83$) e gostaria de avaliar _ex-ante_ o impacto dessa mudança sobre o ponto de ótimo. 
+
+Para imputar esse tipo de opinião o pacote `ffp` disponibiliza a função `view_on_correlation`:
+
+```{r}
+library(ffp)
+
+cor_opinion <- cor(x)
+cor_opinion[4, 1] <- 0.83
+cor_opinion[1, 4] <- 0.83
+
+view_cor <- view_on_correlation(x = x, cor = cor_opinion)
+view_cor
+```
+
+No total, há 10 restrições em cada uma das matrizes `Aeq` e `beq`. Isso porque deseja-se alterar a correlação entre `DAX` e `FTSE` mantendo os demais elementos que não pertencem a diagonal principal intactos $(16 - 4 = 10)$. 
+
+A minimização da distorção que acomoda essas opiniões é calculada com `entropy_pooling`:
+
+```{r}
+prior <- rep(1 / nrow(x), nrow(x))
+ep <- entropy_pooling(p = prior, Aeq = view_cor$Aeq, beq = view_cor$beq, solver = "nlminb")
+ep
+```
+
+Lembre-se que o método `autoplot` está disponível para objetos da classe `ffp`:
+
+```{r}
+library(ggplot2)
+
+autoplot(ep) + 
+  scale_color_viridis_c(option = "C", end = 0.75) + 
+  labs(title    = "Distribuição de Probabilidades Posteriores", 
+       subtitle = "Opinião nas Correlações", 
+       x        = NULL, 
+       y        = NULL)
+```
+
+E que os momentos _condicionais_ de locação e dispersão são acessados com `ffp_moments`:
+
+```{r}
+cond_moments <- ffp_moments(x = x, p = ep)
+cond_moments
+```
+
+Observe que a estrutura de correlação posterior bate _exatamente_ com o cenário esperado, $cor(DAX, FTSE) = 0.85$:
+
+```{r}
+cov2cor(cond_moments$sigma)
+```
+
+_Violá!_ 
+
+Obviamente, a função `view_on_correlation` poderia ser utilizada também para _stress-testing_. Por exemplo, digamos que a gestora acredite que o mercado entrará em modo de "pânico" com as correlações subindo uniformemente para $0.9$: 
+
+```{r}
+co <- matrix(0.9, 4, 4)
+diag(co) <- 1
+co
+```
+
+Repetindo o mesmo processo obtem-se um novo vetor de probabilidades que satisfaz o cenário de "pânico":
+
+```{r}
+view_panic <- view_on_correlation(x = x, cor = co)
+
+ep_panic <- entropy_pooling(
+  p      = prior, 
+  Aeq    = view_panic$Aeq, 
+  beq    = view_panic$beq, 
+  solver = "nlminb"
+)
+
+autoplot(ep_panic) +
+  scale_color_viridis_c(option = "C", end = 0.75) + 
+  labs(title    = "Distribuição de Probabilidades Posteriores", 
+       subtitle = "Opinião nas Correlações: cenário de pânico", 
+       x        = NULL, 
+       y        = NULL)
+```
+
+E que ao mesmo tempo atende as restrições desejadas:
+
+```{r}
+cov2cor(ffp_moments(x = x, p = ep_panic)$sigma)
+```
+
+
+
+```{r, echo=FALSE}
+efficient_frontier <- function(num_portf, sigma, mu, .wmin = 0, .wmax = 1) {
+
+    assertthat::assert_that(is.numeric(.wmin))
+    assertthat::assert_that(is.numeric(.wmax))
+
+    num_assets <- ncol(sigma)
+
+    # determine return of minimum-risk portfolio
+    first_degree  <- matrix(0, num_assets, 1)
+    second_degree <- sigma
+
+    Aeq  <- matrix(1, 1, num_assets)
+    beq  <- 1
+
+    A <- rbind(-diag(num_assets), diag(num_assets))
+    b <- c(-if (length(.wmax) == 1L) rep(.wmax, num_assets) else .wmax, if (length(.wmin) == 1L) rep(.wmin, num_assets) else .wmin)
+
+    Amat <- rbind(Aeq, A)
+    bvec <- c(beq, b)
+    # MinVol_Weights
+    minvol_weights <- matrix(quadprog::solve.QP(Dmat = 2 * second_degree, dvec = -first_degree, Amat = t(Amat), bvec = bvec, meq = length(beq))$solution)
+    minvol_return  <- t(minvol_weights) %*% mu
+
+    # Determine return of maximum-return portfolio
+    maxret_return <- max(mu)
+    maxret_index  <- which(mu == max(mu))
+    # Slice efficient frontier in NumPortf equally thick horizontal sectors in the upper branch only
+    step          <- (maxret_return - minvol_return) / (num_portf - 1)
+    target_returns <- seq(c(minvol_return), maxret_return, c(step))
+
+    # Compute the NumPortf compositions and risk-return coordinates of the optimal allocations relative to each slice initialization
+    composition   <- matrix(NA_real_, num_portf, num_assets)
+    volatility    <- matrix(NA_real_, num_portf, 1)
+    expectedvalue <- matrix(NA_real_, num_portf, 1)
+
+    # start with min vol portfolio
+    composition[1, ] <- t(minvol_weights)
+    volatility[1]    <- sqrt(t(minvol_weights) %*% sigma %*% minvol_weights)
+    expectedvalue[1] <- t(minvol_weights) %*% mu
+
+    for (i in 2:(num_portf - 1)) {
+        # determine least risky portfolio for given expected return
+        AEq <- rbind(matrix(1, 1, num_assets), t(mu))
+        bEq <- rbind(1, target_returns[i])
+        Amat <- rbind(AEq, A)
+        bvec <- c(bEq, b)
+
+        weights <- t(quadprog::solve.QP(Dmat = 2 * second_degree, dvec = -first_degree, Amat = t(Amat), bvec = bvec, meq = length(bEq))$solution)
+
+        composition[i, ] <- weights
+        volatility[i]    <- sqrt(weights %*% sigma %*% t(weights))
+        expectedvalue[i] <- weights %*% mu
+
+    }
+
+    # add max ret portfolio
+    weights                          <- matrix(0, 1, num_assets)
+    weights[maxret_index]            <- 1
+    composition[nrow(composition), ] <- weights
+    volatility[length(volatility)]   <- sqrt(weights %*% sigma %*% t(weights))
+    expectedvalue[length(expectedvalue)] <- weights %*% mu
+
+    make_tidy_names <- function(x) paste0("...", 1:NCOL(x))
+    if (!is.null(colnames(sigma))) {
+        colnames(composition) <- colnames(sigma)
+    } else {
+        colnames(composition) <- make_tidy_names(sigma)
+    }
+
+    out <- list(mu      = tibble::tibble(mu = as.double(expectedvalue)),
+                sigma   = tibble::tibble(sigma = as.double(volatility)),
+                weights = tibble::as_tibble(composition)
+    )
+
+    vctrs::new_list_of(x = out, ptype = double(), class = "efficient_frontier")
+
+}
+
+panic_mom <- ffp_moments(x = x, p = ep_panic)
+
+ef_prior <- efficient_frontier(num_portf = 50, sigma = cov(x), mu = colMeans(x), .wmin = 0.0, .wmax = 1)
+ef_panic <- efficient_frontier(num_portf = 50, sigma = panic_mom$sigma, mu = panic_mom$mu, .wmin = 0.0, .wmax = 1)
+
+tbl_prior <- tibble::tibble(ef_prior$mu, ef_prior$sigma, ef_prior$weights) |> 
+  dplyr::mutate(type = "Prior")
+tbl_panic <- tibble::tibble(ef_panic$mu, ef_panic$sigma, ef_panic$weights) |> 
+  dplyr::mutate(type = "Pânico")
+
+dplyr::bind_rows(tbl_panic, tbl_prior) |> 
+  ggplot2::ggplot(ggplot2::aes(x = sigma * sqrt(252), y = mu * 252, color = type)) + 
+  ggplot2::geom_hline(yintercept = 0, size = 1, linetype = 1, color = "white") + 
+  ggplot2::geom_line(size = 1) + 
+  ggplot2::scale_x_continuous(labels = scales::percent_format()) + 
+  ggplot2::scale_y_continuous(labels = scales::percent_format()) + 
+  ggplot2::scale_color_viridis_d(end = 0.75, option = "C") + 
+  ggplot2::theme(legend.position = "bottom") + 
+  ggplot2::annotate(geom = "curve", x = 0.131, y = 0.15, xend = 0.1355, yend = 0.0, curvature = -0.1, size = 1, 
+                    arrow = ggplot2::arrow(length = ggplot2::unit(2, "mm"))) +
+  ggplot2::annotate(geom = "text", x = 0.137, y = 0.09, label = "Pânico \n precificado \n ex-ante", hjust = "center", size = 5) + 
+  ggplot2::labs(
+    title = "Fronteira Eficiente", 
+    subtitle = "Análise de sensibilidade ex-ante via entropy-pooling", 
+    x = "Volatilidade Anualizada", 
+    y = "Retorno Anualizado", 
+    color = "Cenário"
+  )  
+```
+
+A possibilidade de se precificar rapidamente _qualquer_ opinião é uma das grandes virtudes de entropy-pooling. Com relação a esse ponto, quero ser ainda mais enfático: __Com entropy-pooling, não há cenário que não possa ser precificado!__ 
+ 
+Por hoje é isso. No próximo post mostro como construir opiniões de devem ser satisfeitas com desigualdade.
