@@ -1,5 +1,5 @@
 ---
-title: Opinião nas Correlações
+title: Opiniões nas Correlações
 author: Bernardo Reckziegel
 date: '2022-04-06'
 slug: []
