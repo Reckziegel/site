@@ -19,7 +19,7 @@ A distribuição _posterior_ é comparada com uma _prior_ oriunda do processo `\
 
 <iframe src="https://reckziegel.shinyapps.io/Entropy_Pooling?showcase=0" width="672" height="1500px" data-external="1"></iframe>
 
-Perceba que ao contrário dos métodos bayesianos tradicionais, a otimização via entropy-pooling acontece numa fração de segundos, permitindo que as opiniões sejam reprecifadas em _real-time_. 
+Perceba que ao contrário dos métodos bayesianos tradicionais, a otimização via entropy-pooling acontece numa fração de segundos, permitindo que as opiniões sejam reprecificadas em _real-time_. 
 
 Isso é possível porque entropy-pooling reprecifica apenas as _probabilidades_ de cada evento, e não os eventos em si. Ou seja, a estimação acontece uma única vez, ao invés de centenas de vezes, como em MCMC.
 
