@@ -185,4 +185,4 @@ cov2cor(ffp_moments(x = x, p = ep_panic)$sigma)
 
 A possibilidade de se precificar rapidamente _qualquer_ opinião é uma das grandes virtudes de entropy-pooling. Com relação a esse ponto, quero ser ainda mais enfático: __Com entropy-pooling, não há cenário que não possa ser precificado!__ 
  
-Por hoje é isso. No próximo post mostro como construir opiniões de devem ser satisfeitas com desigualdade.
+Por hoje é isso. No próximo post mostro como construir opiniões que devem ser satisfeitas com desigualdade.
