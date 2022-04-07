@@ -1,0 +1,22 @@
+<p>Muitas vezes os gestores não têm opiniões precisas sobre o que vai acontecer no mercado. Por exemplo, é raro gestores cravarem que o Ibovespa vai subir <span class="math inline">\(30\%\)</span> e/ou o dólar vai cair <span class="math inline">\(10\%\)</span>. Ás vezes, a coisa é mais sutil: o Ibovespa deve performar melhor que o dólar (sem se apegar a um número específico).</p>
+<p>Para mostrar como entropy-pooling acomoda essas opiniões de “rankiamento” utilizarei um dataset diferente, que você pode baixar <a href="https://github.com/Reckziegel/site/tree/master/data">aqui</a>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>yield_curve <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">&quot;/Meu Drive/site/data/di_constant_maturity.rds&quot;</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span>(yield_curve)</span></code></pre></div>
+<pre><code>##                   2Y        3Y        4Y        5Y        6Y        7Y
+## 2022-03-30 0.1240968 0.1197660 0.1151184 0.1138278 0.1132500 0.1132671
+## 2022-03-31 0.1230264 0.1184631 0.1138500 0.1126418 0.1120619 0.1120285
+## 2022-04-01 0.1212715 0.1160663 0.1112955 0.1101563 0.1095733 0.1094685
+## 2022-04-04 0.1211870 0.1158481 0.1107770 0.1093271 0.1085629 0.1083623
+## 2022-04-05 0.1226871 0.1178566 0.1131726 0.1117918 0.1109830 0.1106627
+## 2022-04-06 0.1232964 0.1188525 0.1144155 0.1129656 0.1121911 0.1119632
+##                   8Y        9Y       10Y
+## 2022-03-30 0.1134397 0.1141273 0.1150233
+## 2022-03-31 0.1123047 0.1128959 0.1135978
+## 2022-04-01 0.1096411 0.1101989 0.1109140
+## 2022-04-04 0.1084659 0.1090079 0.1097507
+## 2022-04-05 0.1107663 0.1111716 0.1116921
+## 2022-04-06 0.1120667 0.1124270 0.1129249</code></pre>
+<blockquote>
+<p>Quando for importar os dados na sua máquina lembre de alterar o caminho de busca. No meu PC é /Meu Drive/site/data/di_constant_maturity.rds, mas no seu poderá ser diferente, dependendo em que pasta você salvar os dados.</p>
+</blockquote>
+<p>Para lidar com esse tipo de situação, o pacote <code>ffp</code> disponibiliza a função <code>view_on_rank</code>.</p>

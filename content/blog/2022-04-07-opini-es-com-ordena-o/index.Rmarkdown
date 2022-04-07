@@ -1,0 +1,217 @@
+---
+title: Opiniões com Ordenação
+author: Bernardo Reckziegel
+date: '2022-04-07'
+slug: []
+categories:
+  - R
+  - views
+tags:
+  - ffp
+  - entropy-pooling
+  - bayesian inference
+meta_img: images/image.png
+description: Description for the page
+---
+
+Nem sempre os gestores possuem opiniões precisas sobre os parâmetros de locação e dispersão. Às vezes, as opiniões são mais sutis: a inclilnação da curva de juros vai aumentar, o Ibovespa vai cair, o dólar vai ficar de lado, etc.  
+
+Para mostrar como entropy-pooling acomoda essas opiniões de posição (ou "rankiamento") mais uma vez utilizo o dataset `EuStockMarkets`, que vem junto com a instalação do `R`: 
+
+```{r}
+x <- diff(log(EuStockMarkets))
+head(x)
+```
+
+Com base nesses dados, vamos supor que o time de gestão acredite que os retornos dos índices $SMI$ e $DAX$ estarão encadeados da seguinte maneira:
+
+$$ SMI \leq DAX $$
+Ou seja, o $DAX$ performará melhor do que $SMI$. Já em relação ao para o $CAC$ e $FTSE$, a postura é passiva e não há opinião formada.
+
+Para montar esse tipo de opinião _fraca_, o pacote `ffp` disponibiliza a função `view_on_rank`:
+
+```{r}
+library(ffp)
+
+views <- view_on_rank(x = x, rank = c(2, 1))
+views
+```
+
+No argumento `rank` devemos indicar o número da coluna de cada ativo em `x`, de maneira que aqueles com as melhores perspectivas de retorno estejam localizados à direita dos demais. Como achamos que o $DAX$ (1 coluna) irá performar melhor do que o $SMI$ (2 coluna) usamos `rank = c(2, 1)`.
+
+Matematicamente, estamos buscando minimizar a expressão:
+
+$$ \sum_{i=1}^I x_i(ln(x_i) - ln(p_i)) $$
+sujeito as restrição:
+
+$$ p_i (SMI - DAX) \leq 0 $$ 
+A função que soluciona esse problema é `entropy_pooling`:
+
+```{r}
+prior <- rep(1 / nrow(x), nrow(x))
+ep <- entropy_pooling(p = prior, A = views$A, b = views$b, solver = "nloptr")
+ep
+```
+
+Note que pela primeira vez abandonamos o `solver = "nlmimb"`, pois problemas com restrições de desigualdade devem ser resolvidos com os otimizadores `solnl` ou `nloptr`.
+
+As probabilidades posteriores (que solucionam o problema da entropia mínima relativa) são visualizados com o método `autoplot` do pacote `ggplot2`:
+
+```{r}
+library(ggplot2)
+
+autoplot(ep) + 
+  scale_color_viridis_c(option = "C", end = 0.75) + 
+  labs(title    = "Distribuição de Probabilidades Posteriores", 
+       subtitle = "Opiniões de Ordenação - 'Rankiamento'", 
+       x        = NULL, 
+       y        = NULL)
+```
+
+A razão entre os momentos - _condicionais_ vs. _incondicionais_ - de locação mostra que a restrição foi atendida: o retorno esperado do $DAX$ aumentou em $17\%$ (em relação a _prior_) e o retorno do índice $SMI$ foi rebaixado em $6,5\%$.  
+
+```{r}
+cond_moments <- ffp_moments(x = x, p = ep)
+
+cond_moments$mu / colMeans(x) - 1
+```
+
+Note que embora não fosse a intenção, os retornos projetados para os índices $CAC$ e $FTSE$ também foram alterados. Nesse caso, a função `view_on_mean` poderia ser utlizada para "redirecionar" a locação de volta para as médias amostrais, como mostra o post [Opiniões nos retornos esperados](https://www.bernardo.codes/blog/2022-03-30-opini-es-nos-retornos-esperados/).
+
+```{r, echo=FALSE, warning=FALSE}
+efficient_frontier <- function(num_portf, sigma, mu, .wmin = 0, .wmax = 1) {
+
+    assertthat::assert_that(is.numeric(.wmin))
+    assertthat::assert_that(is.numeric(.wmax))
+
+    num_assets <- ncol(sigma)
+
+    # determine return of minimum-risk portfolio
+    first_degree  <- matrix(0, num_assets, 1)
+    second_degree <- sigma
+
+    Aeq  <- matrix(1, 1, num_assets)
+    beq  <- 1
+
+    A <- rbind(-diag(num_assets), diag(num_assets))
+    b <- c(-if (length(.wmax) == 1L) rep(.wmax, num_assets) else .wmax, if (length(.wmin) == 1L) rep(.wmin, num_assets) else .wmin)
+
+    Amat <- rbind(Aeq, A)
+    bvec <- c(beq, b)
+    # MinVol_Weights
+    minvol_weights <- matrix(quadprog::solve.QP(Dmat = 2 * second_degree, dvec = -first_degree, Amat = t(Amat), bvec = bvec, meq = length(beq))$solution)
+    minvol_return  <- t(minvol_weights) %*% mu
+
+    # Determine return of maximum-return portfolio
+    maxret_return <- max(mu)
+    maxret_index  <- which(mu == max(mu))
+    # Slice efficient frontier in NumPortf equally thick horizontal sectors in the upper branch only
+    step          <- (maxret_return - minvol_return) / (num_portf - 1)
+    target_returns <- seq(c(minvol_return), maxret_return, c(step))
+
+    # Compute the NumPortf compositions and risk-return coordinates of the optimal allocations relative to each slice initialization
+    composition   <- matrix(NA_real_, num_portf, num_assets)
+    volatility    <- matrix(NA_real_, num_portf, 1)
+    expectedvalue <- matrix(NA_real_, num_portf, 1)
+
+    # start with min vol portfolio
+    composition[1, ] <- t(minvol_weights)
+    volatility[1]    <- sqrt(t(minvol_weights) %*% sigma %*% minvol_weights)
+    expectedvalue[1] <- t(minvol_weights) %*% mu
+
+    for (i in 2:(num_portf - 1)) {
+        # determine least risky portfolio for given expected return
+        AEq <- rbind(matrix(1, 1, num_assets), t(mu))
+        bEq <- rbind(1, target_returns[i])
+        Amat <- rbind(AEq, A)
+        bvec <- c(bEq, b)
+
+        weights <- t(quadprog::solve.QP(Dmat = 2 * second_degree, dvec = -first_degree, Amat = t(Amat), bvec = bvec, meq = length(bEq))$solution)
+
+        composition[i, ] <- weights
+        volatility[i]    <- sqrt(weights %*% sigma %*% t(weights))
+        expectedvalue[i] <- weights %*% mu
+
+    }
+
+    # add max ret portfolio
+    weights                          <- matrix(0, 1, num_assets)
+    weights[maxret_index]            <- 1
+    composition[nrow(composition), ] <- weights
+    volatility[length(volatility)]   <- sqrt(weights %*% sigma %*% t(weights))
+    expectedvalue[length(expectedvalue)] <- weights %*% mu
+
+    make_tidy_names <- function(x) paste0("...", 1:NCOL(x))
+    if (!is.null(colnames(sigma))) {
+        colnames(composition) <- colnames(sigma)
+    } else {
+        colnames(composition) <- make_tidy_names(sigma)
+    }
+
+    out <- list(mu      = tibble::tibble(mu = as.double(expectedvalue)),
+                sigma   = tibble::tibble(sigma = as.double(volatility)),
+                weights = tibble::as_tibble(composition)
+    )
+
+    vctrs::new_list_of(x = out, ptype = double(), class = "efficient_frontier")
+
+}
+ep_mom <- ffp_moments(x = x, p = ep)
+
+ef_prior <- efficient_frontier(num_portf = 50, sigma = cov(x), mu = colMeans(x), .wmin = 0.0, .wmax = 1)
+ef_ep    <- efficient_frontier(num_portf = 50, sigma = ep_mom$sigma, mu = ep_mom$mu, .wmin = 0.0, .wmax = 1)
+
+tbl_prior <- tibble::tibble(ef_prior$mu, ef_prior$sigma, ef_prior$weights) |> 
+  dplyr::mutate(type = "Prior")
+tbl_panic <- tibble::tibble(ef_ep$mu, ef_ep$sigma, ef_ep$weights) |> 
+  dplyr::mutate(type = "Posterior")
+
+dplyr::bind_rows(tbl_panic, tbl_prior) |> 
+  ggplot2::ggplot(ggplot2::aes(x = sigma * sqrt(252), y = mu * 252, color = type)) + 
+  #ggplot2::geom_hline(yintercept = 0, size = 1, linetype = 1, color = "white") + 
+  ggplot2::geom_line(size = 1) + 
+  ggplot2::scale_x_continuous(labels = scales::percent_format(), limits = c(0.1175, 0.15)) + 
+  ggplot2::scale_y_continuous(labels = scales::percent_format()) + 
+  ggplot2::scale_color_viridis_d(end = 0.75, option = "C") + 
+  ggplot2::theme(legend.position = "bottom") + 
+  ggplot2::labs(
+    title = "Fronteira Eficiente", 
+    subtitle = "Análise de Cenário ex-ante: opiniões de performance relativa", 
+    x = "Volatilidade Anualizada", 
+    y = "Retorno Anualizado", 
+    color = NULL
+  )  
+```
+
+A fronteira eficiente _condicional_ se situa abaixo da fronteira _incondicional_ porque a opinião coloca um teto na performance do índice mais rentável: 
+
+```{r}
+(1 + colMeans(x)) ^ 252 - 1
+```
+ 
+Como já mencionei outras vezes, é fácil estender esse tipo de análise para o VaR, Expected Shortfall, etc. 
+
+De fato, `ffp` oferece um atalho para esses cálculos com `empirical_stats`:
+
+```{r, warning=FALSE, message=FALSE}
+library(dplyr)
+
+prior_stats <- empirical_stats(x = x, p = as_ffp(prior), level = 0.05) |> 
+  mutate(Regime = "Prior")
+posterior_stats <- empirical_stats(x = x, p = ep, level = 0.05) |> 
+  mutate(Regime = "Posterior")
+
+# Plot
+bind_rows(posterior_stats, prior_stats) |> 
+  ggplot(aes(x = name, y = value, fill = Regime, color = Regime)) + 
+  geom_col(position = "dodge") + 
+  facet_wrap(~ stat, scales = "free") + 
+  scale_fill_viridis_d(option = "C", end = 0.75) + 
+  scale_color_viridis_d(option = "C", end = 0.75) + 
+  theme(legend.position = "bottom") + 
+  labs(title    = "Análise de Sensibilidade", 
+       subtitle = "Opiniões com Ordenação via Entropy-Pooling", 
+       x        = "Índice", 
+       y        = "Estatística")
+  
+```
