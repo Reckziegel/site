@@ -54,7 +54,7 @@ view_cor
 ## beq :  Dim 10 x 1
 ```
 
-No total, há 10 restrições em cada uma das matrizes `Aeq` e `beq`. Isso porque deseja-se alterar a correlação entre `DAX` e `FTSE` mantendo os demais elementos que não pertencem a diagonal principal intactos `\((16 - 4 = 10)\)`. 
+No total, há 10 restrições em cada uma das matrizes `Aeq` e `beq`. Isso porque deseja-se alterar a correlação entre `DAX` e `FTSE` mantendo os demais elementos que não pertencem a diagonal principal intactos. 
 
 A minimização da distorção que acomoda essas opiniões é calculada com `entropy_pooling`:
 
