@@ -14,7 +14,7 @@ meta_img: images/image.png
 description: Description for the page
 ---
 
-Nem sempre os gestores possuem opiniões precisas sobre os parâmetros de locação e dispersão. Às vezes, as opiniões são mais sutis: a inclilnação da curva de juros vai aumentar, o Ibovespa vai cair, o dólar vai ficar de lado, etc.  
+Nem sempre os gestores possuem opiniões precisas sobre os parâmetros de locação e dispersão. Às vezes, as opiniões são mais sutis: a inclinação da curva de juros vai aumentar, o Ibovespa vai cair, o dólar vai ficar de lado, etc.  
 
 Para mostrar como entropy-pooling acomoda essas opiniões de posição (ou "rankiamento") mais uma vez utilizo o dataset `EuStockMarkets`, que vem junto com a instalação do `R`: 
 
@@ -126,9 +126,7 @@ A fronteira eficiente _condicional_ se situa abaixo da fronteira _incondicional_
 ## 0.1785218 0.2287857 0.1164048 0.1149803
 ```
  
-Como já mencionei outras vezes, é fácil estender esse tipo de análise para o VaR, Expected Shortfall, etc. 
-
-De fato, `ffp` oferece um atalho para esses cálculos com `empirical_stats`:
+Como já mencionei outras vezes, é fácil estender esse tipo de análise para o VaR, Expected Shortfall, etc. De fato, `ffp` oferece um atalho para esses cálculos com `empirical_stats`:
 
 
 ```r
@@ -150,7 +148,9 @@ bind_rows(posterior_stats, prior_stats) |>
   labs(title    = "Análise de Sensibilidade", 
        subtitle = "Opiniões com Ordenação via Entropy-Pooling", 
        x        = "Índice", 
-       y        = "Estatística")
+       y        = "Estatística", 
+       fill     = NULL,
+       color    = NULL)
 ```
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-8-1.png" width="672" />
