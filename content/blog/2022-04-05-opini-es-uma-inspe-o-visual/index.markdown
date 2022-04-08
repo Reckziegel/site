@@ -1,5 +1,5 @@
 ---
-title: Opiniões - reprecificação em real-time
+title: Opiniões - Reprecificação em real-time
 author: Bernardo Reckziegel
 date: '2022-04-05'
 slug: []

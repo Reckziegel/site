@@ -90,7 +90,7 @@ ep
 
 O vetor `ep` contém as probabilidades que satisfazem a visão do time de gestão e que distorcem ao mínimo o vetor de probabilidades uniforme, que chamamos de `prior`. 
 
-Abaixo a vizualização dessa distorção: 
+Abaixo a visualização dessa distorção: 
 
 
 ```r
