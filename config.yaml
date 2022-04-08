@@ -45,6 +45,3 @@ menu:
     - name: LinkedIn
       url: https://www.linkedin.com/in/bernardoreckziegel/
       weight: 5
-    - name: Twitter
-      url: https://twitter.com/ReckziegelB
-      weight: 6
