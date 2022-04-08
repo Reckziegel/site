@@ -61,7 +61,7 @@ No argumento `rank` devemos indicar o número da coluna de cada ativo em `x`, de
 Matematicamente, estamos buscando minimizar a expressão:
 
 $$ \sum_{i=1}^I x_i(ln(x_i) - ln(p_i)) $$
-sujeito as restrição:
+sujeito a restrição:
 
 $$ p_i (SMI - DAX) \leq 0 $$ 
 A função que soluciona esse problema é `entropy_pooling`:
@@ -114,7 +114,7 @@ Note que embora não fosse a intenção, os retornos projetados para os índices
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-6-1.png" width="672" />
 
-A fronteira eficiente _condicional_ se situa abaixo da fronteira _incondicional_ porque a opinião coloca um teto na performance do índice mais rentável: 
+A fronteira eficiente _condicional_ se situa abaixo da fronteira _incondicional_ porque a opinião coloca um teto na performance do índice mais rentável - `\(SMI \leq DAX\)`: 
 
 
 ```r
