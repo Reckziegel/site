@@ -67,7 +67,7 @@ cond_moments <- ffp_moments(x = x, p = ep)
 cond_moments
 ```
 
-Observe que a estrutura de correlação posterior bate _exatamente_ com o cenário esperado, $cor(DAX, FTSE) = 0.85$:
+Observe que a estrutura de correlação posterior se _aproxima_ do cenário esperado, $cor(DAX, FTSE) = 0.85$:
 
 ```{r}
 cov2cor(cond_moments$sigma)
