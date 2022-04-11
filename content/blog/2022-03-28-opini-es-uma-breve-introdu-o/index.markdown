@@ -1,5 +1,5 @@
 ---
-title: Opiniões - uma breve introdução
+title: Opiniões - Uma breve introdução
 author: Bernardo Reckziegel
 date: '2022-03-28'
 slug: []
