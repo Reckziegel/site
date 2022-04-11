@@ -53,7 +53,7 @@ round(optimization$solution, 2)
 
 O famoso dataset `EuStockMarkets` que acompanha a instalação do `R` é utilizado para a construção de um portfolio "ótimo" com base no trade-off entre média e variância. O otimizador recomenda que o portfolio seja `\(100\%\)` alocado no mercado francês (CAC). 
 
-Ainda que o universo de ativos disponíveis estivesse inteiramente representado nesses `\(4\)` índices, dificilmente um gestor sério seguiria essa recomendação. Por outro lado, se as decisões não são micro-fundamentadas, são baseadas em quê? Heurística? 
+Ainda que o universo de ativos disponíveis estivesse inteiramente representado nesses `\(4\)` índices, será que algum gestor sério seguiria essa recomendação? Por outro lado, se as decisões não são micro-fundamentadas, são baseadas em quê? Heurística? 
 
 <!-- Soa como se o time de gestão vivesse na década de 30 do século passado. -->
 
