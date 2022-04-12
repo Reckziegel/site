@@ -107,7 +107,7 @@ cond_moments
 ## FTSE 6.834306e-05 4.518376e-05 5.754929e-05 6.341578e-05
 ```
 
-Observe que a estrutura de correlação posterior se _aproxima_ do cenário esperado, `\(cor(DAX, FTSE) = 0.85\)`:
+Observe que a estrutura de correlação posterior se aproxima do cenário esperado, `\(cor(DAX, FTSE) = 0.83\)`:
 
 
 ```r
