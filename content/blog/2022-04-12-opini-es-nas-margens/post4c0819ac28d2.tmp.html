@@ -1,0 +1,80 @@
+<p>Dando sequência aos posts anteriores, hoje mostro como construir opiniões nas distribuições marginais.</p>
+<p>Mais uma vez, para facilicar a reprodução dos resultados, uso o dataset <code>EuStockMarkets</code> que acompanha a instalação do <code>R</code>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">diff</span>(<span class="fu">log</span>(EuStockMarkets))</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(x)</span></code></pre></div>
+<pre><code>##               DAX          SMI          CAC         FTSE
+## [1,] -0.009326550  0.006178360 -0.012658756  0.006770286
+## [2,] -0.004422175 -0.005880448 -0.018740638 -0.004889587
+## [3,]  0.009003794  0.003271184 -0.005779182  0.009027020
+## [4,] -0.001778217  0.001483372  0.008743353  0.005771847
+## [5,] -0.004676712 -0.008933417 -0.005120160 -0.007230164
+## [6,]  0.012427042  0.006737244  0.011714353  0.008517217</code></pre>
+<p>Vamos assumir que o time de econometria (após algumas linhas de código e meia dúzia de derivadas) conclui que a distribuição Student-t assimétrica é a que melhor se adapta aos dados em questão:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cma)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>estimation <span class="ot">&lt;-</span> <span class="fu">fit_t</span>(x, <span class="at">symmetric =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>estimation</span></code></pre></div>
+<pre><code>## # Margins Estimation
+## Converged:       TRUE
+## Dimension:       4
+## AIC:            -52711.16
+## Log-Likelihood:  26374.58
+## Model:           Asymmetric Student-t</code></pre>
+<p>O pacote <code>cma</code> não está no CRAN e para instala-lo você deverá rodar o comando <code>devtools::install_github("Reckziegel/CMA")</code> no console. Esse pacote não é essencial para o post de hoje, mas será fundamental quando for comentar sobre opiniões nas copulas. Assim, já fica a propaganda.</p>
+<p>O pacote <code>cma</code> fornece algumas funções interessantes para geração de cenários. Vamos utilizar a função <code>generate_margins</code> para criar um painél largo de cenários com as mesmas propriedades estatísticas que encontramos em <code>estimation</code>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>t_margins <span class="ot">&lt;-</span> <span class="fu">generate_margins</span>(<span class="at">model =</span> estimation, <span class="at">n =</span> <span class="dv">100000</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>t_margins</span></code></pre></div>
+<pre><code>## # New Margins
+## marginal: &lt;&lt; tbl 100000 x 4 &gt;&gt;</code></pre>
+<p>Utilizaremos esse novo painél para construir as opiniões:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ffp)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>prior <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span> <span class="sc">/</span> <span class="dv">100000</span>, <span class="dv">100000</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>views <span class="ot">&lt;-</span> <span class="fu">view_on_marginal_distribution</span>(<span class="at">x =</span> x, <span class="at">simul =</span> t_margins<span class="sc">$</span>marginal, <span class="at">p =</span> prior)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>views</span></code></pre></div>
+<pre><code>## # ffp view
+## Type:  View On Marginal Distribution
+## Aeq :  Dim 16 x 1859 
+## beq :  Dim 16 x 1</code></pre>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>prior_x <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span> <span class="sc">/</span> <span class="fu">nrow</span>(x), <span class="fu">nrow</span>(x))</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>ep <span class="ot">&lt;-</span> <span class="fu">entropy_pooling</span>(<span class="at">p =</span> prior_x, <span class="at">Aeq =</span> views<span class="sc">$</span>Aeq, <span class="at">beq =</span> views<span class="sc">$</span>beq, <span class="at">solver =</span> <span class="st">&quot;nloptr&quot;</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(ep) <span class="sc">+</span> </span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_viridis_c</span>(<span class="at">option =</span> <span class="st">&quot;C&quot;</span>, <span class="at">end =</span> <span class="fl">0.75</span>) <span class="sc">+</span> </span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title    =</span> <span class="st">&quot;Distribuição de Probabilidades Posteriores&quot;</span>, </span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">&quot;Opinião nas Margens&quot;</span>, </span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">x        =</span> <span class="cn">NULL</span>, </span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">y        =</span> <span class="cn">NULL</span>)</span></code></pre></div>
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>cond_moments <span class="ot">&lt;-</span> <span class="fu">ffp_moments</span>(<span class="at">x =</span> x, <span class="at">p =</span> ep)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Location Matches</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(cond_moments<span class="sc">$</span>mu <span class="sc">/</span> <span class="fu">colMeans</span>(t_margins<span class="sc">$</span>marginal) <span class="sc">-</span> <span class="dv">1</span>, <span class="dv">2</span>)</span></code></pre></div>
+<pre><code>##   DAX   SMI   CAC  FTSE 
+##  0.02 -0.01  0.01 -0.13</code></pre>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Dispersion Matches</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">sqrt</span>(<span class="fu">diag</span>(cond_moments<span class="sc">$</span>sigma)) <span class="sc">/</span> <span class="fu">apply</span>(t_margins<span class="sc">$</span>marginal, <span class="dv">2</span>, sd) <span class="sc">-</span> <span class="dv">1</span>, <span class="dv">2</span>) </span></code></pre></div>
+<pre><code>##  DAX  SMI  CAC FTSE 
+## 0.01 0.01 0.00 0.00</code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>estimation<span class="sc">$</span>chi <span class="ot">&lt;-</span> <span class="fl">2.0</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>estimation<span class="sc">$</span>mu <span class="ot">&lt;-</span> estimation<span class="sc">$</span>mu <span class="sc">*</span> <span class="fl">0.9</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>new_margins <span class="ot">&lt;-</span> <span class="fu">generate_margins</span>(<span class="at">model =</span> estimation, <span class="at">n =</span> <span class="dv">100000</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>views2 <span class="ot">&lt;-</span> <span class="fu">view_on_marginal_distribution</span>(<span class="at">x =</span> x, <span class="at">simul =</span> new_margins<span class="sc">$</span>marginal, <span class="at">p =</span> prior)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>ep2 <span class="ot">&lt;-</span> <span class="fu">entropy_pooling</span>(<span class="at">p =</span> prior_x, <span class="at">Aeq =</span> views2<span class="sc">$</span>Aeq, <span class="at">beq =</span> views2<span class="sc">$</span>beq, <span class="at">solver =</span> <span class="st">&quot;nloptr&quot;</span>)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>cond_moments2 <span class="ot">&lt;-</span> <span class="fu">ffp_moments</span>(<span class="at">x =</span> x, <span class="at">p =</span> ep2)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Location Matches</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(cond_moments2<span class="sc">$</span>mu <span class="sc">/</span> <span class="fu">colMeans</span>(new_margins<span class="sc">$</span>marginal) <span class="sc">-</span> <span class="dv">1</span>, <span class="dv">2</span>)</span></code></pre></div>
+<pre><code>##  DAX  SMI  CAC FTSE 
+##    0    0    0    0</code></pre>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Dispersion Matches</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">sqrt</span>(<span class="fu">diag</span>(cond_moments2<span class="sc">$</span>sigma)) <span class="sc">/</span> <span class="fu">apply</span>(new_margins<span class="sc">$</span>marginal, <span class="dv">2</span>, sd) <span class="sc">-</span> <span class="dv">1</span>, <span class="dv">2</span>)</span></code></pre></div>
+<pre><code>##  DAX  SMI  CAC FTSE 
+##    0    0    0    0</code></pre>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>cond_moments2<span class="sc">$</span>mu <span class="sc">/</span> cond_moments<span class="sc">$</span>mu</span></code></pre></div>
+<pre><code>##      DAX      SMI      CAC     FTSE 
+## 1.048120 1.084042 1.069445 1.277290</code></pre>
