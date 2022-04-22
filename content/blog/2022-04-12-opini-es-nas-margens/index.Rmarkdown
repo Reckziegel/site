@@ -25,7 +25,7 @@ head(x)
 
 Vamos assumir que o time de econometria (após algumas linhas de código e meia dúzia de derivadas) conclua que a distribuição Student-t assimétrica é a que melhor se adapta aos dados em questão. 
 
-Para conduzir o processo de estimação utilizo o pacote [cma](https://reckziegel.github.io/CMA/)[^1]. Essa biblioteca não está no [CRAN](https://cran.r-project.org/) - _for now_ -  e para instala-lo você deverá rodar o comando `devtools::install_github("Reckziegel/CMA")` no console. 
+Para conduzir o processo de estimação utilizo o pacote [cma](https://reckziegel.github.io/CMA/)[^1]. Essa biblioteca não está no [CRAN](https://cran.r-project.org/) - _for now_ -  e para instala-la você deverá rodar o comando `devtools::install_github("Reckziegel/CMA")` no console. 
 
 ```{r, warning=FALSE, message=FALSE}
 # devtools::install_github("Reckziegel/CMA")
@@ -152,7 +152,7 @@ ep <- entropy_pooling(
 cond_moments <- ffp_moments(x = x, p = ep)
 ```
 
-E veja mais uma vez as opiniões são satisfeitas:
+E veja que mais uma vez as opiniões são satisfeitas:
 
 ```{r}
 # Location Matches
@@ -162,11 +162,12 @@ round(cond_moments$mu / colMeans(new_margins$marginal) - 1, 2)
 round(sqrt(diag(cond_moments$sigma)) / apply(new_margins$marginal, 2, sd) - 1, 2)
 ```
 
-![](https://media.giphy.com/media/ujUdrdpX7Ok5W/giphy.gif)
+<!-- ![](https://media.giphy.com/media/ujUdrdpX7Ok5W/giphy.gif) -->
 
-Lembre que qualquer elemento poderia ter sido alterado: média, variância, assimetria, curtose, _you choose_... De fato, portfolios com assimetria positiva são há muito tempo desejo de consumo dos gestores. 
+Modelar as margens como um todo adiciona um novo layer de flexibilidade ao processo de gestão de risco e construção de carteiras. A incerteza é tratada de maneira _prospectiva_, não olhando o retrovisor.
 
-Por hoje era isso e no próximo post avanço no fantástico mundo das copulas.
+Contudo, há outros elementos em uma distribuição multivariada no qual podemos ter opiniões. No próximo post mostro uma fonte assossiação "invisível" pode ser relevante para modermos eventos de pânico. Até lá...
+
 
 [^1]: Essa biblioteca será fundamental quando falarmos de copulas. 
 [^2]: Você pode acessar essa informação com o comando `t_model$chi` no console.

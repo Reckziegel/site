@@ -36,7 +36,7 @@ head(x)
 
 Vamos assumir que o time de econometria (após algumas linhas de código e meia dúzia de derivadas) conclua que a distribuição Student-t assimétrica é a que melhor se adapta aos dados em questão. 
 
-Para conduzir o processo de estimação utilizo o pacote [cma](https://reckziegel.github.io/CMA/)[^1]. Essa biblioteca não está no [CRAN](https://cran.r-project.org/) - _for now_ -  e para instala-lo você deverá rodar o comando `devtools::install_github("Reckziegel/CMA")` no console. 
+Para conduzir o processo de estimação utilizo o pacote [cma](https://reckziegel.github.io/CMA/)[^1]. Essa biblioteca não está no [CRAN](https://cran.r-project.org/) - _for now_ -  e para instala-la você deverá rodar o comando `devtools::install_github("Reckziegel/CMA")` no console. 
 
 
 ```r
@@ -78,18 +78,18 @@ t_margins$marginal
 
 ```
 ## # A tibble: 1,000,000 x 4
-##         DAX       SMI       CAC     FTSE
-##       <dbl>     <dbl>     <dbl>    <dbl>
-##  1 -0.0124  -0.00199  -0.0123   -0.00335
-##  2  0.00429 -0.0127   -0.0188    0.00889
-##  3  0.00719 -0.000338  0.00117  -0.00373
-##  4 -0.00414 -0.00326  -0.000414 -0.00828
-##  5  0.0142   0.0168    0.0161    0.00370
-##  6  0.00114  0.000734 -0.00648  -0.00459
-##  7  0.0196   0.0152    0.0197    0.0149 
-##  8  0.0102   0.00585   0.0207    0.00473
-##  9  0.00214 -0.00140   0.00281   0.00376
-## 10 -0.0112  -0.00613  -0.0171   -0.0134 
+##          DAX       SMI        CAC      FTSE
+##        <dbl>     <dbl>      <dbl>     <dbl>
+##  1  0.00913   0.0116    0.0111     0.00989 
+##  2 -0.00778  -0.00494  -0.00361    0.00246 
+##  3  0.0180   -0.0220   -0.0287    -0.0389  
+##  4  0.00387  -0.00466   0.00318    0.000725
+##  5  0.00308   0.00809  -0.00654   -0.000936
+##  6 -0.00271  -0.00829  -0.0158    -0.00528 
+##  7 -0.000529 -0.00719  -0.0410    -0.00288 
+##  8 -0.00675  -0.00560  -0.00478   -0.00608 
+##  9  0.0123    0.000881  0.00904    0.00448 
+## 10 -0.00184  -0.00695  -0.0000675 -0.00389 
 ## # ... with 999,990 more rows
 ```
 
@@ -148,7 +148,7 @@ ep
 
 ```
 ## <ffp[1859]>
-## 0.0005417355 0.0005590031 0.0005350359 0.0005423133 0.000540445 ... 0.0005040159
+## 0.0005389113 0.0005589966 0.0005357949 0.0005429065 0.000539703 ... 0.0005054094
 ```
 
 O objeto `ep` contém as probabilidades que distorcem ao mínimo o vetor de probabilidades _equal-weighted_ e que ao mesmo tempo atendem as restrições desejadas.
@@ -178,14 +178,14 @@ cond_moments
 ```
 ## $mu
 ##          DAX          SMI          CAC         FTSE 
-## 0.0006257191 0.0008050407 0.0004199667 0.0004203754 
+## 0.0006605320 0.0008186369 0.0004567979 0.0004432016 
 ## 
 ## $sigma
 ##               DAX          SMI          CAC         FTSE
-## DAX  1.002918e-04 6.213163e-05 7.999400e-05 5.073252e-05
-## SMI  6.213163e-05 8.078920e-05 5.977358e-05 4.161501e-05
-## CAC  7.999400e-05 5.977358e-05 1.211140e-04 5.660185e-05
-## FTSE 5.073252e-05 4.161501e-05 5.660185e-05 6.388519e-05
+## DAX  1.001914e-04 6.207432e-05 8.003929e-05 5.070221e-05
+## SMI  6.207432e-05 8.076265e-05 5.982477e-05 4.159521e-05
+## CAC  8.003929e-05 5.982477e-05 1.214189e-04 5.668368e-05
+## FTSE 5.070221e-05 4.159521e-05 5.668368e-05 6.389930e-05
 ```
 
 Observe que o momentos _condicionais_ batem exatamente com os momentos do painel simulado:  
@@ -243,7 +243,7 @@ ep <- entropy_pooling(
 cond_moments <- ffp_moments(x = x, p = ep)
 ```
 
-E veja mais uma vez as opiniões são satisfeitas:
+E veja que mais uma vez as opiniões são satisfeitas:
 
 
 ```r
@@ -266,11 +266,12 @@ round(sqrt(diag(cond_moments$sigma)) / apply(new_margins$marginal, 2, sd) - 1, 2
 ##    0    0    0    0
 ```
 
-![](https://media.giphy.com/media/ujUdrdpX7Ok5W/giphy.gif)
+<!-- ![](https://media.giphy.com/media/ujUdrdpX7Ok5W/giphy.gif) -->
 
-Lembre que qualquer elemento poderia ter sido alterado: média, variância, assimetria, curtose, _you choose_... De fato, portfolios com assimetria positiva são há muito tempo desejo de consumo dos gestores. 
+Modelar as margens como um todo adiciona um novo layer de flexibilidade ao processo de gestão de risco e construção de carteiras. A incerteza é tratada de maneira _prospectiva_, não olhando o retrovisor.
 
-Por hoje era isso e no próximo post avanço no fantástico mundo das copulas.
+Contudo, há outros elementos em uma distribuição multivariada no qual podemos ter opiniões. No próximo post mostro uma fonte assossiação "invisível" pode ser relevante para modermos eventos de pânico. Até lá...
+
 
 [^1]: Essa biblioteca será fundamental quando falarmos de copulas. 
 [^2]: Você pode acessar essa informação com o comando `t_model$chi` no console.
