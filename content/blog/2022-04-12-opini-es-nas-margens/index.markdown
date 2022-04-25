@@ -1,7 +1,7 @@
 ---
 title: Opiniões nas Margens
 author: Bernardo Reckziegel
-date: '2022-04-12'
+date: '2022-04-25'
 slug: []
 categories:
   - R
@@ -60,6 +60,7 @@ O pacote `cma` fornece algumas funções interessantes para geração de cenári
 
 
 ```r
+set.seed(123)
 t_margins <- generate_margins(model = t_model, n = 1000000)
 t_margins
 ```
@@ -78,18 +79,18 @@ t_margins$marginal
 
 ```
 ## # A tibble: 1,000,000 x 4
-##          DAX       SMI        CAC      FTSE
-##        <dbl>     <dbl>      <dbl>     <dbl>
-##  1  0.00913   0.0116    0.0111     0.00989 
-##  2 -0.00778  -0.00494  -0.00361    0.00246 
-##  3  0.0180   -0.0220   -0.0287    -0.0389  
-##  4  0.00387  -0.00466   0.00318    0.000725
-##  5  0.00308   0.00809  -0.00654   -0.000936
-##  6 -0.00271  -0.00829  -0.0158    -0.00528 
-##  7 -0.000529 -0.00719  -0.0410    -0.00288 
-##  8 -0.00675  -0.00560  -0.00478   -0.00608 
-##  9  0.0123    0.000881  0.00904    0.00448 
-## 10 -0.00184  -0.00695  -0.0000675 -0.00389 
+##         DAX      SMI      CAC     FTSE
+##       <dbl>    <dbl>    <dbl>    <dbl>
+##  1 -0.00549 -0.0101  -0.00796 -0.00802
+##  2 -0.00334  0.0109   0.00599 -0.00564
+##  3  0.0152   0.00675  0.0110   0.0112 
+##  4  0.00145  0.00940  0.00146  0.00259
+##  5  0.00194  0.00409 -0.00430  0.00110
+##  6  0.0214   0.0144   0.0109   0.0161 
+##  7  0.00437  0.00404  0.0126   0.00332
+##  8 -0.0110  -0.00254 -0.00451  0.00305
+##  9 -0.00342  0.0105  -0.00212 -0.00929
+## 10 -0.00246  0.00219  0.00659  0.00202
 ## # ... with 999,990 more rows
 ```
 
@@ -116,7 +117,9 @@ views
 ## beq :  Dim 16 x 1
 ```
 
-As listas `Aeq` e `beq` contidas no objeto `views` têm `\(16\)` linhas, ou seja, há `\(16\)` restrições ativas nessa opinião. Por quê tantas restrições? Porque a função `view_on_marginal_distribution` foi desenhada para que a média, variância, assimetria e curtose sejam idênticas ao painel simulado, `t_margins`. Temos, portanto, `\(4\)` restrições ativas para cada ativo, totalizando `\(16\)` restrições. 
+As listas `Aeq` e `beq` contidas no objeto `views` têm `\(16\)` linhas, ou seja, há `\(16\)` restrições ativas nessa opinião. 
+
+Por quê tantas restrições? Porque a função `view_on_marginal_distribution` foi desenhada para que a média, variância, assimetria e curtose sejam idênticas a do painel simulado, `t_margins`. Temos, portanto, `\(4\)` restrições ativas para cada ativo, totalizando `\(16\)` restrições. 
 
 Do ponto de vista matemático, o problema que queremos resolver é:
 
@@ -148,7 +151,7 @@ ep
 
 ```
 ## <ffp[1859]>
-## 0.0005389113 0.0005589966 0.0005357949 0.0005429065 0.000539703 ... 0.0005054094
+## 0.0005413464 0.0005623505 0.0005365219 0.0005426697 0.0005397119 ... 0.0005045393
 ```
 
 O objeto `ep` contém as probabilidades que distorcem ao mínimo o vetor de probabilidades _equal-weighted_ e que ao mesmo tempo atendem as restrições desejadas.
@@ -178,14 +181,14 @@ cond_moments
 ```
 ## $mu
 ##          DAX          SMI          CAC         FTSE 
-## 0.0006605320 0.0008186369 0.0004567979 0.0004432016 
+## 0.0006447704 0.0008035049 0.0004324977 0.0004298670 
 ## 
 ## $sigma
 ##               DAX          SMI          CAC         FTSE
-## DAX  1.001914e-04 6.207432e-05 8.003929e-05 5.070221e-05
-## SMI  6.207432e-05 8.076265e-05 5.982477e-05 4.159521e-05
-## CAC  8.003929e-05 5.982477e-05 1.214189e-04 5.668368e-05
-## FTSE 5.070221e-05 4.159521e-05 5.668368e-05 6.389930e-05
+## DAX  1.004220e-04 6.217232e-05 8.018707e-05 5.065303e-05
+## SMI  6.217232e-05 8.073073e-05 5.986606e-05 4.147749e-05
+## CAC  8.018707e-05 5.986606e-05 1.215396e-04 5.655088e-05
+## FTSE 5.065303e-05 4.147749e-05 5.655088e-05 6.343343e-05
 ```
 
 Observe que o momentos _condicionais_ batem exatamente com os momentos do painel simulado:  
@@ -211,9 +214,32 @@ round(sqrt(diag(cond_moments$sigma)) / apply(t_margins$marginal, 2, sd) - 1, 2)
 ##    0    0    0    0
 ```
 
-Ou seja, a opinião dos econometristas foi, de fato, levada em consideração no processo de otimização.
+E divergem dos momentos _incondicionais_: 
 
-Agora vamos continuar com a brincadeira. Digamos que os economistas da gestora estejam pessimistas e acreditem que os retornos de todos os ativos terão um desempenho `\(10\%\)` abaixo da média histórica. Digamos também que os econometristas estejam preocupadas com um possível aumento da volatilidade e achem prudente reduzir o número de graus de liberdade do painel simulado de `\(\nu = 4.2\)`[^2] para `\(\nu = 2\)`: 
+
+```r
+# Location doesn't match
+round(cond_moments$mu / colMeans(x) - 1, 2)
+```
+
+```
+##   DAX   SMI   CAC  FTSE 
+## -0.01 -0.02 -0.01  0.00
+```
+
+```r
+# Dispersion doesn't match
+round(sqrt(diag(cond_moments$sigma)) / apply(x, 2, sd) - 1, 2) 
+```
+
+```
+##   DAX   SMI   CAC  FTSE 
+## -0.03 -0.03  0.00  0.00
+```
+
+Ou seja, a opinião dos econometristas é, de fato, levada em consideração no processo de otimização.
+
+Agora vamos continuar com a brincadeira... Digamos que os economistas da gestora estejam pessimistas e acreditem que os retornos de todos os ativos terão um desempenho `\(10\%\)` abaixo da média histórica. Digamos também que os econometristas estejam preocupadas com um possível aumento da volatilidade e achem prudente reduzir o número de graus de liberdade do painel simulado de `\(\nu = 4.2\)`[^2] para `\(\nu = 2\)`: 
 
 
 ```r
@@ -268,9 +294,11 @@ round(sqrt(diag(cond_moments$sigma)) / apply(new_margins$marginal, 2, sd) - 1, 2
 
 <!-- ![](https://media.giphy.com/media/ujUdrdpX7Ok5W/giphy.gif) -->
 
-Modelar as margens como um todo adiciona um novo layer de flexibilidade ao processo de gestão de risco e construção de carteiras. A incerteza é tratada de maneira _prospectiva_, não olhando o retrovisor.
+Modelar as margens como um todo adiciona um novo layer de flexibilidade ao processo de construção de carteiras. A incerteza é tratada de maneira _prospectiva_, olhando para frente, não para o retrovisor.
 
-Contudo, há outros elementos em uma distribuição multivariada no qual podemos ter opiniões. No próximo post mostro uma fonte assossiação "invisível" pode ser relevante para modermos eventos de pânico. Até lá...
+Mas as margens não são o único elemento de uma distribuição multivariada que podemos manipular com o combo  [ffp](https://github.com/Reckziegel/FFP) + [cma](https://github.com/Reckziegel/CMA). No próximo post falarei sobre uma fonte de assossiação "invisível", mas extremamente relevante para modelagem de eventos de pânico. 
+
+_Stay tuned_...
 
 
 [^1]: Essa biblioteca será fundamental quando falarmos de copulas. 
