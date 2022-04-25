@@ -66,7 +66,7 @@ views
 
 As listas `Aeq` e `beq` contidas no objeto `views` têm $16$ linhas, ou seja, há $16$ restrições ativas nessa opinião. 
 
-Por quê tantas restrições? Porque a função `view_on_marginal_distribution` foi desenhada para que a média, variância, assimetria e curtose sejam idênticas a do painel simulado, `t_margins`. Temos, portanto, $4$ restrições ativas para cada ativo, totalizando $16$ restrições. 
+Por quê tantas restrições? Porque a função `view_on_marginal_distribution` foi desenhada para que a média, variância, assimetria e curtose sejam idênticas as do painel simulado, `t_margins`. Temos, portanto, $4$ restrições ativas para cada ativo, totalizando $16$ restrições. 
 
 Do ponto de vista matemático, o problema que queremos resolver é:
 
@@ -137,7 +137,7 @@ round(sqrt(diag(cond_moments$sigma)) / apply(x, 2, sd) - 1, 2)
 
 Ou seja, a opinião dos econometristas é, de fato, levada em consideração no processo de otimização.
 
-Agora vamos continuar com a brincadeira... Digamos que os economistas da gestora estejam pessimistas e acreditem que os retornos de todos os ativos terão um desempenho $10\%$ abaixo da média histórica. Digamos também que os econometristas estejam preocupadas com um possível aumento da volatilidade e achem prudente reduzir o número de graus de liberdade do painel simulado de $\nu = 4.2$[^2] para $\nu = 2$: 
+Agora vamos continuar com a brincadeira... Digamos que os analistas da gestora estejam pessimistas e acreditem que os retornos de todos os ativos terão um desempenho $10\%$ abaixo da média histórica. Digamos também que os econometristas estejam preocupados com um possível aumento da volatilidade e achem prudente reduzir o número de graus de liberdade de $\nu = 4.2$[^2] para $\nu = 2$: 
 
 ```{r}
 # Return 10% below average
@@ -175,11 +175,11 @@ round(cond_moments$mu / colMeans(new_margins$marginal) - 1, 2)
 round(sqrt(diag(cond_moments$sigma)) / apply(new_margins$marginal, 2, sd) - 1, 2)
 ```
 
-<!-- ![](https://media.giphy.com/media/ujUdrdpX7Ok5W/giphy.gif) -->
+![](https://media.giphy.com/media/ujUdrdpX7Ok5W/giphy.gif)
 
-Modelar as margens como um todo adiciona um novo layer de flexibilidade ao processo de construção de carteiras. A incerteza é tratada de maneira _prospectiva_, olhando para frente, não para o retrovisor.
+Modelar as margens como um todo adiciona um novo layer de flexibilidade no processo de construção de carteiras. A incerteza é tratada de maneira _prospectiva_, olhando para frente, não para o retrovisor.
 
-Mas as margens não são o único elemento de uma distribuição multivariada que podemos manipular com o combo  [ffp](https://github.com/Reckziegel/FFP) + [cma](https://github.com/Reckziegel/CMA). No próximo post falarei sobre uma fonte de assossiação "invisível", mas extremamente relevante para modelagem de eventos de pânico. 
+Mas as margens não são o único elemento de uma distribuição multivariada que podemos moldar com o combo  [ffp](https://github.com/Reckziegel/FFP) + [cma](https://github.com/Reckziegel/CMA). É por esse motivo que no próximo post falarei sobre uma fonte de associação "invisível", mas extremamente relevante para modelagem de eventos de pânico. 
 
 _Stay tuned_...
 
