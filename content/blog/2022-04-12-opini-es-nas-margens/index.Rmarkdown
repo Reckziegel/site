@@ -135,7 +135,7 @@ round(cond_moments$mu / colMeans(x) - 1, 2)
 round(sqrt(diag(cond_moments$sigma)) / apply(x, 2, sd) - 1, 2) 
 ```
 
-Ou seja, a opinião dos econometristas está sendo, de fato, levada em consideração no processo de otimização.
+Ou seja, a opinião dos econometristas é, de fato, levada em consideração no processo de otimização.
 
 Agora vamos continuar com a brincadeira... Digamos que os analistas da gestora estejam pessimistas e acreditem que os retornos de todos os ativos terão um desempenho $10\%$ abaixo da média histórica. Digamos também que os econometristas estejam preocupados com um possível aumento da volatilidade e achem prudente reduzir o número de graus de liberdade de $\nu = 4.2$[^2] para $\nu = 2$: 
 
