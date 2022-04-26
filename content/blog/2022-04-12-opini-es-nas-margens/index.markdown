@@ -136,8 +136,6 @@ Esse sistema é resolvido com a função `entropy_pooling`:
 
 
 ```r
-library(ggplot2)
-
 prior_from_data <- rep(1 / nrow(x), nrow(x))
 
 ep <- entropy_pooling(
@@ -156,10 +154,10 @@ ep
 
 O objeto `ep` contém as probabilidades que distorcem ao mínimo o vetor de probabilidades _equal-weighted_ e que ao mesmo tempo atendem as restrições desejadas.
 
-O método `autoplot` do pacote `ggplot2` está disponível para objetos da classe `ffp`: 
-
 
 ```r
+library(ggplot2)
+
 autoplot(ep) + 
   scale_color_viridis_c(option = "C", end = 0.75) + 
   labs(title    = "Distribuição de Probabilidades Posteriores", 
