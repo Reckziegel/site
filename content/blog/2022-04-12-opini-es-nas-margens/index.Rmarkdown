@@ -177,9 +177,7 @@ round(sqrt(diag(cond_moments$sigma)) / apply(new_margins$marginal, 2, sd) - 1, 2
 
 ![](https://media.giphy.com/media/ujUdrdpX7Ok5W/giphy.gif)
 
-Modelar as margens adiciona um novo layer de flexibilidade no processo de construção de carteiras. A incerteza é tratada de maneira _prospectiva_, olhando para frente, não para o retrovisor.
-
-Mas as margens não são o único elemento de uma distribuição multivariada no qual podemos _opinar_ com o combo  [ffp](https://reckziegel.github.io/FFP/) + [cma](https://reckziegel.github.io/CMA/). É por esse motivo que no próximo post falarei sobre uma fonte de associação "invisível", mas extremamente relevante para modelagem de eventos de euforia e pânico. 
+Modelar as margens amplia as possibilidades de maneira significativa. Contudo, as margens não são o único elemento em que podemos construir opiniões com o combo  [ffp](https://reckziegel.github.io/FFP/) + [cma](https://reckziegel.github.io/CMA/). No próximo post falarei sobre uma fonte de associação "invisível", mas extremamente relevante para modelagem de eventos de euforia e pânico. 
 
 _Stay tuned_...
 
