@@ -1,7 +1,7 @@
 ---
 title: Opiniões nas Margens
 author: Bernardo Reckziegel
-date: '2022-04-25'
+date: '2022-04-27'
 slug: []
 categories:
   - R
@@ -36,7 +36,7 @@ head(x)
 
 Vamos assumir que o time de econometria (após algumas linhas de código e meia dúzia de derivadas) conclua que a distribuição Student-t assimétrica é a que melhor se adapta aos dados em questão. 
 
-Para conduzir o processo de estimação utilizo o pacote [cma](https://reckziegel.github.io/CMA/)[^1]. Essa biblioteca não está no [CRAN](https://cran.r-project.org/) - _for now_ -  e para instala-la você deverá rodar o comando `devtools::install_github("Reckziegel/CMA")` no console. 
+Para conduzir o processo de estimação utilizo o pacote [cma](https://reckziegel.github.io/CMA/)[^1]. Essa biblioteca não está no [CRAN](https://cran.r-project.org/) - _for now_ -  e para instala-la você deverá rodar o comando `devtools::install_github("Reckziegel/CMA")` no console:
 
 
 ```r
@@ -290,11 +290,9 @@ round(sqrt(diag(cond_moments$sigma)) / apply(new_margins$marginal, 2, sd) - 1, 2
 ##    0    0    0    0
 ```
 
-![](https://media.giphy.com/media/ujUdrdpX7Ok5W/giphy.gif)
+Os momentos _condicionais_ são a grande jóia da coroa das _probabilidades flexíveis_. Muitas vezes, uma diferença pequena entre as estimativas - _condicionais_ vs _incondicionais_ - pode ter um impacto enorme sobre a alocação final. 
 
-Modelar as margens amplia as possibilidades de maneira significativa. Contudo, as margens não são o único elemento em que podemos construir opiniões com o combo  [ffp](https://reckziegel.github.io/FFP/) + [cma](https://reckziegel.github.io/CMA/). No próximo post falarei sobre uma fonte de associação "invisível", mas extremamente relevante para modelagem de eventos de euforia e pânico. 
-
-_Stay tuned_...
+Contudo, as margens não são o único elemento em que podemos construir opiniões com [ffp](https://reckziegel.github.io/FFP/) e [cma](https://reckziegel.github.io/CMA/). No próximo post falarei mais sobre uma fonte de associação "invisível", mas extremamente relevante para modelagem de eventos de euforia e pânico.
 
 
 [^1]: Essa biblioteca será fundamental quando falarmos de copulas. 
