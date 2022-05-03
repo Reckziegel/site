@@ -14,7 +14,7 @@ meta_img: images/image.png
 description: Description for the page
 ---
 
-Vamos assumir que o time de gestão esteja receoso com a performance _futura_ do mercado de ações e deseje simular um cenário de "estresse" para entender _ex-ante_ o impacto sobre o P&L. 
+Vamos assumir que o time de gestão esteja receoso com a performance _futura_ do mercado de ações e deseje simular um cenário de "estresse" para medir o impacto _ex-ante_ sobre o P&L. 
 
 Uma das maneiras de simular esse tipo de comportamento é colocando as opiniões nas correlações - como fiz [aqui](https://www.bernardo.codes/blog/2022-04-06-opini-o-nas-correla-es/) - ou manipulando as copulas diretamente. No post de hoje mostro como implementar o segundo approach. 
 
@@ -39,19 +39,20 @@ x <- matrix(diff(log(EuStockMarkets)), ncol = 4)
 colnames(x) <- colnames(EuStockMarkets)
 
 p <- tibble(SMI = x[ , "SMI"], DAX = x[ , "DAX"]) |> 
-  ggplot(aes(x = SMI, y = DAX)) + 
+  ggplot(aes(x = SMI, y = DAX, color = DAX)) + 
   geom_point(alpha = 0.5, show.legend = FALSE) + 
   scale_x_continuous(labels = scales::percent_format()) + 
   scale_y_continuous(labels = scales::percent_format()) + 
+  scale_color_viridis_c(option = "C", end = 0.75) + 
   labs(title    = "Correlação entre SMI e DAX", 
-       subtitle = "Combinação de duas distribuições marginais")
+       subtitle = "Combinação entre distribuições marginais")
 
-ggExtra::ggMarginal(p, margins = 'both', fill = "grey", col = "grey")
+ggExtra::ggMarginal(p, margins = 'both', fill = "grey", color = "grey")
 ```
 
-Ou seja, são as informações *puramente* individuais - as "margens" - que ditam a estrutura de correlação dos ativos financeiros.
+Ou seja, são as informações individuais - as "margens" - que ditam a estrutura de correlação dos ativos financeiros.
 
-Pense nas distribuições multivariadas como sendo formadas pela combinação de dois elementos:
+<!-- Pense nas distribuições multivariadas como sendo formadas pela combinação de dois elementos: -->
 
 > Distribuição Multivariada = Margens + Copulas
 
@@ -68,15 +69,16 @@ Abaixo a copula empírica dos índices `SMI` e `DAX`:
 ```{r, warning=FALSE, message=FALSE, echo=FALSE}
 c <- copula::pobs(x[ , c("SMI", "DAX")]) |> 
   as_tibble() |> 
-  ggplot(aes(x = SMI, y = DAX)) + 
+  ggplot(aes(x = SMI, y = DAX, color = DAX)) + 
   geom_point(alpha = 0.5, show.legend = FALSE) + 
+  scale_color_viridis_c(option = "C", end = 0.75) + 
   labs(title    = "Copula Empírica", 
        subtitle = "Fonte de informação puramente conjunta entre SMI e DAX")
 
-ggExtra::ggMarginal(c, margins = 'both', type = "histogram", bins = 25, col = "grey")
+ggExtra::ggMarginal(c, margins = 'both', type = "histogram", bins = 25, fill = "grey")
 ```
 
-Perceba que essa copula, em particular, apresenta dois pontos de aglomeração nos extremos: quando o `SMI` cai muito (perto de $0$), o `DAX` também cai muito (perto de $0$); quando `SMI` sobe muito (perto de $1$), o `DAX` também sobe muito (perto de $1$). Ou seja, essa copula está nos revelando que em momentos de euforia e pânico os índices `SMI` e `DAX` andam juntos!
+Perceba que essa copula, em particular, apresenta dois pontos de aglomeração nos extremos: quando o `SMI` cai muito (perto de $0$), o `DAX` também cai muito (perto de $0$); quando `SMI` sobe muito (perto de $1$), o `DAX` também sobe muito (perto de $1$). Ou seja, essa copula está revelando que em momentos de euforia e pânico os índices `SMI` e `DAX` andam juntos!
 
 Obviamente, nem todas as copulas são iguais. Abaixo mostro quatro tipos de copulas bastante conhecidas, que fazem parte do mundo [arquimediano](https://en.wikipedia.org/wiki/Copula_(probability_theory)#Archimedean_copulas).
 
@@ -86,7 +88,7 @@ Obviamente, nem todas as copulas são iguais. Abaixo mostro quatro tipos de copu
 shiny::hr()
 ```
 
-A copula de Clayton geralmente é utilizada para modelar eventos de pânico, porque muitos pontos se aglomeram à esquerda na parte inferior (quando x cai, y também cai). Já a copula de Gumbel é utilizada para modelar eventos de euforia, pois muitos pontos se concentram à direita na parte superior (quando x sobe, y também sobe).
+A copula de Clayton geralmente é utilizada para modelar eventos de pânico, porque uma enorme quantidade de pontos se aglomeram à esquerda na parte inferior (quando x cai, y também cai). Já a copula de Gumbel é utilizada para modelar eventos de euforia, pois muitos pontos se concentram à direita na parte superior (quando x sobe, y também sobe).
 
 Na prática, não há uma única forma de "decompor" as distribuições entre margens e copulas. Aqui, sigo o approach das *probabilidades flexíveis* e manipulo esses elementos com o algoritmo [CMA](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1752702), que oferece uma receita não-paramétrica de dois passos para "separar" e "combinar" distribuições multivariadas.
 
