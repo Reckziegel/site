@@ -1,7 +1,7 @@
 ---
 title: Opiniões nas Copulas
 author: Bernardo Reckziegel
-date: '2022-05-02'
+date: '2022-05-03'
 slug: []
 categories:
   - R
@@ -14,15 +14,11 @@ meta_img: images/image.png
 description: Description for the page
 ---
 
-Toda a distribuição multivariada é formada pela combinação de dois elementos:
+Vamos assumir que o time de gestão esteja receoso com a performance *futura* do mercado de ações e deseje simular um cenário de “estresse” para entender *ex-ante* o impacto sobre o P&L.
 
-> Distribuição Multivariada = Margens + Copulas
+Uma das maneiras de simular esse tipo de comportamento é colocando as opiniões nas correlações - como fiz [aqui](https://www.bernardo.codes/blog/2022-04-06-opini-o-nas-correla-es/) - ou manipulando as copulas diretamente. No post de hoje mostro como implementar o segundo approach.
 
-As margens carregam as informações *puramente* índividuais (exclusivas de cada ativo) e as copulas levam as informações *puramente* conjuntas (de dependência entre as variáveis)[^1].
-
-Estamos mais acostumados a trabalhar com as margens, mas as copulas também são uma fonte riquíssima de informação. É, portanto, natural *tentar* estimar as copulas, assim como fazemos com as distribuições marginais.
-
-Como de praxe, análise de hoje é conduzida com o dataset `EuStockMarkets`, que vem com a instalação do `R`:
+Como de praxe, análise é conduzida com o dataset `EuStockMarkets`, que vem com a instalação do `R`:
 
 ``` r
 # invariance
@@ -39,19 +35,25 @@ head(x)
     ## [5,] -0.004676712 -0.008933417 -0.005120160 -0.007230164
     ## [6,]  0.012427042  0.006737244  0.011714353  0.008517217
 
+<!-- Estamos mais acostumados a trabalhar com as margens, mas as copulas também são uma fonte riquíssima de informação. É, portanto, natural *tentar* estimar as copulas, assim como fazemos com as distribuições marginais. -->
+
 No gráfico abaixo coloco o índice `SMI` no eixo x e o `DAX` no eixo y. Perceba que é a combinação das distribuições marginais que nos permite fazer inferência sobre a associação linear dessas variáveis:
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-1.png" width="672" />
 
 Ou seja, são as informações *puramente* individuais - as “margens” - que ditam a estrutura de correlação dos ativos financeiros.
 
-<!-- Já a copula está dentro do intervalo `\([0, 1]\)` e pode ser vista como uma medida de _score_ não-linear, pois não há como passar uma única reta entre cada ponto presente no gráfico.  -->
+Pense nas distribuições multivariadas como sendo formadas pela combinação de dois elementos:
 
-Já as copulas possuem uma conexão de dependência mais profunda:
+> Distribuição Multivariada = Margens + Copulas
 
-> Copula = Distribuição Multivariada - Margens
+As margens carregam as informações *puramente* índividuais (exclusivas de cada ativo), enquanto as copulas levam as informações *puramente* conjuntas (de dependência entre as variáveis)[^1].
 
-A copula é a informação que sobra uma vez que tenhamos “limpado” a informação das margens de um determinado grupo de ativos. Dito de outra forma: pegue um dataset qualquer, “jogue fora” a estrutura de correlação linear e o que sobrar você chama de copula.
+Manipulando a expressão acima obtemos:
+
+> Copulas = Distribuição Multivariada - Margens
+
+Em outras palavras, a copula é a informação que sobra uma vez que tenhamos “limpado” a informação puramente individual contida nas margens.
 
 Abaixo a copula empírica dos índices `SMI` e `DAX`:
 
@@ -67,7 +69,7 @@ Obviamente, nem todas as copulas são iguais. Abaixo mostro quatro tipos de copu
 
 A copula de Clayton geralmente é utilizada para modelar eventos de pânico, porque muitos pontos se aglomeram à esquerda na parte inferior (quando x cai, y também cai). Já a copula de Gumbel é utilizada para modelar eventos de euforia, pois muitos pontos se concentram à direita na parte superior (quando x sobe, y também sobe).
 
-Na prática, não há uma única forma de “decompor” as distribuições entre margens e copulas. Aqui, sigo o approach das *probabilidades flexíveis* e manipulo esses elementos com o algoritmo [CMA](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1752702), que oferece uma receita de dois passos para “separar” e “combinar” distribuições multivariadas.
+Na prática, não há uma única forma de “decompor” as distribuições entre margens e copulas. Aqui, sigo o approach das *probabilidades flexíveis* e manipulo esses elementos com o algoritmo [CMA](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1752702), que oferece uma receita não-paramétrica de dois passos para “separar” e “combinar” distribuições multivariadas.
 
 O pacote `cma` não está no CRAN, então para reproduzir os códigos abaixo você deve rodar o comando: `devtools::install_github("Reckziegel/CMA")` no console:
 
@@ -83,8 +85,6 @@ sep
     ## marginal: << tbl 1859 x 4 >>
     ## cdf     : << tbl 1859 x 4 >>
     ## copula  : << tbl 1859 x 4 >>
-
-<!-- O objeto `sep` mantém cada elemento da distribuição guardado em uma lista distinta. -->
 
 Para objetos da classe `cma_separation` o pacote `cma` disponibiliza a família de funções `fit_copula_*()`. Como comentei, a copula de clayton é um candidado natural para modelar eventos de estresse:
 
@@ -111,11 +111,9 @@ Quando maior for o parâmetro `\(\alpha\)`, mais aglomerados os dados ficam a es
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-8-1.png" width="672" />
 
-Moral da história: podemos realizar uma análise de “estresse” *ex-ante* colocando as opiniões nas correlações - como fiz [aqui](https://www.bernardo.codes/blog/2022-04-06-opini-o-nas-correla-es/) - ou modelando as copulas diretamente. Eu acho o segundo approach mais elegante.
+Para precificar um cenário de “sell-off” *ex-ante*, adiciono uma perturbação no parâmetro `\(\alpha\)`. Em particular, uso `\(\alpha = 5\)` e com essa nova estimativa simulo um painel amplo com `\(1.000.000\)` de linhas e `\(4\)` colunas que guardam as mesmas propriedades estatísticas do objeto `clayton_fit`.
 
-Para precificar um cenário de “sell-off” *ex-ante*, adiciono uma perturbação no parâmetro `\(\alpha\)`. Em particular, uso `\(\alpha = 5\)` e com essa nova estimativa simulo um painel amplo com `\(1.000.000\)` de linhas e `\(4\)` colunas que contêm as mesmas propriedades estatísticas do objeto `clayton_fit`.
-
-Esse processo é realizado com a função `generate_copulas` do pacote `cma`:
+Esse processo é realizado com a função `generate_copulas`:
 
 ``` r
 # lock environment
@@ -151,7 +149,7 @@ views_on_cop
 Formalmente, o objetivo é minimizar a expressão:
 
 $$ min \sum_{i=1}^I x_i(ln(x_i) - ln(p_i)) $$
-`\(s.t.\)`
+`\(s.a.\)`
 $$ \sum_{i=1}^I \hat{p_i} U_{j,k}U_{j,l}  =  \sum_{i=1}^I p_i \hat{U}_{j,k}\hat{U}_{j,l} $$
 $$ \sum_{i=1}^I \hat{p_i} U_{j,k}U_{j,l}U_{j,i}  =  \sum_{i=1}^I p_i \hat{U}_{j,k}\hat{U}_{j,l}\hat{U}_{j,i} $$
 $$ \sum_{i=1}^I \hat{p_i}  U_{j,k} = 0.5 $$
@@ -176,7 +174,7 @@ ep
     ## <ffp[1859]>
     ## 2.675292e-12 0.0002722608 6.850905e-06 5.248376e-05 0.001002795 ... 0.0005913308
 
-O vetor de probabilidades `ep` é aquele que consegue atender as opiniões do econometrista (nós) distorcendo ao mínimo as probabilidades uniformes:
+O vetor de probabilidades `ep` é aquele que consegue atender as opiniões do econometrista distorcendo ao mínimo as probabilidades uniformes:
 
 ``` r
 library(ggplot2)
@@ -184,14 +182,14 @@ library(ggplot2)
 autoplot(ep) + 
   scale_color_viridis_c(option = "C", end = 0.75) + 
   labs(title    = "Distribuição de Probabilidades Posteriores", 
-       subtitle = "Opinião/Perturbação na Copula de Clayton", 
+       subtitle = "Perturbação na Copula de Clayton", 
        x        = NULL, 
        y        = NULL)
 ```
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-12-1.png" width="672" />
 
-Dessas probabilidades, deriva-se os momentos *condicionais* que são o principal insumo para construção de uma **fronteira eficiente bayesiana**:
+Dessas probabilidades, deriva-se os momentos *condicionais*, que são o principal insumo para construção de uma **fronteira eficiente bayesiana**:
 
 ``` r
 ffp_moments(x = x, p = ep)
@@ -208,7 +206,7 @@ ffp_moments(x = x, p = ep)
     ## CAC  1.070850e-04 9.467923e-05 1.314587e-04 8.035356e-05
     ## FTSE 7.536304e-05 6.690249e-05 8.035356e-05 7.180174e-05
 
-Uma maneira simples de analisar o impacto dessas opiniões é combinando o output da função `empirical_stats` com o `ggplot2`:
+Uma maneira simples de analisar o impacto dessas opiniões nos ativos da carteira é combinando o output da função `empirical_stats` com o `ggplot2`:
 
 ``` r
 library(dplyr)
@@ -231,9 +229,9 @@ bind_rows(prior, posterior) |>
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-14-1.png" width="672" />
 
-Perceba que o impacto da perturbação nas copulas vai na direção esperada: sob regime de “stress” os retornos são menores, as volatilidades mais elevadas, as margens mais assimétricas, as caudas mais largas e, por fim, o VaR e Expected Shortfall também são maiores.
+Perceba que o impacto da perturbação vai na direção esperada: sob regime de “stress” os retornos são menores, as volatilidades mais elevadas, as margens mais assimétricas, as caudas mais largas e, por fim, o VaR e Expected Shortfall também são maiores.
 
-Obviamente, manipulando os objetos `prior` e `posterior` é possível chegar as mudanças exatas. Abaixo um exemplo de como esse cálculo pode ser feito para o *Value-at-Risk* (VaR) ao nível de `\(99\%\)`:
+Manipulando os objetos `prior` e `posterior` é possível computar o impacto exato sobre essas estatísticas. Por exemplo, o incremento no *Value-at-Risk* (VaR), ao nível de `\(99\%\)`, pode ser calculado da seguinte forma:
 
 ``` r
 library(tidyr)
