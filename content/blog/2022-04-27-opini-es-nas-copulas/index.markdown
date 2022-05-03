@@ -51,13 +51,13 @@ Já as copulas possuem uma conexão de dependência mais profunda:
 
 > Copula = Distribuição Multivariada - Margens
 
-A copula é a informação que sobra uma vez que tenhamos “limpado” a informação das margens de um determinado ativo. Dito de outra forma: pegue um dataset qualquer, “jogue fora” a estrutura de correlação linear e o que sobrar você chame de copula.
+A copula é a informação que sobra uma vez que tenhamos “limpado” a informação das margens de um determinado grupo de ativos. Dito de outra forma: pegue um dataset qualquer, “jogue fora” a estrutura de correlação linear e o que sobrar você chama de copula.
 
 Abaixo a copula empírica dos índices `SMI` e `DAX`:
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-3-1.png" width="672" />
 
-As copulas são normalizadas dentro do cubo unitário `\([0,1]\)`. Perceba que essa copula, em particular, apresenta dois pontos de aglomeração nos extremos: quando o `SMI` cai muito, o `DAX` também cai muito; quando `SMI` sobe muito, o `DAX` também sobe muito. Ou seja, essa copula está nos revelando que em momentos de euforia e pânico os índices `SMI` e `DAX` andam juntos!
+Perceba que essa copula, em particular, apresenta dois pontos de aglomeração nos extremos: quando o `SMI` cai muito (perto de `\(0\)`), o `DAX` também cai muito (perto de `\(0\)`); quando `SMI` sobe muito (perto de `\(1\)`), o `DAX` também sobe muito (perto de `\(1\)`). Ou seja, essa copula está nos revelando que em momentos de euforia e pânico os índices `SMI` e `DAX` andam juntos!
 
 Obviamente, nem todas as copulas são iguais. Abaixo mostro quatro tipos de copulas bastante conhecidas, que fazem parte do mundo [arquimediano](https://en.wikipedia.org/wiki/Copula_(probability_theory)#Archimedean_copulas).
 
@@ -107,13 +107,13 @@ clayton_fit$estimate
 
     ## [1] 1.066038
 
-Quando maior for o parâmetro `\(\alpha\)`, mais aglomerados os dados ficam a esquerda da distribuição.
+Quando maior for o parâmetro `\(\alpha\)`, mais aglomerados os dados ficam a esquerda da distribuição. Veja:
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-8-1.png" width="672" />
 
-Moral da história: podemos realizar uma análise de estresse *ex-ante* colocando as opiniões nas correlações - como fiz [aqui](https://www.bernardo.codes/blog/2022-04-06-opini-o-nas-correla-es/) - ou modelando as copulas diretamente. Eu acho o segundo approach mais elegante.
+Moral da história: podemos realizar uma análise de “estresse” *ex-ante* colocando as opiniões nas correlações - como fiz [aqui](https://www.bernardo.codes/blog/2022-04-06-opini-o-nas-correla-es/) - ou modelando as copulas diretamente. Eu acho o segundo approach mais elegante.
 
-Para precificar um cenário de “sell-off” *ex-ante*, adiciono uma perturbação no parâmetro `\(\alpha\)`. Em particular, uso `\(\alpha = 5\)` e com essa nova estimativa simulo um painel amplo com `\(1.000.000\)` de linhas e `\(4\)` colunas que contêm as nesnas propriedades estatísticas do objeto `clayton_fit`.
+Para precificar um cenário de “sell-off” *ex-ante*, adiciono uma perturbação no parâmetro `\(\alpha\)`. Em particular, uso `\(\alpha = 5\)` e com essa nova estimativa simulo um painel amplo com `\(1.000.000\)` de linhas e `\(4\)` colunas que contêm as mesmas propriedades estatísticas do objeto `clayton_fit`.
 
 Esse processo é realizado com a função `generate_copulas` do pacote `cma`:
 
@@ -128,7 +128,7 @@ clayton_fit$estimate <- 5
 simul_clayton <- generate_copulas(model = clayton_fit, n = 1000000)
 ```
 
-Para acomodar opiniões o pacote `ffp` disponibiliza a família de funções `view_on_*()`. Para o caso em questão, usa-se `view_on_copula`:
+Para colocar opiniões nas copulas, o pacote `ffp` disponibiliza a função `view_on_copula`:
 
 ``` r
 library(ffp)
@@ -148,7 +148,7 @@ views_on_cop
     ## Aeq :  Dim 34 x 1859 
     ## beq :  Dim 34 x 1
 
-Formalmente, busca-se minimizar a expressão:
+Formalmente, o objetivo é minimizar a expressão:
 
 $$ min \sum_{i=1}^I x_i(ln(x_i) - ln(p_i)) $$
 `\(s.t.\)`
@@ -176,7 +176,7 @@ ep
     ## <ffp[1859]>
     ## 2.675292e-12 0.0002722608 6.850905e-06 5.248376e-05 0.001002795 ... 0.0005913308
 
-O vetor de probabilidades `ep` é aquele que consegue atender as opiniões do econometrista distorcendo ao mínimo as probabilidades uniformes:
+O vetor de probabilidades `ep` é aquele que consegue atender as opiniões do econometrista (nós) distorcendo ao mínimo as probabilidades uniformes:
 
 ``` r
 library(ggplot2)
@@ -184,7 +184,7 @@ library(ggplot2)
 autoplot(ep) + 
   scale_color_viridis_c(option = "C", end = 0.75) + 
   labs(title    = "Distribuição de Probabilidades Posteriores", 
-       subtitle = "Opinião/Perturbação na Copula", 
+       subtitle = "Opinião/Perturbação na Copula de Clayton", 
        x        = NULL, 
        y        = NULL)
 ```
@@ -208,7 +208,7 @@ ffp_moments(x = x, p = ep)
     ## CAC  1.070850e-04 9.467923e-05 1.314587e-04 8.035356e-05
     ## FTSE 7.536304e-05 6.690249e-05 8.035356e-05 7.180174e-05
 
-Outra maneira simples de analisar o impacto das opiniões é combinando o output da função `empirical_stats` com o `ggplot2`:
+Uma maneira simples de analisar o impacto dessas opiniões é combinando o output da função `empirical_stats` com o `ggplot2`:
 
 ``` r
 library(dplyr)
@@ -219,7 +219,6 @@ posterior <- empirical_stats(x = x, p = ep) |>
   mutate(type = "Posterior")
 
 bind_rows(prior, posterior) |> 
-  # plot
   ggplot(aes(x = name, y = value, color = type, fill = type)) +
   geom_col(position = "dodge") +
   facet_wrap(~stat, scales = "free") +
@@ -232,9 +231,9 @@ bind_rows(prior, posterior) |>
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-14-1.png" width="672" />
 
-O impacto da perturbação nas copulas vai na direção esperada: sob regime de “stress” os retornos são menores, as volatilidades mais elevadas, as margens mais assimétricas, as caudas mais largas e, por fim, o VaR e Expected Shortfall também são maiores.
+Perceba que o impacto da perturbação nas copulas vai na direção esperada: sob regime de “stress” os retornos são menores, as volatilidades mais elevadas, as margens mais assimétricas, as caudas mais largas e, por fim, o VaR e Expected Shortfall também são maiores.
 
-Obviamente, manipulando os objetos `prior` e `posterior` é possível chegar aos números exatos. Abaixo um exemplo de como esse cálculo pode ser feito para o Value-at-Risk (VaR) ao nível de `\(99\%\)`:
+Obviamente, manipulando os objetos `prior` e `posterior` é possível chegar as mudanças exatas. Abaixo um exemplo de como esse cálculo pode ser feito para o *Value-at-Risk* (VaR) ao nível de `\(99\%\)`:
 
 ``` r
 library(tidyr)
