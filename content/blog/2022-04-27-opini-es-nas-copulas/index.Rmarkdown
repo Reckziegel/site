@@ -45,7 +45,7 @@ p <- tibble(SMI = x[ , "SMI"], DAX = x[ , "DAX"]) |>
   scale_y_continuous(labels = scales::percent_format()) + 
   scale_color_viridis_c(option = "C", end = 0.75) + 
   labs(title    = "Correlação entre SMI e DAX", 
-       subtitle = "Combinação entre distribuições marginais")
+       subtitle = "Combinação de diferentes distribuições marginais")
 
 ggExtra::ggMarginal(p, margins = 'both', fill = "grey", color = "grey")
 ```
@@ -139,7 +139,7 @@ dplyr::bind_rows(r1, r2) |>
 
 ```
 
-Para precificar um cenário de "sell-off" *ex-ante*, adiciono uma perturbação no parâmetro $\alpha$. Em particular, uso $\alpha = 5$ e com essa nova estimativa simulo um painel amplo com $1.000.000$ de linhas e $4$ colunas que guardam as mesmas propriedades estatísticas do objeto `clayton_fit`.
+Para precificar um cenário de "sell-off" *ex-ante*, adiciono uma perturbação no parâmetro $\alpha$. Em particular, uso $\alpha = 5$ e com essa nova estimativa simulo um painel com $1.000.000$ de linhas e $4$ colunas que guardam as mesmas propriedades estatísticas do objeto `clayton_fit`.
 
 Esse processo é realizado com a função `generate_copulas`:
 
@@ -236,7 +236,7 @@ bind_rows(prior, posterior) |>
 
 Perceba que o impacto da perturbação vai na direção esperada: sob regime de "stress" os retornos são menores, as volatilidades mais elevadas, as margens mais assimétricas, as caudas mais largas e, por fim, o VaR e Expected Shortfall também são maiores.
 
-Manipulando os objetos `prior` e `posterior` é possível computar o impacto exato sobre essas estatísticas. Por exemplo, o incremento no _Value-at-Risk_ (VaR), ao nível de $99\%$, pode ser calculado da seguinte forma:
+Manipulando os objetos `prior` e `posterior` é possível computar o impacto exato sobre qualquer uma dessas estatísticas. Por exemplo, o incremento no _Value-at-Risk_ (VaR), ao nível de $99\%$, pode ser calculado da seguinte forma:
 
 ```{r}
 library(tidyr)

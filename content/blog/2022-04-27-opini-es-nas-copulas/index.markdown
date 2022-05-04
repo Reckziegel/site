@@ -111,7 +111,7 @@ Quando maior for o parâmetro `\(\alpha\)`, mais aglomerados os dados ficam a es
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-8-1.png" width="672" />
 
-Para precificar um cenário de “sell-off” *ex-ante*, adiciono uma perturbação no parâmetro `\(\alpha\)`. Em particular, uso `\(\alpha = 5\)` e com essa nova estimativa simulo um painel amplo com `\(1.000.000\)` de linhas e `\(4\)` colunas que guardam as mesmas propriedades estatísticas do objeto `clayton_fit`.
+Para precificar um cenário de “sell-off” *ex-ante*, adiciono uma perturbação no parâmetro `\(\alpha\)`. Em particular, uso `\(\alpha = 5\)` e com essa nova estimativa simulo um painel com `\(1.000.000\)` de linhas e `\(4\)` colunas que guardam as mesmas propriedades estatísticas do objeto `clayton_fit`.
 
 Esse processo é realizado com a função `generate_copulas`:
 
@@ -231,7 +231,7 @@ bind_rows(prior, posterior) |>
 
 Perceba que o impacto da perturbação vai na direção esperada: sob regime de “stress” os retornos são menores, as volatilidades mais elevadas, as margens mais assimétricas, as caudas mais largas e, por fim, o VaR e Expected Shortfall também são maiores.
 
-Manipulando os objetos `prior` e `posterior` é possível computar o impacto exato sobre essas estatísticas. Por exemplo, o incremento no *Value-at-Risk* (VaR), ao nível de `\(99\%\)`, pode ser calculado da seguinte forma:
+Manipulando os objetos `prior` e `posterior` é possível computar o impacto exato sobre qualquer uma dessas estatísticas. Por exemplo, o incremento no *Value-at-Risk* (VaR), ao nível de `\(99\%\)`, pode ser calculado da seguinte forma:
 
 ``` r
 library(tidyr)
