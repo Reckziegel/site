@@ -70,6 +70,13 @@ ep
 ## 6.709143e-05 0.000659403 0.001085763 0.0003254822 0.0005215729 ... 0.0004748052
 ```
 
+O objeto `ep` é o vetor de probabilidades que soluciona o problema:
+
+$$ min \sum_{i=1}^I x_i(ln(x_i) - ln(p_i)) $$
+`\(s.a.\)`
+$$ \sum_{i=1}^I \hat{p_i} x_{j,k}x_{j,l}  =   \hat{m}_k \hat{m}_l + \hat{\sigma}_{k} \hat{\sigma}_{l} \hat{C}_{k, l} $$ 
+Ou seja, dentre todos os possíveis vetores que atendem a restrição imposta, `ep` é aquele que distorce ao mínimo o vetor de probabilidades uniforme (equal-weighted). 
+
 Lembre-se que o método `autoplot` está disponível para objetos da classe `ffp`:
 
 
@@ -183,6 +190,6 @@ cov2cor(ffp_moments(x = x, p = ep_panic)$sigma)
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-10-1.png" width="672" />
 
-A possibilidade de se precificar rapidamente _qualquer_ opinião é uma das grandes virtudes de entropy-pooling. Com relação a esse ponto, quero ser ainda mais enfático: __Com entropy-pooling, não há cenário que não possa ser precificado!__ 
+A possibilidade de se precificar rapidamente _qualquer_ opinião é uma das grandes virtudes de entropy-pooling. 
  
 Por hoje é isso. No próximo post mostro como construir opiniões que devem ser satisfeitas com desigualdade.
