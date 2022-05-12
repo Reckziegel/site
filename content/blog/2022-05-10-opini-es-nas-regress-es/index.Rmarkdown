@@ -1,0 +1,166 @@
+---
+title: Opiniões nas Regressões
+author: 'Bernardo Reckziegel '
+date: '2022-05-10'
+slug: []
+categories:
+  - R
+  - views
+tags:
+  - bayesian inference
+  - entropy-pooling
+  - ffp
+meta_img: images/image.png
+description: Description for the page
+---
+
+Uma consequência bacana de se trabalhar com [entropy-pooling](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1213325) é que as _probabilidades flexíveis_ também podem ser utilizadas para _condicionar_ os betas das regressões lineares. 
+
+No post de hoje mostro como combinar [ffp](https://reckziegel.github.io/FFP/) com a famosa função `lm`. 
+
+Os pacotes utilizados são:
+
+```{r, warning=FALSE, message=FALSE}
+library(tidyverse) # Onde tudo é mais fácil!
+library(lubridate) # Manipulação de datas
+library(quantmod)  # Download de dados financeiros
+library(timetk)    # Coerção entre diferentes estruturas 
+library(readxl)    # Leitura de arquivos em excel
+library(broom)     # Visualização das Regressões
+library(ggdist)    # Visualização das Regressões
+library(ffp)       # Probabilidades Flexíveis
+```
+
+Deixo de lado o dataset `EuStockMarkets` para brincar com o ibovespa e os _risk-factors_ calculados pelo time do [NEFIN](https://nefin.com.br).
+
+Os dados do índice Ibovespa são coletados diretamente via Yahoo Finance:
+
+```{r, warning=FALSE, message=FALSE}
+ibov <- getSymbols(Symbols = "^BVSP", auto.assign = FALSE) |> 
+  tk_tbl(preserve_index = TRUE, rename_index = "date") |> 
+  select(date, ibov = contains("Adjusted")) |> 
+  transmute(date, ibov = c(0, diff(log(ibov))))
+ibov
+```
+
+Já para baixar os dados do NEFIN há um trabalho adicional. Geralmente eles disponibilizam os dados no link https://nefin.com.br/data/risk_factors.html, com um mês de atraso:
+
+```{r}
+urls <- list(market = "https://nefin.com.br/resources/risk_factors/Market_Factor.xls",
+             smb    = "https://nefin.com.br/resources/risk_factors/SMB_Factor.xls",
+             hml    = "https://nefin.com.br/resources/risk_factors/HML_Factor.xls",
+             wml    = "https://nefin.com.br/resources/risk_factors/WML_Factor.xls",
+             iml    = "https://nefin.com.br/resources/risk_factors/IML_Factor.xls",
+             risk_free = "https://nefin.com.br/resources/risk_factors/Risk_Free.xls")
+
+destfiles <- list("market.xls", "smb.xls", "hml.xls", "wml.xls", "iml.xls", "risk_free.xls")
+
+risk_factors <- map2(.x = urls,
+                     .y = destfiles,
+                     .f = ~curl::curl_download(url = .x, destfile = .y)) |> 
+  map(read_excel) |> 
+  reduce(left_join, by = c("year", "month", "day")) |> 
+  mutate(date = make_date(year = year, month = month, day = day)) |> 
+  rename_all(str_to_lower) |> 
+  rename(rm = "rm_minus_rf", rf = "risk_free") |> 
+  select(date, everything(), -year, -month, -day, -rf)
+risk_factors
+```
+
+Por fim, unifico os objetos `ibov` e `risk_factors` com o intuito de manter apenas os últimos $10$ anos de história:
+
+```{r}
+data <- left_join(ibov, risk_factors, by = "date") |> 
+  filter(date > "2011-01-02") |> 
+  na.omit()
+data
+```
+
+O foco agora se direciona para o cálculo das probabilidades. Mostro dois métodos que estão no pacote `ffp` e ainda não foram discutidos nos posts anteriores: `crisp` e `exp_decay`. 
+
+O objetivo da função `crisp` é restringir a análise para alguma situação macro/micro específica, dando $100\%$ de peso para as condições que atendem a restrição e $0\%$% para aquelas não atendem:
+
+$$p = 
+\begin{cases}
+    1 & \text{se } x_t \text{ atende a restrição} \\
+    0 & \text{se } x_t \text{ não atende a restrição}
+\end{cases}$$
+
+Uma vez que as _dummies_ sejam computadas, o vetor $p$ é normalizado para garantir que a soma do processo seja igual a $1$. 
+
+```{r}
+crisp_positive <- crisp(data$ibov, data$ibov > 0)
+crisp_negative <- crisp(data$ibov, data$ibov < 0)
+```
+
+No exemplo acima, a análise é condicionada para os períodos que o ibovespa teve retornos acima e abaixo de zero. 
+
+Já a função `exp_decay` busca dar mais importância para observações recentes por meio da relação exponencial:
+
+$$ p = e^{-\lambda(T-t)}$$
+no qual $\lambda$ é um parâmetro de decaimento que determina o grau de persistência das últimas observações. Via de regra, quando maior o parâmetro $\lambda$, menor o número de cenários efetivamente considerados. Utilizo $\lambda = 0.001359$, cuja a meia vida é quase igual a 2 anos[^1]:
+
+```{r}
+exp_smoothing  <- exp_decay(data$ibov, 0.001359)
+```
+
+O paper [Historical Scenarios with Fully Flexible Probabilities](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1696802) descreve bem o contexto em que as probabilidades podem ser utilizadas para geração de cenários e risk-management.
+
+Com base nessas probabilidades é possível estimar os betas _condicionais_. A função `lm` contém um argumento pouco conhecido, mas incrivelmente útil, chamado `weights`. Quando `weights = NULL`, a função `lm` minimiza a soma dos mínimos quadrados ordinários (MQO). Entretanto, quando `weights` não é nulo, a função minimiza os [mínimos quadrados ponderados](https://en.wikipedia.org/wiki/Weighted_least_squares#:~:text=Weighted%20least%20squares%20(WLS)%2C,is%20incorporated%20into%20the%20regression) (MQP), de modo que as observações com maior peso ganham maior importância no processo de otimização:
+
+```{r}
+unconditional <- lm(ibov ~ rm + smb + hml + wml + iml, data = data) |> 
+  tidy() |> 
+  mutate(Cenário = "Incondicional")
+
+positive <- lm(ibov ~ rm + smb + hml + wml + iml, data = data, weights = crisp_positive) |> 
+  tidy() |> 
+  mutate(Cenário = "Otimista")
+
+negative <- lm(ibov ~ rm + smb + hml + wml + iml, data = data, weights = crisp_negative) |> 
+  tidy() |> 
+  mutate(Cenário = "Pessimista")
+
+exponential <- lm(ibov ~ rm + smb + hml + wml + iml, data = data, weights = exp_smoothing) |> 
+  tidy() |> 
+  mutate(Cenário = "Exponencial")
+
+regression <- bind_rows(unconditional, positive, negative, exponential)
+regression
+```
+
+O output dessas regressões é mais fácil de ser digerido visualmente: 
+
+```{r, warning=FALSE, message=FALSE}
+library(ggdist)
+library(distributional)
+
+regression  |> 
+  mutate(term = fct_reorder(as_factor(term), estimate)) |> 
+  filter(term != "rm", term != "(Intercept)") |> 
+  ggplot(aes(y = term, group = `Cenário`, color = `Cenário`, fill = `Cenário`) ) +
+  stat_halfeye(aes(xdist = dist_student_t(df = 2784, mu = estimate, sigma = std.error)), alpha = 0.75) + 
+  geom_vline(xintercept = 0, size = 1, color = "grey", linetype = 2) + 
+  scale_fill_viridis_d(end = 0.75, option = "C") + 
+  scale_color_viridis_d(end = 0.75, option = "C") + 
+  theme(legend.position = "bottom") + 
+  labs(title    = "Regressão Linear via WLS-Entropy-Pooling",
+       subtitle = "Distribuição dos parâmetros sob diferentes cenários",
+       x        = NULL, 
+       y        = NULL)
+```
+
+O Ibovespa responde de $1$ para $1$ ao fator de mercado em praticamente qualquer cenário. Assim, excluí esse item para deixar o gráfico mais limpo.
+
+A grosso modo, o Ibovespa é um índice com um "tilt" em direção a empresas de _value_ com baixa-média capitalização. A entrada de novas companhias (MGLU3, LWSA3, BIDI11, PETZ3, etc.) e a diminuição da importância de empresas tradicionais (PETR4, VALE3, BBAS3, etc.) acho que explicam parcialmente esse posicionamento. A exposição ao fator de momentum é baixa e a liquidez média bastante elevada (prêmio de iliquidez negativo).
+
+nO cenário "pessimista" - Quando os retornos são negativos - o Ibovespa fica mais exposto ao fator SMB, possivelmente porque em momentos de _sell-off_ as empresas cíclicas domésticas (que têm menor capitalização) são as primeiras a levar porrada. No cenário "otimista", o _drift_ em direção as empresas de baixa capitalização diminui um pouco, sem muito impacto sobre os demais fatores. 
+
+Por fim, quando maior peso é dado para as observações mais recentes - alisamento exponencial - os coeficientes estimados diminuem em módulo para todos os fatores, embora continuem estatisticamente significativos ao nível de $95\%$.
+
+
+
+Legal ver como uma análise que começa de maneira totalmente bayesiana consegue facilmente conversar com o mundo clássico - frequentista - onde a aceitação é mais ampla.  
+
+
+[^1]: 510 dias para ser mais exato. Veja com o comando: `half_life(0.001359)`.
