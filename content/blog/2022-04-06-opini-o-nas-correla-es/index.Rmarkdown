@@ -47,6 +47,13 @@ ep <- entropy_pooling(p = prior, Aeq = view_cor$Aeq, beq = view_cor$beq, solver 
 ep
 ```
 
+O objeto `ep` é o vetor de probabilidades que soluciona o problema:
+
+$$ min \sum_{i=1}^I x_i(ln(x_i) - ln(p_i)) $$
+$s.a.$
+$$ \sum_{i=1}^I \hat{p_i} x_{j,k}x_{j,l}  =   \hat{m}_k \hat{m}_l + \hat{\sigma}_{k} \hat{\sigma}_{l} \hat{C}_{k, l} $$ 
+Ou seja, dentre todos os possíveis vetores que atendem a restrição imposta, `ep` é aquele que distorce ao mínimo o vetor de probabilidades uniforme (equal-weighted). 
+
 Lembre-se que o método `autoplot` está disponível para objetos da classe `ffp`:
 
 ```{r}
@@ -220,6 +227,6 @@ dplyr::bind_rows(tbl_panic, tbl_prior) |>
   )  
 ```
 
-A possibilidade de se precificar rapidamente _qualquer_ opinião é uma das grandes virtudes de entropy-pooling. Com relação a esse ponto, quero ser ainda mais enfático: __Com entropy-pooling, não há cenário que não possa ser precificado!__ 
+A possibilidade de se precificar rapidamente _qualquer_ opinião é uma das grandes virtudes de entropy-pooling. 
  
 Por hoje é isso. No próximo post mostro como construir opiniões que devem ser satisfeitas com desigualdade.
