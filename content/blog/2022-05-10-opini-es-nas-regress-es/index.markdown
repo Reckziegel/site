@@ -236,7 +236,6 @@ A grosso modo, o Ibovespa é um índice com um _tilt_ em direção a empresas de
 
 Sob o cenário definido como "pessimista", o Ibovespa parece ficar ainda mais exposto ao fator SMB, possivelmente porque em momentos de _sell-off_ as empresas cíclicas domésticas (que têm menor capitalização) são as primeiras a tomar porrada. Já no cenário "otimista", o _drift_ em direção as empresas de baixa capitalização diminui e a liquidez aumenta, sem muito impacto sobre os demais fatores. Por fim, chama atenção como a performance recente - "exponencial" - diverge do comportamento médio dos últimos `\(10\)` anos. 
 
-Banca ver como uma análise que começa de maneira totalmente bayesiana consegue conversar com o mundo frequentista de maneira rápida e sem complicações. :smiley:
-
+Bacana ver como uma análise que começa de maneira totalmente bayesiana consegue conversar com o mundo frequentista de maneira rápida e sem complicações. 
 
 [^1]: 510 dias para ser mais exato. Veja com o comando: `half_life(0.001359)`.
