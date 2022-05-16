@@ -1,7 +1,7 @@
 ---
 title: Opiniões nas Regressões
 author: 'Bernardo Reckziegel '
-date: '2022-05-13'
+date: '2022-05-16'
 slug: []
 categories:
   - R
@@ -14,9 +14,7 @@ meta_img: images/image.png
 description: Description for the page
 ---
 
-Uma consequência bacana de se trabalhar com [entropy-pooling](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1213325) é que as _probabilidades flexíveis_ também podem ser utilizadas para _condicionar_ os betas das regressões lineares. 
-
-Nos posts anteriores mostrei como utilizar a biblioteca [ffp](https://reckziegel.github.io/FFP/) para adicionar opiniões em diversos elementos das distribuições multivariadas ([retornos](https://www.bernardo.codes/blog/2022-03-30-opini-es-nos-retornos-esperados/), [volatilidades](https://www.bernardo.codes/blog/2022-04-04-opini-es-nas-volatilidades/), [correlações](https://www.bernardo.codes/blog/2022-04-06-opini-o-nas-correla-es/), [margens](https://www.bernardo.codes/blog/2022-04-12-opini-es-nas-margens/), [copulas](https://www.bernardo.codes/blog/2022-04-27-opini-es-nas-copulas/), etc.). Hoje mostro como combinar os objetos da classe `ffp` com a famosa função `lm`. 
+Nos posts anteriores mostrei como utilizar a biblioteca [ffp](https://reckziegel.github.io/FFP/) para adicionar opiniões em diversos elementos das distribuições multivariadas ([retornos](https://www.bernardo.codes/blog/2022-03-30-opini-es-nos-retornos-esperados/), [volatilidades](https://www.bernardo.codes/blog/2022-04-04-opini-es-nas-volatilidades/), [correlações](https://www.bernardo.codes/blog/2022-04-06-opini-o-nas-correla-es/), [margens](https://www.bernardo.codes/blog/2022-04-12-opini-es-nas-margens/), [copulas](https://www.bernardo.codes/blog/2022-04-27-opini-es-nas-copulas/), etc.). Hoje mostro como as _probabilidades flexíveis_ podem úteis para _condicionar_ os betas das regressões lineares. 
 
 Os pacotes utilizados são:
 
@@ -47,7 +45,7 @@ ibov
 ```
 
 ```
-## # A tibble: 3,807 x 2
+## # A tibble: 3,808 x 2
 ##    date           ibov
 ##    <date>        <dbl>
 ##  1 2007-01-02  0      
@@ -60,10 +58,10 @@ ibov
 ##  8 2007-01-11  0.00786
 ##  9 2007-01-12  0.00991
 ## 10 2007-01-15 -0.00409
-## # ... with 3,797 more rows
+## # ... with 3,798 more rows
 ```
 
-Enquanto os dados do NEFIN são disponibilizados no endereço https://nefin.com.br/data/risk_factors.html. Esse link contém url's estáveis, o que facilita a coleta das informações: 
+Já os dados do NEFIN são disponibilizados no endereço https://nefin.com.br/data/risk_factors.html. Esse link contém url's estáveis, o que facilita o download das informações: 
 
 
 ```r
@@ -105,36 +103,36 @@ risk_factors
 ## # ... with 5,268 more rows
 ```
 
-Essa etapa é finalizada com a unificação dos objetos `ibov` e `risk_factors` em uma única `tibble`, que contem os retornos entre `03-01-2011` e `29-04-2022`:
+A etapa de coleta é finalizada com a unificação dos objetos `ibov` e `risk_factors` em uma única `tibble`, que contem os retornos entre `03-01-2012` e `29-04-2022`:
 
 
 ```r
 data <- left_join(ibov, risk_factors, by = "date") |> 
-  filter(date > "2011-01-02") |> 
+  filter(date > "2010-01-02") |> 
   na.omit()
 data
 ```
 
 ```
-## # A tibble: 2,790 x 7
-##    date            ibov       rm       smb       hml       wml      iml
-##    <date>         <dbl>    <dbl>     <dbl>     <dbl>     <dbl>    <dbl>
-##  1 2011-01-03  0.00944   0.00776 -0.00653  -0.00590  -0.00569  -0.00909
-##  2 2011-01-04  0.00508   0.00443 -0.00546   0.00780  -0.00671  -0.00151
-##  3 2011-01-05  0.0109    0.00891 -0.0128    0.00615  -0.000305 -0.0100 
-##  4 2011-01-06 -0.00723  -0.00824  0.00410   0.00214  -0.00407   0.00402
-##  5 2011-01-07 -0.00742  -0.0102   0.000620 -0.000881  0.00668   0.00178
-##  6 2011-01-10  0.000999  0.00328 -0.000814 -0.00610  -0.00341   0.00183
-##  7 2011-01-11  0.00421   0.00407 -0.00439  -0.00135   0.00140  -0.00331
-##  8 2011-01-12  0.0170    0.0133  -0.00522   0.0118   -0.00176  -0.00248
-##  9 2011-01-13 -0.0128   -0.0120   0.000618  0.00307   0.00322   0.00392
-## 10 2011-01-14  0.00309   0.00286  0.00396   0.00859   0.00118   0.00459
-## # ... with 2,780 more rows
+## # A tibble: 3,037 x 7
+##    date           ibov       rm      smb        hml      wml       iml
+##    <date>        <dbl>    <dbl>    <dbl>      <dbl>    <dbl>     <dbl>
+##  1 2010-01-04  0.0210   0.0214  -0.00544  0.00345   -0.00640 -0.00615 
+##  2 2010-01-05  0.00278  0.00133 -0.00411  0.00497   -0.00674  0.00249 
+##  3 2010-01-06  0.00694  0.00587  0.0144   0.00473    0.00624  0.00883 
+##  4 2010-01-07 -0.00394 -0.00295  0.00984  0.00533    0.00367  0.0130  
+##  5 2010-01-08 -0.00267 -0.00184  0.00961 -0.0000292 -0.00294  0.0172  
+##  6 2010-01-11  0.00242  0.00147  0.0100   0.0123     0.00545  0.0192  
+##  7 2010-01-12 -0.00508 -0.00465  0.00351 -0.00348    0.00184 -0.00559 
+##  8 2010-01-13  0.00440  0.00400  0.00639  0.00147    0.00633  0.000103
+##  9 2010-01-14 -0.00833 -0.00697 -0.00107 -0.00835    0.00638  0.00515 
+## 10 2010-01-15 -0.0119  -0.0122   0.00950  0.00979    0.00972  0.0108  
+## # ... with 3,027 more rows
 ```
 
-Com isso, o foco se direciona para o cálculo das probabilidades posteriores. Em particular, de dois métodos que estão no pacote `ffp` e ainda não foram discutidos nos posts anteriores: `crisp` e `exp_decay`. 
+Com isso, o foco se direciona para o computo das opiniões. Utilizo dois métodos que estão no pacote `ffp` e ainda não foram discutidos nos posts anteriors: `crisp` e `exp_decay`. 
 
-O objetivo da função `crisp` é restringir a análise para alguma situação macro/micro específica, dando `\(100\%\)` de peso para as condições que atendem a restrição e `\(0\%\)`% para aquelas não atendem:
+O objetivo da função `crisp` é restringir a análise para alguma situação macro/micro específica, dando `\(100\%\)` de peso para as condições que atendem a uma certa restrição e `\(0\%\)` para aquelas não atendem:
 
 `$$p = 
 \begin{cases}
@@ -150,9 +148,9 @@ crisp_positive <- crisp(data$ibov, data$ibov > 0)
 crisp_negative <- crisp(data$ibov, data$ibov < 0)
 ```
 
-No exemplo acima, a análise é condicionada para os períodos que o ibovespa teve retornos acima e abaixo de zero. 
+No exemplo acima, a análise é condicionada para os períodos em que o ibovespa teve retornos acima e abaixo de zero. 
 
-Já a função `exp_decay` busca dar mais importância para observações recentes por meio da relação de alisamento exponencial:
+Já a função `exp_decay` busca dar mais relevância para observações recentes por meio da relação de alisamento exponencial:
 
 $$ p = e^{-\lambda(T-t)}$$
 Em que `\(\lambda\)` é um parâmetro de decaimento que determina o grau de persistência das últimas observações. Via de regra, quando maior o parâmetro `\(\lambda\)`, menor o número de cenários efetivamente considerados. Utilizo `\(\lambda = 0.001359\)`, cuja a meia vida é próxima de 2 anos[^1]:
@@ -164,7 +162,9 @@ exp_smoothing  <- exp_decay(data$ibov, 0.001359)
 
 <!-- Caso tenha interesse em entender o contexto em que as probabilidades podem ser utilizadas para geração de cenários e risk-management, recomendo o paper [Historical Scenarios with Fully Flexible Probabilities](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1696802), mais uma grande contribuição do Meucci.  -->
 
-Com base nessas probabilidades - ou qualquer outro vetor que você queira - é possível estimar os betas _condicionais_. A função `lm` possui um argumento pouco conhecido, mas incrivelmente útil, chamado `weights`. Quando esse argumento não é nulo, a função `lm` conduz a estimação por meio dos [mínimos quadrados ponderados](https://en.wikipedia.org/wiki/Weighted_least_squares#:~:text=Weighted%20least%20squares%20(WLS)%2C,is%20incorporated%20into%20the%20regression) (MQP), de modo que as observações com maior peso ganham uma importância relativa maior no processo de otimização:
+Com base nessas opiniões - ou qualquer outro vetor de probabilidades que você queira - é possível estimar os betas _condicionais_ por meio de uma regressão linear. A função `lm` possui um argumento pouco conhecido, mas incrivelmente útil, chamado `weights`. Quando esse argumento não é nulo, a função `lm` conduz a estimação por meio dos [mínimos quadrados ponderados](https://en.wikipedia.org/wiki/Weighted_least_squares#:~:text=Weighted%20least%20squares%20(WLS)%2C,is%20incorporated%20into%20the%20regression) (MQP), de modo que as observações com maior peso ganham maior importância no processo de otimização. 
+
+Uso essa ideia para uma análise de atribuição _ex-post_ do ibovespa:
 
 
 ```r
@@ -192,18 +192,18 @@ regression
 
 ```
 ## # A tibble: 24 x 6
-##    term         estimate std.error statistic  p.value Cenário      
-##    <chr>           <dbl>     <dbl>     <dbl>    <dbl> <chr>        
-##  1 (Intercept)  0.000165 0.0000454      3.63 2.85e- 4 Incondicional
-##  2 rm           1.05     0.00366      288.   0        Incondicional
-##  3 smb          0.126    0.0104        12.0  1.50e-32 Incondicional
-##  4 hml          0.0769   0.00629       12.2  1.80e-33 Incondicional
-##  5 wml         -0.0621   0.00498      -12.5  9.53e-35 Incondicional
-##  6 iml         -0.227    0.0110       -20.6  8.99e-88 Incondicional
-##  7 (Intercept)  0.00113  0.0000638     17.7  7.94e-67 Otimista     
-##  8 rm           0.989    0.00504      196.   0        Otimista     
-##  9 smb          0.112    0.0104        10.8  1.78e-26 Otimista     
-## 10 hml          0.0691   0.00618       11.2  2.32e-28 Otimista     
+##    term         estimate std.error statistic   p.value Cenário      
+##    <chr>           <dbl>     <dbl>     <dbl>     <dbl> <chr>        
+##  1 (Intercept)  0.000168 0.0000429      3.91 9.35e-  5 Incondicional
+##  2 rm           1.05     0.00351      300.   0         Incondicional
+##  3 smb          0.130    0.00968       13.4  6.15e- 40 Incondicional
+##  4 hml          0.0788   0.00607       13.0  1.48e- 37 Incondicional
+##  5 wml         -0.0577   0.00470      -12.3  9.14e- 34 Incondicional
+##  6 iml         -0.227    0.0103       -22.1  4.00e-100 Incondicional
+##  7 (Intercept)  0.00108  0.0000604     17.9  4.60e- 68 Otimista     
+##  8 rm           0.992    0.00483      205.   0         Otimista     
+##  9 smb          0.112    0.00968       11.6  1.90e- 30 Otimista     
+## 10 hml          0.0705   0.00598       11.8  2.25e- 31 Otimista     
 ## # ... with 14 more rows
 ```
 
@@ -232,13 +232,11 @@ regression  |>
 
 <!-- O Ibovespa responde de `\(1\)` para `\(1\)` ao fator de mercado em praticamente qualquer cenário. Assim, excluí esse item para deixar o gráfico mais limpo. -->
 
-A grosso modo, o Ibovespa é um índice com um _tilt_ em direção a empresas de _value_ com média capitalização. A entrada de novas companhias e a diminuição da importância de empresas tradicionais (PETR4, VALE3, BBAS3, etc.) explica parcialmente o direcionamento em relação ao fator SMB. A exposição a momentum é baixa e a liquidez média bastante elevada (prêmio de iliquidez negativo).
+A grosso modo, o Ibovespa é um índice com um _tilt_ em direção a empresas de _value_ com média capitalização. A entrada de novas companhias e a diminuição da importância de empresas tradicionais (PETR4, VALE3, BBAS3, etc.) acho que explica parcialmente o direcionamento em relação ao fator SMB. A exposição a momentum é baixa e a liquidez média bastante elevada (prêmio de iliquidez negativo).
 
-Sob o cenário definido como "pessimista", o Ibovespa parece ficar ainda mais exposto ao fator SMB, possivelmente porque em momentos de _sell-off_ as empresas cíclicas domésticas (que têm menor capitalização) são as primeiras a tomar porrada. Já no cenário "otimista", o _drift_ em direção as empresas de baixa capitalização diminui, sem muito impacto sobre os demais fatores. 
+Sob o cenário definido como "pessimista", o Ibovespa parece ficar ainda mais exposto ao fator SMB, possivelmente porque em momentos de _sell-off_ as empresas cíclicas domésticas (que têm menor capitalização) são as primeiras a tomar porrada. Já no cenário "otimista", o _drift_ em direção as empresas de baixa capitalização diminui e a liquidez aumenta, sem muito impacto sobre os demais fatores. Por fim, chama atenção como a performance recente - "exponencial" - diverge do comportamento médio dos últimos `\(10\)` anos. 
 
-Também chama atenção como a performance recente - "exponencial" - diverge do comportamento médio dos últimos `\(10\)` anos.
-
-É legal ver como uma análise que começa de maneira totalmente bayesiana consegue facilmente conversar com o mundo frequentista, sem muitas complicações.
+É legal ver como uma análise que começa de maneira totalmente bayesiana consegue conversar com o mundo frequentista, sem muitas complicações.
 
 
 [^1]: 510 dias para ser mais exato. Veja com o comando: `half_life(0.001359)`.
