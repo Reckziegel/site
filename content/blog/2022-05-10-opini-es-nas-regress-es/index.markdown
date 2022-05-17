@@ -1,7 +1,7 @@
 ---
 title: Opiniões nas Regressões
 author: 'Bernardo Reckziegel '
-date: '2022-05-16'
+date: '2022-05-17'
 slug: []
 categories:
   - R
@@ -14,7 +14,7 @@ meta_img: images/image.png
 description: Description for the page
 ---
 
-Nos posts anteriores mostrei como utilizar a biblioteca [ffp](https://reckziegel.github.io/FFP/) para adicionar opiniões em diversos elementos das distribuições multivariadas ([retornos](https://www.bernardo.codes/blog/2022-03-30-opini-es-nos-retornos-esperados/), [volatilidades](https://www.bernardo.codes/blog/2022-04-04-opini-es-nas-volatilidades/), [correlações](https://www.bernardo.codes/blog/2022-04-06-opini-o-nas-correla-es/), [margens](https://www.bernardo.codes/blog/2022-04-12-opini-es-nas-margens/), [copulas](https://www.bernardo.codes/blog/2022-04-27-opini-es-nas-copulas/), etc.). Hoje mostro como a abordagem das _probabilidades flexíveis_ pode útil para condicionar os betas das regressões lineares. 
+Nos posts anteriores mostrei como utilizar a biblioteca [ffp](https://reckziegel.github.io/FFP/) para adicionar opiniões em diversos elementos das distribuições multivariadas ([retornos](https://www.bernardo.codes/blog/2022-03-30-opini-es-nos-retornos-esperados/), [volatilidades](https://www.bernardo.codes/blog/2022-04-04-opini-es-nas-volatilidades/), [correlações](https://www.bernardo.codes/blog/2022-04-06-opini-o-nas-correla-es/), [margens](https://www.bernardo.codes/blog/2022-04-12-opini-es-nas-margens/), [copulas](https://www.bernardo.codes/blog/2022-04-27-opini-es-nas-copulas/), etc.). Hoje mostro como a abordagem das _probabilidades flexíveis_ pode ser útil para condicionar os betas das regressões lineares. 
 
 Os pacotes utilizados são:
 
@@ -45,7 +45,7 @@ ibov
 ```
 
 ```
-## # A tibble: 3,808 x 2
+## # A tibble: 3,809 x 2
 ##    date           ibov
 ##    <date>        <dbl>
 ##  1 2007-01-02  0      
@@ -58,7 +58,7 @@ ibov
 ##  8 2007-01-11  0.00786
 ##  9 2007-01-12  0.00991
 ## 10 2007-01-15 -0.00409
-## # ... with 3,798 more rows
+## # ... with 3,799 more rows
 ```
 
 Já os dados do NEFIN ficam disponíveis no endereço https://nefin.com.br/data/risk_factors.html. Esse link contém url's estáveis, o que facilita o download das informações: 
@@ -103,7 +103,7 @@ risk_factors
 ## # ... with 5,268 more rows
 ```
 
-Essa etapa de coleta é finalizada com a unificação dos objetos `ibov` e `risk_factors` em uma única `tibble`, que contem os retornos de `03-01-2012` até `29-04-2022`:
+A etapa de coleta é finalizada com a unificação dos objetos `ibov` e `risk_factors` em uma única `tibble`, que contem os retornos de `03-01-2012` até `29-04-2022`:
 
 
 ```r
@@ -162,7 +162,7 @@ exp_smoothing  <- exp_decay(data$ibov, 0.001359)
 
 <!-- Caso tenha interesse em entender o contexto em que as probabilidades podem ser utilizadas para geração de cenários e risk-management, recomendo o paper [Historical Scenarios with Fully Flexible Probabilities](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1696802), mais uma grande contribuição do Meucci.  -->
 
-Com base nessas opiniões - ou qualquer outro vetor de probabilidades que você queira - é possível estimar os betas _condicionais_ via regressão linear. A função `lm` possui um argumento pouco conhecido, mas incrivelmente útil, chamado `weights`. Quando esse argumento não é nulo, a função `lm` conduz a estimação por meio dos [mínimos quadrados ponderados](https://en.wikipedia.org/wiki/Weighted_least_squares#:~:text=Weighted%20least%20squares%20(WLS)%2C,is%20incorporated%20into%20the%20regression) (MQP), de modo que as observações com maior peso ganham maior importância no processo de otimização. 
+Com base nessas opiniões - ou qualquer outro vetor de probabilidades que você queira - é possível estimar os betas _condicionais_. A função `lm` possui um argumento pouco conhecido, mas incrivelmente útil, chamado `weights`. Quando esse argumento não é nulo, a função `lm` conduz a estimação por meio dos [mínimos quadrados ponderados](https://en.wikipedia.org/wiki/Weighted_least_squares#:~:text=Weighted%20least%20squares%20(WLS)%2C,is%20incorporated%20into%20the%20regression) (MQP), de modo que as observações com maior peso ganham maior importância no processo de otimização. 
 
 Uso essa ideia para uma análise de atribuição _ex-post_ do ibovespa:
 
@@ -206,8 +206,6 @@ regression
 ## 10 hml          0.0705   0.00598       11.8  2.25e- 31 Otimista     
 ## # ... with 14 more rows
 ```
-
-O output dessas regressões é mais fácil de ser digerido visualmente: 
 
 
 ```r
