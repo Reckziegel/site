@@ -1,0 +1,137 @@
+---
+title: Momentum Entropy-Pooling
+author: Bernardo Reckziegel
+date: '2022-05-17'
+slug: []
+categories:
+  - R
+  - views
+tags:
+  - entropy-pooling
+  - ffp
+  - momentum
+  - factor-investing
+meta_img: images/image.png
+description: Description for the page
+---
+
+Nos últimos posts mostrei algumas funcionalidades básicas do pacote `ffp`. Em particular, como portfolio e risk-managers podem utilizar essa biblioteca para adicionar opiniões nos mercados.
+
+Hoje avanço e mostro como entropy-pooling pode ser útil também para construção de estratégias de _factor-investing_ e _smart-beta_.
+
+Geralmente, os "fatores" são construídos com base em portfolios dollar-neutro, no qual assume-se que as ações que estão mais próximas de possuirem uma característica "x" devem ser compradas e aquelas que mais se afastam dessa característica devem ser vendidas. No caso da estratégia de momentum, geralmente se compra as ações aque mais subiram nos últimos 12 meses e se vende aquelas que mais caíram. 
+
+Não vou entrar no mérito se a estratégia é "boa" ou não. Meu objetivo é apenas mostrar como entropy-pooling pode ser utilizado para contrução de portfolios eficientes com um _tilt_ ao fator de momentum. Dito de outra forma: estou "vendendo" a técnica (entropy-pooling), não a estratégia (momentum).
+
+Trabalho com a base de dados `br_stock_indices.xlsx` que você pode baixar no endereço https://github.com/Reckziegel/site/tree/master/data.
+
+```{r, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(lubridate)
+library(readxl)
+library(rsample)
+library(ffp)
+
+indices <- read_excel(path = "/Meu Drive/site/data/br_stock_indices.xlsx", 
+                      col_types = c("date", rep("numeric", 6))) |> 
+  mutate(date = as_date(date))  
+returns <- indices |> 
+  modify_if(.p = is.numeric, .f = ~ log(.x / dplyr::lag(.x))) |> # invariance
+  na.omit()
+returns
+```
+
+Selecionei alguns índices bastante conhecidos e disponíveis por um período de tempo relativamente longo para o Brasil. Não há _chery-picking_ na escolha do dataset no sentido de favorecer os retornos da estratégia, que apresenta uma performance consistente ao longo dos últimos 200 anos (https://www.aqr.com/Insights/Research/Journal-Article/Fact-Fiction-and-Momentum-Investing).
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+get_assessment_date <- function(x) {
+  map(.x = x$splits, .f = ~ assessment(.x)) |> 
+    map(.f = keep, .p = is.Date) |> 
+    reduce(bind_rows) |> 
+    pull(date)
+}
+optimal_portfolio   <- function(sigma, mu, .wmin = 0, .wmax = 1) {
+
+  num_assets <- ncol(sigma)
+
+  Aeq  <- matrix(1, 1, num_assets)
+  beq  <- 1
+
+  A <- rbind(-diag(num_assets), diag(num_assets))
+  b <- c(
+    -if (length(.wmax) == 1L) rep(.wmax, num_assets) else .wmax, 
+     if (length(.wmin) == 1L) rep(.wmin, num_assets) else .wmin
+  )
+
+  Amat <- rbind(Aeq, A)
+  bvec <- c(beq, b)
+
+  weights <- matrix(quadprog::solve.QP(Dmat = 2 * sigma, dvec = mu, Amat = t(Amat), bvec = bvec, meq = length(beq))$solution)
+  weights
+
+}
+momentum_moments    <- function(.x, .period = 52) {
+
+  .order <- .x |>
+    select(where(is.numeric)) |>
+    summarise_all(~prod(1 + tail(.x, n = .period)) - 1) |>
+    as.double() |>
+    order()
+
+  prior <- rep(1 / nrow(.x), nrow(.x))
+  views <- view_on_rank(x = .x, rank = .order)
+
+  ep <- try(entropy_pooling(p = prior, A = views$A, b = views$b, solver = "nloptr"))
+
+  if (class(ep) == "try-error") {
+    ep <- prior
+  }
+
+  ffp_moments(x = .x, p = ep)
+
+}
+```
+
+```{r, warning=FALSE, message=FALSE}
+optimin <- returns |> 
+  rolling_origin(initial = 52 * 16, assess = 1, cumulative = TRUE)
+optimin <- optimin |> 
+  mutate(optimin, date = get_assessment_date(optimin))
+
+optimin <- optimin |>
+  dplyr::mutate(.analysis   = map(.x = splits, .f = analysis),
+                .assessment = map(.x = splits, .f = assessment))
+optimin <- optimin |>
+  dplyr::mutate(.moments = map(.x = .analysis, .f = ~ momentum_moments(.x = .x, .period = 52)))
+optimin <- optimin |>
+  dplyr::mutate(.weights = map(.x = .moments, .f = ~ optimal_portfolio(sigma = .x$sigma, mu = .x$mu, .wmin = 0, .wmax = 1)))
+optimin <- optimin |>
+  dplyr::mutate(ret = map2_dbl(.x = .weights, .y = .assessment, .f = ~ as.matrix(.y[ , -1]) %*% .x))
+optimin
+```
+
+
+```{r}
+benchmark <- select(returns, date, IBOV)
+
+optimin |>
+  left_join(benchmark, by = "date") |>
+  select(date, ret, IBOV) |>
+  na.omit() |>
+  mutate(Momentum = ret - (1.04 ^ (1 / 52) - 1)) |>
+  select(date, Momentum, IBOV) |>
+  mutate_if(is.numeric, ~ cumprod(1 + .x)) |>
+  pivot_longer(cols = -date) |>
+  ggplot(aes(x = date, y = value, color = name)) +
+  geom_line() + 
+  scale_y_log10() + 
+  scale_color_viridis_d(end = 0.75, option = "C") + 
+  labs(title = "Fator Momemtum contruído via Entropy-Pooling", 
+       subtitle = "Portfolios long-only com 'tilt' na performance de 52 semanas", 
+       x = NULL, y = NULL, color = NULL) + 
+  theme(legend.position = "bottom")
+```
+
+Antes de plotar a estratégia contra o ibovespa adiciono uma taxa anual de $4\%$, que considero um valor bastante elevado e capaz de emular não somente os custos fixos, como potencial bonus e custos transacionais.
+
+
