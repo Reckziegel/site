@@ -1,7 +1,7 @@
 ---
 title: Momentum Entropy-Pooling
 author: Bernardo Reckziegel
-date: '2022-05-17'
+date: '2022-05-18'
 slug: []
 categories:
   - R
@@ -17,27 +17,32 @@ description: Description for the page
 
 Nos últimos posts mostrei algumas funcionalidades básicas do pacote `ffp`. Em particular, como portfolio e risk-managers podem utilizar essa biblioteca para adicionar opiniões nos mercados.
 
-Hoje avanço e mostro como entropy-pooling pode ser útil também para construção de estratégias de _factor-investing_ e _smart-beta_.
+Hoje mostro como entropy-pooling pode ser útil para construção de estratégias de _factor-investing_ e _smart-beta_.
 
-Geralmente, os "fatores" são construídos com base em portfolios dollar-neutro, no qual assume-se que as ações que estão mais próximas de possuirem uma característica "x" devem ser compradas e aquelas que mais se afastam dessa característica devem ser vendidas. No caso da estratégia de momentum, geralmente se compra as ações aque mais subiram nos últimos 12 meses e se vende aquelas que mais caíram. 
+Foco minha atenção no fator de [momentum](https://www.investopedia.com/terms/m/momentum.asp) por dois motivos: 
 
-Não vou entrar no mérito se a estratégia é "boa" ou não. Meu objetivo é apenas mostrar como entropy-pooling pode ser utilizado para contrução de portfolios eficientes com um _tilt_ ao fator de momentum. Dito de outra forma: estou "vendendo" a técnica (entropy-pooling), não a estratégia (momentum).
+1) A performance desse fator no Brasil e no [exterior](https://www.aqr.com/Insights/Research/Journal-Article/Value-and-Momentum-Everywhere) é estrelar;
+2) É mais fácil de construir do que os demais fatores.  
+
+O segundo motivo é especialmente importante para um texto curto como esse. 
 
 Trabalho com a base de dados `br_stock_indices.xlsx` que você pode baixar no endereço https://github.com/Reckziegel/site/tree/master/data.
 
 
 ```r
-library(tidyverse)
-library(lubridate)
-library(readxl)
-library(rsample)
-library(ffp)
+library(tidyverse) # Dispensa introdução
+library(lubridate) # Manipulação de datas
+library(readxl)    # Leitura de arquivos xmlx
+library(rsample)   # Rolling-Windonws no mundo do tidyverse
+library(quadprog)  # Otimização Quadrátiva
+library(ffp)       # Probabilidades Flexíveis
 
 indices <- read_excel(path = "/Meu Drive/site/data/br_stock_indices.xlsx", 
                       col_types = c("date", rep("numeric", 6))) |> 
   mutate(date = as_date(date))  
 returns <- indices |> 
-  modify_if(.p = is.numeric, .f = ~ log(.x / dplyr::lag(.x))) |> # invariance
+  # invariance
+  modify_if(.p = is.numeric, .f = ~ log(.x / lag(.x))) |> 
   na.omit()
 returns
 ```
@@ -59,45 +64,62 @@ returns
 ## # ... with 845 more rows
 ```
 
-Selecionei alguns índices bastante conhecidos e disponíveis por um período de tempo relativamente longo para o Brasil. Não há _chery-picking_ na escolha do dataset no sentido de favorecer os retornos da estratégia, que apresenta uma performance consistente ao longo dos últimos 200 anos (https://www.aqr.com/Insights/Research/Journal-Article/Fact-Fiction-and-Momentum-Investing).
+Esse índices são bastante conhecidos e com um histórico relativamente longo para o Brasil. Reforço que não há _chery-picking_, no sentido de favorecer os resultados da estratégia. Escolhi esses índices porque queria trabalhar com ativos que tivessem pelo menos 15 anos de história. No mais, acho que os fatos falam por si ([Fact, Fiction and Momentum Investing](https://www.aqr.com/Insights/Research/Journal-Article/Fact-Fiction-and-Momentum-Investing)). 
+
+O portfolio de momentum geralmente é construído como um portfolio _dollar-neutral_, `\(100\%\)` investido, no qual a performance passada determina quais ativos entram na ponta comprada e/ou vendida. 
+
+Aqui, aplico uma mudança no modo de construção do fator. Ao invés de comprar/vender os ativos que estão acima/abaixo de um determinado percentil, "rankeio" as ações de de melhor para pior performance e utilizo entropy-pooling para construir um vetor de probabilidades que acomoda o "rankiamento" e ao mesmo tempo distorce ao mínimo o vetor de probabilidades _equal-weigthed_ original. Com base no vetor de probabilidades posterior, estimo os momentos _condicionais_ - `\(\mu\)` e `\(\sigma\)` - que resultam da relação de ordenação imposta por mim. 
+
+Ou seja, a cada ponto do tempo soluciono numericamente o sistema:
+
+$$ \sum_{i=1}^I x_i(ln(x_i) - ln(p_i)) $$
+`\(s.t.\)`
+
+$$ \sum_{i=1}^I \hat{p_i} (Opinion_{i, 1} - Opinion_{i, 2}) \leq 0 $$ 
+$$ \sum_{i=1}^I \hat{p_i} (Opinion_{i, 2} - Opinion_{i, 3}) \leq 0 $$ 
+
+$$ ... $$ 
+
+$$ \sum_{i=1}^I \hat{p_i} (Opinion_{i, j-1} - Opinion_{i, v}) \leq 0 $$ 
+No qual a solução, `\(p^*\)`, 
 
 
 
 
 ```r
 optimin <- returns |> 
-  rolling_origin(initial = 52 * 16, assess = 1, cumulative = TRUE)
+  rolling_origin(initial = 845, assess = 1, cumulative = TRUE)
 optimin <- optimin |> 
   mutate(optimin, date = get_assessment_date(optimin))
 
 optimin <- optimin |>
-  dplyr::mutate(.analysis   = map(.x = splits, .f = analysis),
-                .assessment = map(.x = splits, .f = assessment))
+  mutate(.analysis   = map(.x = splits, .f = analysis),
+         .assessment = map(.x = splits, .f = assessment))
 optimin <- optimin |>
-  dplyr::mutate(.moments = map(.x = .analysis, .f = ~ momentum_moments(.x = .x, .period = 52)))
+  mutate(.moments = map(.x = .analysis, .f = ~ momentum_moments(.x = .x, .period = 52)))
 optimin <- optimin |>
-  dplyr::mutate(.weights = map(.x = .moments, .f = ~ optimal_portfolio(sigma = .x$sigma, mu = .x$mu, .wmin = 0, .wmax = 1)))
+  mutate(.weights = map(.x = .moments, .f = ~ optimal_portfolio(sigma = .x$sigma, mu = .x$mu, .wmin = 0, .wmax = 1)))
 optimin <- optimin |>
-  dplyr::mutate(ret = map2_dbl(.x = .weights, .y = .assessment, .f = ~ as.matrix(.y[ , -1]) %*% .x))
+  mutate(ret = map2_dbl(.x = .weights, .y = .assessment, .f = ~ as.matrix(.y[ , -1]) %*% .x))
 optimin
 ```
 
 ```
 ## # Rolling origin forecast resampling 
-## # A tibble: 23 x 8
+## # A tibble: 10 x 8
 ##    splits          id      date       .analysis .assessment      .moments    
 ##    <list>          <chr>   <date>     <list>    <list>           <list>      
-##  1 <split [832/1]> Slice01 2021-12-17 <tibble>  <tibble [1 x 7]> <named list>
-##  2 <split [833/1]> Slice02 2021-12-24 <tibble>  <tibble [1 x 7]> <named list>
-##  3 <split [834/1]> Slice03 2021-12-31 <tibble>  <tibble [1 x 7]> <named list>
-##  4 <split [835/1]> Slice04 2022-01-07 <tibble>  <tibble [1 x 7]> <named list>
-##  5 <split [836/1]> Slice05 2022-01-14 <tibble>  <tibble [1 x 7]> <named list>
-##  6 <split [837/1]> Slice06 2022-01-21 <tibble>  <tibble [1 x 7]> <named list>
-##  7 <split [838/1]> Slice07 2022-01-28 <tibble>  <tibble [1 x 7]> <named list>
-##  8 <split [839/1]> Slice08 2022-02-04 <tibble>  <tibble [1 x 7]> <named list>
-##  9 <split [840/1]> Slice09 2022-02-11 <tibble>  <tibble [1 x 7]> <named list>
-## 10 <split [841/1]> Slice10 2022-02-18 <tibble>  <tibble [1 x 7]> <named list>
-## # ... with 13 more rows, and 2 more variables: .weights <list>, ret <dbl>
+##  1 <split [845/1]> Slice01 2022-03-18 <tibble>  <tibble [1 x 7]> <named list>
+##  2 <split [846/1]> Slice02 2022-03-25 <tibble>  <tibble [1 x 7]> <named list>
+##  3 <split [847/1]> Slice03 2022-04-01 <tibble>  <tibble [1 x 7]> <named list>
+##  4 <split [848/1]> Slice04 2022-04-08 <tibble>  <tibble [1 x 7]> <named list>
+##  5 <split [849/1]> Slice05 2022-04-15 <tibble>  <tibble [1 x 7]> <named list>
+##  6 <split [850/1]> Slice06 2022-04-22 <tibble>  <tibble [1 x 7]> <named list>
+##  7 <split [851/1]> Slice07 2022-04-29 <tibble>  <tibble [1 x 7]> <named list>
+##  8 <split [852/1]> Slice08 2022-05-06 <tibble>  <tibble [1 x 7]> <named list>
+##  9 <split [853/1]> Slice09 2022-05-13 <tibble>  <tibble [1 x 7]> <named list>
+## 10 <split [854/1]> Slice10 2022-05-20 <tibble>  <tibble [1 x 7]> <named list>
+## # ... with 2 more variables: .weights <list>, ret <dbl>
 ```
 
 
@@ -108,8 +130,7 @@ benchmark <- select(returns, date, IBOV)
 optimin |>
   left_join(benchmark, by = "date") |>
   select(date, ret, IBOV) |>
-  na.omit() |>
-  mutate(Momentum = ret - (1.04 ^ (1 / 52) - 1)) |>
+  mutate(Momentum = ret - (1.01 ^ (1 / 52) - 1)) |>
   select(date, Momentum, IBOV) |>
   mutate_if(is.numeric, ~ cumprod(1 + .x)) |>
   pivot_longer(cols = -date) |>
@@ -117,8 +138,8 @@ optimin |>
   geom_line() + 
   scale_y_log10() + 
   scale_color_viridis_d(end = 0.75, option = "C") + 
-  labs(title = "Fator Momemtum contruído via Entropy-Pooling", 
-       subtitle = "Portfolios long-only com 'tilt' na performance de 52 semanas", 
+  labs(title = "Momentum Entropy-Pooling", 
+       subtitle = "Portfolio long-only com 'tilt' em momentum (52 semanas)", 
        x = NULL, y = NULL, color = NULL) + 
   theme(legend.position = "bottom")
 ```
