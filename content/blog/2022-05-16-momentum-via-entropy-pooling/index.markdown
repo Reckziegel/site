@@ -1,7 +1,7 @@
 ---
 title: Momentum Entropy-Pooling
 author: Bernardo Reckziegel
-date: '2022-05-18'
+date: '2022-06-02'
 slug: []
 categories:
   - R
@@ -36,11 +36,11 @@ library(readxl)    # Leitura de arquivos xmlx
 library(curl)      # Leitura de arquivos xmlx
 library(rsample)   # Rolling-windows no tidyverse
 library(quadprog)  # Otimização Quadrática
-library(corrr)     # Correlation Networks 
-library(viridisLite) # Viridis palette 
+#library(corrr)     # Correlation Networks 
+#library(viridisLite) # Viridis palette 
 library(ffp)       # Probabilidades Flexíveis
 
-# Access the dataset  
+# Connect  
 url <- "https://github.com/Reckziegel/site/raw/master/data/br_stock_indices.xlsx"
 destfile <- "br_stock_indices.xlsx"
 curl_download(url, destfile)
@@ -74,27 +74,26 @@ returns
 ## # ... with 845 more rows
 ```
 
-Para implementar a estratégia, seleciono os índices da B3 com pelo menos `\(15\)` anos de história. Os dados estão em periodicidade semanal e compreendem o período de 10/02/2010 até 20/05/2022. 
+O dataset `returns` contém os índices da B3 com pelo menos `\(15\)` anos de história. Os dados estão em periodicidade semanal e compreendem o período de 10/02/2010 até 20/05/2022. 
 
-A estrutura de correlação histórica mostra que os índices `IMAT`, `INFC` e `IEEX` são os principais diversificadores em relação ao `IBOV`:
+<!-- A estrutura de correlação histórica mostra que os índices `IMAT`, `INFC` e `IEEX` são os principais diversificadores em relação ao `IBOV`: -->
 
+<!-- ```{r, message=FALSE, warning=FALSE} -->
+<!-- returns |>  -->
+<!--   select(where(is.numeric)) |>   -->
+<!--   correlate() |>  -->
+<!--   network_plot(colours = plasma(n = 10)) -->
+<!-- ``` -->
 
-```r
-returns |> 
-  select(where(is.numeric)) |>  
-  correlate() |> 
-  network_plot(colours = plasma(n = 10))
-```
+<!-- Já a próximidade dos índices `INDX`e `IDIV` denuncia o _tilt_ do Ibovespa em direção ao fator de _value_, como mostrei no [post anterior](https://www.bernardo.codes/blog/2022-05-10-opini-es-nas-regress-es/). -->
 
-<img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-1.png" width="672" />
+<!-- Enfim, voltando aos fatores...  -->
 
-Já a próximidade dos índices `INDX`e `IDIV` denuncia o _tilt_ do Ibovespa em direção ao fator de _value_, como mostrei no [post anterior](https://www.bernardo.codes/blog/2022-05-10-opini-es-nas-regress-es/).
+Para construir o fator de _momentum_ geralmente utiliza-se um portfolio _dollar-neutral_, `\(100\%\)` investido, no qual a performance passada determina quais ativos entram na ponta comprada e/ou vendida da carteira. O ponto de corte é geralmente algum percentil: por exemplo, ordena-se ativos da melhor para pior performance e compra-se aqueles até o `\(33º\)` percentil e vende-se os ativos do `\(67º\)` percentil para baixo.
 
-Enfim, voltando aos fatores... Para construir o fator de momentum geralmente utiliza-se um portfolio _dollar-neutral_, `\(100\%\)` investido, no qual a performance passada determina quais ativos entram na ponta comprada e/ou vendida da carteira. O ponto de corte é algum percentil: por exemplo, compra-se/vende-se os ativos que tiveram uma performance relativa acima/abaixo de um determinado ponto de corte. 
+Nesse post, ao invés de comprar/vender os ativos que estão acima/abaixo de um determinado percentil, utilizo entropy-pooling para construir um portfolio de média-variância com um _tilt_ em _momentum_ Para isso, ordeno as ações da melhor para pior performance e computo o vetor de probabilidades _posterior_ que acomoda essa "ordenação" e oferece a menor distorção possível em relação ao vetor de probabilidades original, _equal-weigthed_[^1].
 
-Nesse post, ao invés de comprar/vender os ativos que estão acima/abaixo de um determinado percentil, utilizo entropy-pooling para construir um portfolio de média-variância com um _tilt_ em momentum. Para isso, ordeno as ações da melhor para pior performance e computo o vetor de probabilidades _posterior_ que acomoda essa "ordenação" e ao mesmo tempo oferece a menor distorção possível em relação ao vetor de probabilidades original, _equal-weigthed_. 
-
-O processo de estimação é todo conduzido via [tidyverse](https://www.tidyverse.org/). O passo inicial envolve a construção de estruturas em formato de "rolling-window" com auxílio da função `rolling_origin`:
+O processo de estimação é todo conduzido dentro do ecossistema do [tidyverse](https://www.tidyverse.org/). O passo inicial envolve a construção de uma estrutura no formato de _rolling-window_, no qual os dados são divididos entre "treinamento" - `.analysis` - e "avaliação" - `.assessment` - `\(1\)` passo a frente:
 
 
 
@@ -108,7 +107,7 @@ get_assessment_date <- function(x) {
 }
 
 optimin <- returns |> 
-  rolling_origin(initial = 52 * 5, assess = 1, cumulative = TRUE)
+  rolling_origin(initial = 52 * 5, assess = 1, cumulative = FALSE)
 optimin <- optimin |> 
   mutate(optimin, 
          .date       = get_assessment_date(optimin),  
@@ -117,9 +116,7 @@ optimin <- optimin |>
   select(-splits, -id)
 ```
 
-O objeto `optimin` é dividido entre "treinamento" - `.analysis` - e "avaliação" -`.assessment` - `\(1\)` passo a frente. 
-
-Para resolver o problema da entropia-mínima relativa (EMR) o sistema de equações abaixo precisa ser resolvido a cada ponto do tempo: 
+Para resolver o problema da Entropia-Mínima Relativa (EMR) o sistema de equações abaixo precisa ser solucionado em cada ponto do tempo: 
 
 $$ \sum_{i=1}^I x_i(ln(x_i) - ln(p_i)) $$
 `\(s.t.\)`
@@ -128,9 +125,7 @@ $$ \sum_{i=1}^I \hat{p_i} (Opinion_{i, 2} - Opinion_{i, 3}) \leq 0 $$
 $$ ... $$ 
 $$ \sum_{i=1}^I \hat{p_i} (Opinion_{i, j-1} - Opinion_{i, v}) \leq 0 $$ 
 
-A solução numérica retorna o vetor de probabilidades _posterior_, `\(\hat{p}^*\)`, que permite estimar os parâmetros `\(\mu^*_{conditional}\)` e `\(\sigma^*_{conditional}\)`, principais insumos do modelo de média-variância. 
-
-A função `momentum_moments` definida abaixo resume esse processo:
+O vetor de probabilidades _posterior_ - `\(\hat{p}^*\)` - permite estimar os parâmetros `\(\mu^*_{posterior}\)` e `\(\sigma^*_{posterior}\)`. A função `momentum_moments` implementa essa etapa:
 
 
 ```r
@@ -150,7 +145,7 @@ momentum_moments <- function(.x, .period = 52) {
   # Solve the Relative Entropy Problem
   ep <- try(entropy_pooling(p = prior, A = views$A, b = views$b, solver = "nloptr"))
 
-  # If optimization fails, use the prior
+  # If optimization fails (not common) use the prior
   if (class(ep)[[1]] == "try-error") {
     ep <- prior
   }
@@ -161,7 +156,7 @@ momentum_moments <- function(.x, .period = 52) {
 }
 ```
 
-O objeto `optimin` está no formato [tidy](https://r4ds.had.co.nz/tidy-data.html) o que torna mais fácil aplicar a função `momentum_moments` em série para cada elemento contido na coluna `.analysis`[^1]:
+Como o objeto `optimin` está no formato [tidy](https://r4ds.had.co.nz/tidy-data.html), a função `momentum_moments` pode ser aplicada em série de maneira bastante suscinta[^2]:
 
 
 ```r
@@ -171,14 +166,9 @@ optimin <- optimin |>
     .x = .analysis, 
     .f = ~ momentum_moments(.x = .x, .period = 52))
   )
-optimin
 ```
 
-Dentro de cada elemento da coluna `.moments` há uma lista com as estimativas `\(\hat{\mu}^*_{posterior}\)` e `\(\hat{\sigma}^*_{posterior}\)`. 
-
-> Experimente rodar o comando `optimin$.moments[[1]]` no console.
-
-Essas estimativas de média e variância _condicionais_ são o principal insumo para construção de um __portfolio eficiente bayesiano__, que é resolvido via otimização quadrática: 
+Dentro de cada elemento da coluna `.moments` há uma lista com as estimativas `\(\hat{\mu}^*_{posterior}\)` e `\(\hat{\sigma}^*_{posterior}\)`[^3]. Essas estimativas _condicionais_ são o principal insumo para construção de um __portfolio eficiente bayesiano__, que é solucionado via otimização quadrática: 
 
 
 ```r
@@ -210,25 +200,23 @@ optimal_portfolio <- function(sigma, mu, .wmin = 0, .wmax = 0.4) {
 }
 ```
 
-Novamente, o fato do objeto `optimin` estar no formato `tidy` torna a otimização recursiva fácil e _human-readable_:
+Novamente, o fato do objeto `optimin` estar no formato [tidy](https://r4ds.had.co.nz/tidy-data.html) torna a otimização recursiva fácil e _human-readable_:
 
 
 ```r
 optimin <- optimin |>
   mutate(.weights = map(
     .x = .moments, 
-    .f = ~ optimal_portfolio(sigma = .x$sigma, mu = .x$mu)
+    .f = ~ optimal_portfolio(sigma = .x$sigma, mu = .x$mu, .wmin = 0, .wmax = 0.4)
     )
   )
 ```
 
-No qual o peso máximo para cada ativo na carteira foi limitado em `\(40\%\)` para garantir que ao menos `\(3\)` ativos estejam na carteira a cada ponto do tempo. 
+Limito o peso máximo para cada ativo em `\(40\%\)` para garantir que ao menos `\(3\)` ativos estejam na carteira a cada ponto do tempo[^4].
 
-> Altere os parâmetros `.wmax` e `.xmin` se você quiser!
+Dentro de cada elemento na coluna `.weights` há um vetor de alocação ótimo. Por exemplo, `optimin$.weights[[1]]` acessa o primeiro vetor, `optimin$.weights[[2]]` o segundo vetor, e assim por diante. 
 
-Dentro de cada elemento dentro da coluna em `.weights` há um vetor de alocação ótimo. Por exemplo, `optimin$.weights[[1]]` acessa o primeiro vetor, `optimin$.weights[[2]]` o segundo vetor, e assim por diante. 
-
-O retorno bruto da estratégia é acessado com a interação dos elementos em `.weights` com `.assessment`:
+O retorno bruto da estratégia é acessado com a interação dos elementos em `.weights` e `.assessment`:
 
 
 ```r
@@ -238,22 +226,32 @@ optimin <- optimin |>
     .y = .assessment, 
     .f = ~ as.matrix(.y[ , -1]) %*% .x)
   )
-optimin
 ```
 
+A última etapa passa pelo cálculo dos retornos acumulados do Ibovespa e da estratégia proposta:
 
 
 ```r
-benchmark <- select(returns, date, IBOV) |> 
+benchmark <- returns |> 
+  select(date, IBOV) |> 
   rename(.date = "date")
 
+# Joint strategy with Ibovespa
 optimin |>
   left_join(benchmark, by = ".date") |>
   select(.date, ret, IBOV) |>
+  
+  # Apply 1.5% cost 
   mutate(Momentum = ret - (1.015 ^ (1 / 52) - 1)) |>
   select(.date, Momentum, IBOV) |>
+  
+  # Compound
   mutate_if(is.numeric, ~ cumprod(1 + .x) * 100) |>
+  
+  # Tidy
   pivot_longer(cols = -.date) |>
+  
+  # Plot
   ggplot(aes(x = .date, y = value, color = name)) +
   geom_line() + 
   scale_y_log10() + 
@@ -266,18 +264,19 @@ optimin |>
 
 <img src="images/ep_momentum_pnl_evolution.png" alt="" width="95%"/>
 
-O gráfico acima mostra a evolução dessa estratégia contra o ibovespa. Adiciono o custo de `\(1,5\%\)` ao ano, que considero alto para uma estratégia "de fator" capaz de ganhar escala. A titulo de comparação, a Black Rock cobra `\(0,3\%\)` a.a. pelo seu [ETF de momentum](https://www.blackrock.com/pt/profissionais/products/270051/ishares-msci-world-momentum-factor-ucits-etf) e o Itaú cobra `\(0,5\%\)` a.a. sobre seus [ETF's de renda variável](https://www.itnow.com.br/). Outros custos relacionados a execução da estratégia acho que podem ser acomodados com `\(1,0\%\)` ao ano.
+Adiciono o custo de `\(1,5\%\)` ao ano, que considero alto para uma estratégia capaz de ganhar escala. A titulo de comparação, a Black Rock cobra `\(0,3\%\)` a.a. pelo seu [ETF de momentum](https://www.blackrock.com/pt/profissionais/products/270051/ishares-msci-world-momentum-factor-ucits-etf) e o Itaú cobra `\(0,5\%\)` a.a. sobre seus [ETF's de renda variável](https://www.itnow.com.br/). Outros custos relacionados a execução da estratégia são facilmente acomodados com `\(1,0\%\)` ao ano.
 
-Óbvio, há outras questões envolvidas. Aumentar o universo de ativos disponíveis faz a fronteira eficiente se deslocar para a esquerda e para cima, expandindo as possibilidades de investimento e o retorno da estratégia. Mas esse efeito tem um limite: o erro de estimação não é neutro as mudanças no conjunto dos ativos e aumenta com a redução dos graus de liberdade. No geral, acho que a expansão da fronteira domina os erros de estimação, pelo menos para datasets pequenos (entre `\(15-30\)` ativos). Se a estratégia for aplicada em índices/fatores, uma dimensão baixa pode ser capaz de mitigar o parte significativa do risco idiossincrático. 
+Óbvio, há outras questões envolvidas: 
 
-A frequência do rebalanceamento também é relevante. No exercício acima, o rebalanceamente é realizado em cada ponto do tempo. Para esse tipo de estratégia o ideal seria trabalhar com dados de maior latência e rabalancear a carteira com menor frequência. Essa mudança contribuiria para diminuir a incerteza que permeia os parâmetros da matrix de covariância _posteior_ de maneira significativa, além de reduzir o custo computacional.
+- Aumentar o universo de ativos disponíveis faz a fronteira eficiente se deslocar para a esquerda e para cima, expandindo as possibilidades de investimento e o retorno da estratégia. Mas esse efeito tem um limite: o erro de estimação não é neutro as mudanças na dimensão do "mercado" (aqui representado pelo objeto `returns`). No geral, acho que a expansão da fronteira domina os erros de estimação, pelo menos para datasets pequenos (entre `\(15-25\)` ativos). 
 
-Ainda tem o _turnover_: a estratégia de momentum gira mais do que a estratégia de _value_. Por outro lado, dividendos e juros sobre capital próprio (típicos de _value_) geralmente possuem uma maior tributação do que ganhos de capital (momentum). Em um ambiente global, é bem possível que esses efeitos se anulem, embora não possa cravar com certeza.
+- A frequência do rebalanceamento também é relevante. No exercício acima, o rebalanceamente é realizado em cada ponto do tempo. Mas para esse tipo de estratégia o ideal seria trabalhar com dados de maior latência e rabalancear a carteira com menor frequência. Essa mudança contribuiria para melhorar a estimação da matrix de covariância de maneira significativa, além de reduzir o custo computacional.
 
-Enfim, nem tudo é um moranguinho. No próximo post mostro uma maneira mais sofisticada de se realizar _backtests_. 
+- Ainda tem o _turnover_: a estratégia de _momentum_ gira mais do que a estratégia de _value_. Por outro lado, em um ambiente global, os dividendos (típicos de _value_) possuem uma maior tributação do que ganhos de capital (_momentum_). Talvez esses efeitos se anulem, não sei. 
 
-Até lá...
- 
-[^1]: A função `map` no `R` têm uma função muito simular a função `map` no `Python`. 
+Enfim, acredito que o viés para esse tipo de estratégia é pra cima. O modelo de média-variância e o CAPM ainda são mal compreendidos no Brasil, o que torna o mercado brasileiro uma mina de ouro para aplicações bayesianas ancoradas nos fundamentos.
 
-
+[^1]: Para saber mais sobre entropy-pooling, veja meus posts anteriores.
+[^2]: A função `map` no `R` têm uma função muito simular a função `map` no `Python`. 
+[^3]: Experimente rodar o comando `optimin$.moments[[1]]` no console.
+[^4]: Altere os parâmetros `.wmax` e `.xmin` se você quiser. 
