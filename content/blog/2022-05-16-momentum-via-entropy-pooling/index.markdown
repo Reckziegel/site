@@ -1,7 +1,7 @@
 ---
 title: Momentum Entropy-Pooling
 author: Bernardo Reckziegel
-date: '2022-06-02'
+date: '2022-06-03'
 slug: []
 categories:
   - R
@@ -36,8 +36,6 @@ library(readxl)    # Leitura de arquivos xmlx
 library(curl)      # Leitura de arquivos xmlx
 library(rsample)   # Rolling-windows no tidyverse
 library(quadprog)  # Otimização Quadrática
-#library(corrr)     # Correlation Networks 
-#library(viridisLite) # Viridis palette 
 library(ffp)       # Probabilidades Flexíveis
 
 # Connect  
@@ -75,19 +73,6 @@ returns
 ```
 
 O dataset `returns` contém os índices da B3 com pelo menos `\(15\)` anos de história. Os dados estão em periodicidade semanal e compreendem o período de 10/02/2010 até 20/05/2022. 
-
-<!-- A estrutura de correlação histórica mostra que os índices `IMAT`, `INFC` e `IEEX` são os principais diversificadores em relação ao `IBOV`: -->
-
-<!-- ```{r, message=FALSE, warning=FALSE} -->
-<!-- returns |>  -->
-<!--   select(where(is.numeric)) |>   -->
-<!--   correlate() |>  -->
-<!--   network_plot(colours = plasma(n = 10)) -->
-<!-- ``` -->
-
-<!-- Já a próximidade dos índices `INDX`e `IDIV` denuncia o _tilt_ do Ibovespa em direção ao fator de _value_, como mostrei no [post anterior](https://www.bernardo.codes/blog/2022-05-10-opini-es-nas-regress-es/). -->
-
-<!-- Enfim, voltando aos fatores...  -->
 
 Para construir o fator de _momentum_ geralmente utiliza-se um portfolio _dollar-neutral_, `\(100\%\)` investido, no qual a performance passada determina quais ativos entram na ponta comprada e/ou vendida da carteira. O ponto de corte é geralmente algum percentil: por exemplo, ordena-se ativos da melhor para pior performance e compra-se aqueles até o `\(33º\)` percentil e vende-se os ativos do `\(67º\)` percentil para baixo.
 
@@ -216,7 +201,7 @@ Limito o peso máximo para cada ativo em `\(40\%\)` para garantir que ao menos `
 
 Dentro de cada elemento na coluna `.weights` há um vetor de alocação ótimo. Por exemplo, `optimin$.weights[[1]]` acessa o primeiro vetor, `optimin$.weights[[2]]` o segundo vetor, e assim por diante. 
 
-O retorno bruto da estratégia é acessado com a interação dos elementos em `.weights` e `.assessment`:
+O retorno bruto da estratégia é computado com a interação dos elementos em `.weights` e `.assessment`:
 
 
 ```r
@@ -264,15 +249,13 @@ optimin |>
 
 <img src="images/ep_momentum_pnl_evolution.png" alt="" width="95%"/>
 
-Adiciono o custo de `\(1,5\%\)` ao ano, que considero alto para uma estratégia capaz de ganhar escala. A titulo de comparação, a Black Rock cobra `\(0,3\%\)` a.a. pelo seu [ETF de momentum](https://www.blackrock.com/pt/profissionais/products/270051/ishares-msci-world-momentum-factor-ucits-etf) e o Itaú cobra `\(0,5\%\)` a.a. sobre seus [ETF's de renda variável](https://www.itnow.com.br/). Outros custos relacionados a execução da estratégia são facilmente acomodados com `\(1,0\%\)` ao ano.
+Adiciono o custo de `\(1,5\%\)` ao ano, que considero alto para uma estratégia capaz de ganhar escala. A titulo de comparação, a Black Rock cobra `\(0,3\%\)` a.a. pelo seu [ETF de momentum](https://www.blackrock.com/pt/profissionais/products/270051/ishares-msci-world-momentum-factor-ucits-etf) e o Itaú cobra `\(0,5\%\)` a.a. sobre seus [ETF's de renda variável](https://www.itnow.com.br/). Outros custos relacionados a execução da estratégia podem ser acomodados com `\(1,0\%\)` ao ano.
 
-Óbvio, há outras questões envolvidas: 
+Óbvio, há outras questões envolvidas: aumentar o universo de ativos disponíveis faz a fronteira eficiente se deslocar para a esquerda e para cima, expandindo as possibilidades de investimento e o retorno da estratégia. Mas esse efeito tem um limite: o erro de estimação não é neutro as mudanças na dimensão do "mercado" (aqui representado pelo objeto `returns`). No geral, acho que a expansão da fronteira domina os erros de estimação, pelo menos para datasets pequenos (entre `\(15-25\)` ativos). 
 
-- Aumentar o universo de ativos disponíveis faz a fronteira eficiente se deslocar para a esquerda e para cima, expandindo as possibilidades de investimento e o retorno da estratégia. Mas esse efeito tem um limite: o erro de estimação não é neutro as mudanças na dimensão do "mercado" (aqui representado pelo objeto `returns`). No geral, acho que a expansão da fronteira domina os erros de estimação, pelo menos para datasets pequenos (entre `\(15-25\)` ativos). 
+A frequência do rebalanceamento também é relevante. No exercício acima, o rebalanceamente é realizado em cada ponto do tempo. Mas para esse tipo de estratégia o ideal seria trabalhar com dados de maior latência e rabalancear a carteira com menor frequência. Essa mudança contribuiria para melhorar a estimação da matrix de covariância de maneira significativa, além de reduzir o custo computacional.
 
-- A frequência do rebalanceamento também é relevante. No exercício acima, o rebalanceamente é realizado em cada ponto do tempo. Mas para esse tipo de estratégia o ideal seria trabalhar com dados de maior latência e rabalancear a carteira com menor frequência. Essa mudança contribuiria para melhorar a estimação da matrix de covariância de maneira significativa, além de reduzir o custo computacional.
-
-- Ainda tem o _turnover_: a estratégia de _momentum_ gira mais do que a estratégia de _value_. Por outro lado, em um ambiente global, os dividendos (típicos de _value_) possuem uma maior tributação do que ganhos de capital (_momentum_). Talvez esses efeitos se anulem, não sei. 
+Ainda tem o _turnover_: a estratégia de _momentum_ gira mais do que a estratégia de _value_. Por outro lado, em um ambiente global, os dividendos (típicos de _value_) possuem uma maior tributação do que ganhos de capital (_momentum_). Talvez esses efeitos se anulem, não sei. 
 
 Enfim, acredito que o viés para esse tipo de estratégia é pra cima. O modelo de média-variância e o CAPM ainda são mal compreendidos no Brasil, o que torna o mercado brasileiro uma mina de ouro para aplicações bayesianas ancoradas nos fundamentos.
 
