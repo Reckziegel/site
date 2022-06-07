@@ -139,7 +139,7 @@ momentum_moments <- function(.x, .period = 52) {
 }
 ```
 
-Como o objeto `optimin` está no formato [tidy](https://r4ds.had.co.nz/tidy-data.html), a função `momentum_moments` pode ser aplicada em série de maneira bastante suscinta[^4]:
+Como o objeto `optimin` está no formato [tidy](https://r4ds.had.co.nz/tidy-data.html), a função `momentum_moments` pode ser aplicada em série de maneira bastante suscinta[^3]:
 
 
 ```r
@@ -151,7 +151,7 @@ optimin <- optimin |>
   )
 ```
 
-Dentro de cada elemento da coluna `.moments` há uma lista com as estimativas `\(\hat{\mu}^*_{posterior}\)` e `\(\hat{\sigma}^*_{posterior}\)`[^5]. Essas estimativas _condicionais_ são o principal insumo para construção de um __portfolio eficiente bayesiano__, que é solucionado via otimização quadrática: 
+Dentro de cada elemento da coluna `.moments` há uma lista com as estimativas `\(\hat{\mu}^*_{posterior}\)` e `\(\hat{\sigma}^*_{posterior}\)`[^4]. Essas estimativas _condicionais_ são o principal insumo para construção de um __portfolio eficiente bayesiano__, que é solucionado via otimização quadrática: 
 
 
 ```r
@@ -253,7 +253,7 @@ Adiciono o custo de `\(1,5\%\)` ao ano, que considero alto para uma estratégia 
 
 A frequência do rebalanceamento também é relevante. No exercício acima, o rebalanceamente é realizado em cada ponto do tempo. Mas para esse tipo de estratégia o ideal seria trabalhar com dados de maior latência e rabalancear a carteira com menor frequência (1x por mês, por exemplo). Essa mudança contribuiria para melhorar a estimação da matrix de covariância de maneira significativa, além de reduzir o custo computacional.
 
-Ainda tem o _turnover_[^3]: a estratégia de _momentum_ gira mais do que a estratégia de _value_. Para mercados de baixa dimensão (como aquele apresentado aqui) esse não parece ser um problema. Mas, se o "mercado" for expandido, é muito provável que essa métrica tenha que ser analisada com mais atenção por meio de simulações. 
+Ainda tem o _turnover_[^5]: a estratégia de _momentum_ gira mais do que a estratégia de _value_. Para mercados de baixa dimensão (como aquele apresentado aqui) esse não parece ser um problema. Mas, se o "mercado" for expandido, é muito provável que essa métrica tenha que ser analisada com mais atenção por meio de simulações. 
 
 
 ```r
@@ -279,7 +279,7 @@ Para terminar, acredito que o viés para esse tipo de estratégia seja para cima
 Por hoje é isso e semana que vem mostro uma maneira robusta para avaliar cenários do tipo _"What if..."_. 
 
 [^1]: O dataset `returns` contém os índices da B3 com pelo menos `\(15\)` anos de história. Os dados estão em periodicidade semanal e compreendem o período de 10/02/2010 até 20/05/2022. 
-[^3]: Uma aplicação mais sofisticada do modelo apresentado aqui pode ser visto no paper [Quantitative Portfolio Construction and Systematic Trading Strategies using Factor Entropy Pooling](https://risk.edhec.edu/sites/risk/files/edhec-working-paper-quantitative-portfolio-construction_1398417370465_0.pdf).
+[^2]: Uma aplicação mais sofisticada do modelo apresentado aqui pode ser visto no paper [Quantitative Portfolio Construction and Systematic Trading Strategies using Factor Entropy Pooling](https://risk.edhec.edu/sites/risk/files/edhec-working-paper-quantitative-portfolio-construction_1398417370465_0.pdf).
 [^3]: A função `map` no `R` têm um papel muito similar a função `map` no `Python`, mas no `R` utilizamos a programação funcional com mais frequência. :sunglasses: 
 [^4]: Experimente rodar o comando `optimin$.moments[[1]]` no console.
 [^5]: Defino o _turnover_ como a soma da diferença absoluta entre as posições do período vigente vs. as posições do período imediatamente anterior:
