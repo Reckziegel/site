@@ -56,7 +56,7 @@ returns
 
 Geralmente, o fator de _momentum_ é construído como um portfolio _dollar-neutral_, $100\%$ investido, no qual a performance passada determina quais ativos entram na ponta comprada e/ou vendida da carteira. O ponto de corte é algum percentil: por exemplo, ordena-se ativos da melhor para pior performance e compra-se aqueles até o $33º$ percentil e vende-se os ativos do $67º$ percentil para baixo.
 
-Nesse post, ao invés de comprar/vender os ativos que estão acima/abaixo de um determinado percentil, utilizo entropy-pooling para construir um portfolio de média-variância com um _tilt_ em _momentum_ Para isso, ordeno as ações da melhor para pior performance e computo o vetor de probabilidades _posterior_ que acomoda essa "ordenação" e oferece a menor distorção possível em relação ao vetor de probabilidades original, _equal-weigthed_[^2] [^3]. 
+Nesse post, ao invés de comprar/vender os ativos que estão acima/abaixo de um determinado percentil, utilizo entropy-pooling para construir um portfolio de média-variância com um _tilt_ em _momentum_ Para isso, ordeno as ações da melhor para pior performance e computo o vetor de probabilidades _posterior_ que acomoda essa "ordenação" e oferece a menor distorção possível em relação ao vetor de probabilidades original, _equal-weigthed_[^2]. 
 
 O processo de estimação é todo conduzido dentro do ecossistema do [tidyverse](https://www.tidyverse.org/). O passo inicial envolve a construção de uma estrutura no formato de _rolling-window_, no qual os dados são divididos entre "treinamento" - `.analysis` - e "avaliação" - `.assessment` - $1$ passo a frente:
 
@@ -244,7 +244,7 @@ Adiciono o custo de $1,5\%$ ao ano, que considero alto para uma estratégia capa
 
 A frequência do rebalanceamento também é relevante. No exercício acima, o rebalanceamente é realizado em cada ponto do tempo. Mas para esse tipo de estratégia o ideal seria trabalhar com dados de maior latência e rabalancear a carteira com menor frequência (1x por mês, por exemplo). Essa mudança contribuiria para melhorar a estimação da matrix de covariância de maneira significativa, além de reduzir o custo computacional.
 
-Ainda tem o _turnover_[^6]: a estratégia de _momentum_ gira mais do que a estratégia de _value_. Para mercados de baixa dimensão (como aquele apresentado aqui) esse não parece ser um problema. Mas, se o "mercado" for expandido, é muito provável que essa métrica tenha que ser analisada com mais atenção por meio de simulações. 
+Ainda tem o _turnover_[^3]: a estratégia de _momentum_ gira mais do que a estratégia de _value_. Para mercados de baixa dimensão (como aquele apresentado aqui) esse não parece ser um problema. Mas, se o "mercado" for expandido, é muito provável que essa métrica tenha que ser analisada com mais atenção por meio de simulações. 
 
 ```{r, eval=FALSE}
 turnover <- optimin |> 
@@ -270,9 +270,8 @@ Para terminar, acredito que o viés para esse tipo de estratégia seja para cima
 Por hoje é isso e semana que vem mostro uma maneira robusta para avaliar cenários do tipo _"What if..."_. 
 
 [^1]: O dataset `returns` contém os índices da B3 com pelo menos $15$ anos de história. Os dados estão em periodicidade semanal e compreendem o período de 10/02/2010 até 20/05/2022. 
-[^2]: Para saber mais sobre entropy-pooling, veja meus posts anteriores.
 [^3]: Uma aplicação mais sofisticada do modelo apresentado aqui pode ser visto no paper [Quantitative Portfolio Construction and Systematic Trading Strategies using Factor Entropy Pooling](https://risk.edhec.edu/sites/risk/files/edhec-working-paper-quantitative-portfolio-construction_1398417370465_0.pdf).
-[^4]: A função `map` no `R` têm um papel muito similar a função `map` no `Python`, mas no `R` utilizamos a programação funcional com mais frequência. :sunglasses: 
-[^5]: Experimente rodar o comando `optimin$.moments[[1]]` no console.
-[^6]: Defino o _turnover_ como a soma da diferença absoluta entre as posições do período vigente vs. as posições do período imediatamente anterior:
+[^3]: A função `map` no `R` têm um papel muito similar a função `map` no `Python`, mas no `R` utilizamos a programação funcional com mais frequência. :sunglasses: 
+[^4]: Experimente rodar o comando `optimin$.moments[[1]]` no console.
+[^5]: Defino o _turnover_ como a soma da diferença absoluta entre as posições do período vigente vs. as posições do período imediatamente anterior:
 $$ turnover = \sum_{i=1}^{I} | w_t - w_{t-1} | $$
