@@ -72,9 +72,9 @@ returns
 ## # ... with 840 more rows
 ```
 
-Geralmente, o fator de _momentum_ é construído como um portfolio _dollar-neutral_, `\(100\%\)` investido, no qual a performance passada determina quais ativos entram na ponta comprada e/ou vendida da carteira. O ponto de corte é algum percentil: por exemplo, ordena-se ativos da melhor para pior performance e compra-se aqueles até o `\(33º\)` percentil e vende-se os ativos do `\(67º\)` percentil para baixo.
+Geralmente, o fator de _momentum_ é construído como um portfolio _dollar-neutral_, `\(100\%\)` investido, no qual a performance passada determina quais ativos entram na ponta comprada e/ou vendida da carteira. O ponto de corte é algum percentil: por exemplo, ordena-se ativos da melhor para pior performance e compra-se aqueles até o `\(33º\)` percentil e vende-se os ativos do `\(67º\)` percentil para baixo, condicional a alguma restrição de liquidez.
 
-Nesse post, ao invés de comprar/vender os ativos que estão acima/abaixo de um determinado percentil, utilizo entropy-pooling para construir um portfolio de média-variância com um _tilt_ em _momentum_ Para isso, ordeno as ações da melhor para pior performance e computo o vetor de probabilidades _posterior_ que acomoda essa "ordenação" e oferece a menor distorção possível em relação ao vetor de probabilidades original, _equal-weigthed_[^2]. 
+Nesse post, ao invés de comprar/vender os ativos que estão acima/abaixo de um determinado percentil, utilizo [entropy-pooling](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1213325) para construir um portfolio de média-variância com um _tilt_ em _momentum_ Para isso, ordeno as ações da melhor para pior performance e computo o vetor de probabilidades _posterior_ que acomoda essa "ordenação" e oferece a menor distorção possível em relação ao vetor de probabilidades original, _equal-weigthed_[^2]. 
 
 O processo de estimação é todo conduzido dentro do ecossistema do [tidyverse](https://www.tidyverse.org/). O passo inicial envolve a construção de uma estrutura no formato de _rolling-window_, no qual os dados são divididos entre "treinamento" - `.analysis` - e "avaliação" - `.assessment` - `\(1\)` passo a frente:
 
