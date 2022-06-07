@@ -265,7 +265,7 @@ turnover |>
 
 <!-- Por outro lado, em um ambiente global, os dividendos (típicos de _value_) possuem uma maior tributação do que ganhos de capital (_momentum_). Talvez esses efeitos se anulem, não sei.  -->
 
-Para terminar, acredito que o viés para esse tipo de estratégia seja para cima. O modelo de média-variância e o [CAPM](https://en.wikipedia.org/wiki/Capital_asset_pricing_model) ainda são mal compreendidos no Brasil, o que significa que tem pouca gente olhando para o que acontece em torno do ponto de ótimo. No mínimo, as estratégias que buscam a "optimalidade" ("allocation") oferecem alguma diversificação sobre a dominancia das estratégias de _value_ ("positioning") dominantes no mercado brasileiro, mas ai já é papo para outro post.
+Para terminar, acredito que o viés para esse tipo de estratégia seja para cima. O modelo de média-variância e o [CAPM](https://en.wikipedia.org/wiki/Capital_asset_pricing_model) ainda são mal compreendidos no Brasil, o que significa que tem pouca gente olhando para o que acontece em torno do ponto de ótimo. No mínimo, as estratégias que buscam a "optimalidade" ("allocation") oferecem alguma diversificação sobre a hegemonia das estratégias de _value_ ("positioning") dominantes no mercado brasileiro, mas ai já é papo para outro post.
 
 Por hoje é isso e semana que vem mostro uma maneira robusta para avaliar cenários do tipo _"What if..."_. 
 
