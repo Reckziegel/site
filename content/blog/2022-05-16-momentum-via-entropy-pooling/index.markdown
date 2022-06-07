@@ -1,7 +1,7 @@
 ---
 title: Momentum Entropy-Pooling
 author: Bernardo Reckziegel
-date: '2022-06-03'
+date: '2022-06-06'
 slug: []
 categories:
   - R
@@ -26,7 +26,7 @@ Foco minha atenção no fator de [momentum](https://www.investopedia.com/terms/m
 
 O segundo motivo é especialmente importante para um texto curto como esse. 
 
-O script abaixo carrega os pacotes utilizados e cria a conexão com a base de dados que permitirá replicar os resultados desse post: 
+O script abaixo carrega os pacotes utilizados e cria a conexão com a base de dados que permitirá replicar os resultados desse post[^1]: 
 
 
 ```r
@@ -72,13 +72,9 @@ returns
 ## # ... with 840 more rows
 ```
 
-O dataset `returns` contém os índices da B3 com pelo menos `\(15\)` anos de história. Os dados estão em periodicidade semanal e compreendem o período de 10/02/2010 até 20/05/2022. 
-
 Geralmente, o fator de _momentum_ é construído como um portfolio _dollar-neutral_, `\(100\%\)` investido, no qual a performance passada determina quais ativos entram na ponta comprada e/ou vendida da carteira. O ponto de corte é algum percentil: por exemplo, ordena-se ativos da melhor para pior performance e compra-se aqueles até o `\(33º\)` percentil e vende-se os ativos do `\(67º\)` percentil para baixo.
 
-Nesse post, ao invés de comprar/vender os ativos que estão acima/abaixo de um determinado percentil, utilizo entropy-pooling para construir um portfolio de média-variância com um _tilt_ em _momentum_ Para isso, ordeno as ações da melhor para pior performance e computo o vetor de probabilidades _posterior_ que acomoda essa "ordenação" e oferece a menor distorção possível em relação ao vetor de probabilidades original, _equal-weigthed_[^1]. 
-
-> Uma aplicação bem mais sofisticada do modelo apresentado aqui pode ser visto no paper [Quantitative Portfolio Construction and Systematic Trading Strategies using Factor Entropy Pooling](https://risk.edhec.edu/sites/risk/files/edhec-working-paper-quantitative-portfolio-construction_1398417370465_0.pdf)
+Nesse post, ao invés de comprar/vender os ativos que estão acima/abaixo de um determinado percentil, utilizo entropy-pooling para construir um portfolio de média-variância com um _tilt_ em _momentum_ Para isso, ordeno as ações da melhor para pior performance e computo o vetor de probabilidades _posterior_ que acomoda essa "ordenação" e oferece a menor distorção possível em relação ao vetor de probabilidades original, _equal-weigthed_[^2] [^3]. 
 
 O processo de estimação é todo conduzido dentro do ecossistema do [tidyverse](https://www.tidyverse.org/). O passo inicial envolve a construção de uma estrutura no formato de _rolling-window_, no qual os dados são divididos entre "treinamento" - `.analysis` - e "avaliação" - `.assessment` - `\(1\)` passo a frente:
 
@@ -143,7 +139,7 @@ momentum_moments <- function(.x, .period = 52) {
 }
 ```
 
-Como o objeto `optimin` está no formato [tidy](https://r4ds.had.co.nz/tidy-data.html), a função `momentum_moments` pode ser aplicada em série de maneira bastante suscinta[^2]:
+Como o objeto `optimin` está no formato [tidy](https://r4ds.had.co.nz/tidy-data.html), a função `momentum_moments` pode ser aplicada em série de maneira bastante suscinta[^4]:
 
 
 ```r
@@ -155,7 +151,7 @@ optimin <- optimin |>
   )
 ```
 
-Dentro de cada elemento da coluna `.moments` há uma lista com as estimativas `\(\hat{\mu}^*_{posterior}\)` e `\(\hat{\sigma}^*_{posterior}\)`[^3]. Essas estimativas _condicionais_ são o principal insumo para construção de um __portfolio eficiente bayesiano__, que é solucionado via otimização quadrática: 
+Dentro de cada elemento da coluna `.moments` há uma lista com as estimativas `\(\hat{\mu}^*_{posterior}\)` e `\(\hat{\sigma}^*_{posterior}\)`[^5]. Essas estimativas _condicionais_ são o principal insumo para construção de um __portfolio eficiente bayesiano__, que é solucionado via otimização quadrática: 
 
 
 ```r
@@ -199,7 +195,7 @@ optimin <- optimin |>
   )
 ```
 
-Limito o peso máximo para cada ativo em `\(40\%\)` para garantir que ao menos `\(3\)` ativos estejam na carteira a cada ponto do tempo[^4].
+Limito o peso máximo para cada ativo em `\(40\%\)` para garantir que ao menos `\(3\)` ativos estejam na carteira a cada ponto do tempo (altere os parâmetros `.wmax` e `.xmin` se você quiser).
 
 Dentro de cada elemento na coluna `.weights` há um vetor de alocação ótimo. Por exemplo, `optimin$.weights[[1]]` acessa o primeiro vetor, `optimin$.weights[[2]]` o segundo vetor, e assim por diante. 
 
@@ -208,7 +204,7 @@ O retorno bruto da estratégia é computado com a interação dos elementos em `
 
 ```r
 optimin <- optimin |>
-  mutate(ret = map2_dbl(
+  mutate(gross_return = map2_dbl(
     .x = .weights, 
     .y = .assessment, 
     .f = ~ as.matrix(.y[ , -1]) %*% .x)
@@ -226,11 +222,11 @@ benchmark <- returns |>
 # Joint strategy with Ibovespa
 optimin |>
   left_join(benchmark, by = ".date") |>
-  select(.date, ret, IBOV) |>
+  select(.date, gross_return, IBOV) |>
   
   # Apply 1.5% cost 
-  mutate(`Momentum Entropy-Pooling` = ret - (1.015 ^ (1 / 52) - 1)) |>
-  select(.date, `Momentum Entropy-Pooling`, IBOV) |>
+  mutate(`Momentum-EP` = gross_return - (1.015 ^ (1 / 52) - 1)) |>
+  select(.date, `Momentum-EP`, IBOV) |>
   
   # Compound
   mutate_if(is.numeric, ~ cumprod(1 + .x) * 100) |>
@@ -244,20 +240,20 @@ optimin |>
   scale_y_log10() + 
   scale_color_viridis_d(end = 0.75, option = "C") + 
   labs(title = "Momentum Entropy-Pooling", 
-       subtitle = "Portfolio long-only com 'tilt' em momentum", 
+       subtitle = "Portfolio bayesiano long-only com 'tilt' em momentum", 
        x = NULL, y = NULL, color = NULL) + 
   theme(legend.position = "bottom")
 ```
 
 <img src="images/ep_momentum_pnl_evolution.png" alt="" width="95%"/>
 
-Adiciono o custo de `\(1,5\%\)` ao ano, que considero alto para uma estratégia capaz de ganhar escala. A titulo de comparação, a Black Rock cobra `\(0,3\%\)` a.a. pelo seu [ETF de momentum](https://www.blackrock.com/pt/profissionais/products/270051/ishares-msci-world-momentum-factor-ucits-etf) e o Itaú cobra `\(0,5\%\)` a.a. sobre seus [ETF's de renda variável](https://www.itnow.com.br/). Acredito que outros custos relacionados a execução da estratégia possam ser acomodados com `\(1,0\%\)` ao ano.
+Adiciono o custo de `\(1,5\%\)` ao ano, que considero alto para uma estratégia capaz de ganhar escala. A titulo de comparação, a Black Rock cobra `\(0,3\%\)` a.a. pelo seu [ETF de momentum](https://www.blackrock.com/pt/profissionais/products/270051/ishares-msci-world-momentum-factor-ucits-etf) e o Itaú cobra `\(0,5\%\)` a.a. sobre seus [ETF's de renda variável](https://www.itnow.com.br/). Acredito que os demais custos relacionados a execução da estratégia possam ser acomodados com `\(1,0\%\)` ao ano.
 
-Óbvio, há mais questões envolvidas: aumentar o universo de ativos disponíveis faz a fronteira eficiente se deslocar para a esquerda e para cima, expandindo as possibilidades de investimento e o retorno da estratégia. Mas esse efeito tem um limite: o erro de estimação não é neutro as mudanças na dimensão do "mercado" (aqui representado pelo objeto `returns`). No geral, acho que a expansão da fronteira domina os erros de estimação, pelo menos para datasets pequenos (entre `\(15-20\)` ativos). 
+Óbvio, há outras questões envolvidas: aumentar o universo de ativos disponíveis faz a fronteira eficiente se deslocar para a esquerda e para cima, expandindo as possibilidades de investimento e o retorno da estratégia. Mas esse efeito tem um limite: o erro de estimação não é neutro as mudanças na dimensão do "mercado" (aqui representado pelo objeto `returns`). No geral, acho que a expansão da fronteira domina os erros de estimação, pelo menos para datasets pequenos (entre `\(15-25\)` ativos). 
 
-A frequência do rebalanceamento também é relevante. No exercício acima, o rebalanceamente é realizado em cada ponto do tempo. Mas para esse tipo de estratégia o ideal seria trabalhar com dados de maior latência e rabalancear a carteira em períodos mais dilatados. Essa mudança contribuiria para melhorar a estimação da matrix de covariância de maneira significativa, além de reduzir o custo computacional.
+A frequência do rebalanceamento também é relevante. No exercício acima, o rebalanceamente é realizado em cada ponto do tempo. Mas para esse tipo de estratégia o ideal seria trabalhar com dados de maior latência e rabalancear a carteira com menor frequência (1x por mês, por exemplo). Essa mudança contribuiria para melhorar a estimação da matrix de covariância de maneira significativa, além de reduzir o custo computacional.
 
-Ainda tem o _turnover_[^5]: a estratégia de _momentum_ gira mais do que a estratégia de _value_. Para mercados de baixa dimensão (como aquele trabalhado aqui) esse não parece ser um problema. Mas, se o "mercado" for expandido, é muito provável que essa métrica tenha que ser analisada com mais atenção via simulação. 
+Ainda tem o _turnover_[^6]: a estratégia de _momentum_ gira mais do que a estratégia de _value_. Para mercados de baixa dimensão (como aquele apresentado aqui) esse não parece ser um problema. Mas, se o "mercado" for expandido, é muito provável que essa métrica tenha que ser analisada com mais atenção por meio de simulações. 
 
 
 ```r
@@ -274,17 +270,18 @@ turnover |>
        x = NULL, y = NULL)
 ```
 
+<img src="images/ep_momentum_turnover.png" alt="" width="95%" height="80%"/>
 
 <!-- Por outro lado, em um ambiente global, os dividendos (típicos de _value_) possuem uma maior tributação do que ganhos de capital (_momentum_). Talvez esses efeitos se anulem, não sei.  -->
 
-Enfim, acredito que o viés para esse tipo de estratégia seja para cima. O modelo de média-variância e o [CAPM](https://en.wikipedia.org/wiki/Capital_asset_pricing_model) ainda são mal compreendidos no Brasil, o que significa que tem pouca gente olhando para essas estratégias No mínimo, há valor pelo poder de diversificação frente a estratégias comummente implementadas, mas ai é papo para outro post.
+Para terminar, acredito que o viés para esse tipo de estratégia seja para cima. O modelo de média-variância e o [CAPM](https://en.wikipedia.org/wiki/Capital_asset_pricing_model) ainda são mal compreendidos no Brasil, o que significa que tem pouca gente olhando para o que acontece em torno do ponto de ótimo. No mínimo, as estratégias que buscam a "optimalidade" ("allocation") oferecem alguma diversificação sobre a dominancia das estratégias de _value_ ("positioning") dominantes no mercado brasileiro, mas ai já é papo para outro post.
 
-Por hoje é isso e semana que vem mostro uma maneira robusta para avaliar cenários do tipo _"E se..."_[^6]. 
+Por hoje é isso e semana que vem mostro uma maneira robusta para avaliar cenários do tipo _"What if..."_. 
 
-[^1]: Para saber mais sobre entropy-pooling, veja meus posts anteriores.
-[^2]: A função `map` no `R` têm uma função muito simular a função `map` no `Python`. 
-[^3]: Experimente rodar o comando `optimin$.moments[[1]]` no console.
-[^4]: Altere os parâmetros `.wmax` e `.xmin` se você quiser. 
-[^5]: Defino o _turnover_ como a soma da diferença entre as posições do período vigente vs. as posições do período imediatamente anterior:
+[^1]: O dataset `returns` contém os índices da B3 com pelo menos `\(15\)` anos de história. Os dados estão em periodicidade semanal e compreendem o período de 10/02/2010 até 20/05/2022. 
+[^2]: Para saber mais sobre entropy-pooling, veja meus posts anteriores.
+[^3]: Uma aplicação mais sofisticada do modelo apresentado aqui pode ser visto no paper [Quantitative Portfolio Construction and Systematic Trading Strategies using Factor Entropy Pooling](https://risk.edhec.edu/sites/risk/files/edhec-working-paper-quantitative-portfolio-construction_1398417370465_0.pdf).
+[^4]: A função `map` no `R` têm um papel muito similar a função `map` no `Python`, mas no `R` utilizamos a programação funcional com mais frequência. :sunglasses: 
+[^5]: Experimente rodar o comando `optimin$.moments[[1]]` no console.
+[^6]: Defino o _turnover_ como a soma da diferença absoluta entre as posições do período vigente vs. as posições do período imediatamente anterior:
 $$ turnover = \sum_{i=1}^{I} | w_t - w_{t-1} | $$
-[^6]: _"What if..."_.
