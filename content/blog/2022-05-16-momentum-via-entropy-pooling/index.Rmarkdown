@@ -56,7 +56,7 @@ returns
 
 Geralmente, o fator de _momentum_ é construído como um portfolio _dollar-neutral_, $100\%$ investido, no qual a performance passada determina quais ativos entram na ponta comprada e/ou vendida da carteira. O ponto de corte é algum percentil: por exemplo, ordena-se ativos da melhor para pior performance e compra-se aqueles até o $33º$ percentil e vende-se os ativos do $67º$ percentil para baixo, condicional a alguma restrição de liquidez.
 
-Nesse post, ao invés de comprar/vender os ativos que estão acima/abaixo de um determinado percentil, utilizo [entropy-pooling](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1213325) para construir um portfolio de média-variância com um _tilt_ em _momentum_ Para isso, ordeno as ações da melhor para pior performance e computo o vetor de probabilidades _posterior_ que acomoda essa "ordenação" e oferece a menor distorção possível em relação ao vetor de probabilidades original, _equal-weigthed_[^2]. 
+Nesse post, ao invés de comprar/vender os ativos que estão acima/abaixo de um determinado percentil, utilizo [entropy-pooling](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1213325) para construir um portfolio de média-variância com um _tilt_ em _momentum_. Para isso, ordeno as ações da melhor para pior performance e computo o vetor de probabilidades _posterior_ que acomoda essa "ordenação" e oferece a menor distorção possível em relação ao vetor de probabilidades original, _equal-weigthed_[^2]. 
 
 O processo de estimação é todo conduzido dentro do ecossistema do [tidyverse](https://www.tidyverse.org/). O passo inicial envolve a construção de uma estrutura no formato de _rolling-window_, no qual os dados são divididos entre "treinamento" - `.analysis` - e "avaliação" - `.assessment` - $1$ passo a frente:
 
@@ -242,7 +242,7 @@ Adiciono o custo de $1,5\%$ ao ano, que considero alto para uma estratégia capa
 
 Óbvio, há outras questões envolvidas: aumentar o universo de ativos disponíveis faz a fronteira eficiente se deslocar para a esquerda e para cima, expandindo as possibilidades de investimento e o retorno da estratégia. Mas esse efeito tem um limite: o erro de estimação não é neutro as mudanças na dimensão do "mercado" (aqui representado pelo objeto `returns`). No geral, acho que a expansão da fronteira domina os erros de estimação, pelo menos para datasets pequenos (entre $15-25$ ativos). 
 
-A frequência do rebalanceamento também é relevante. No exercício acima, o rebalanceamente é realizado em cada ponto do tempo. Mas para esse tipo de estratégia o ideal seria trabalhar com dados de maior latência e rabalancear a carteira com menor frequência (1x por mês, por exemplo). Essa mudança contribuiria para melhorar a estimação da matrix de covariância de maneira significativa, além de reduzir o custo computacional.
+A frequência do rebalanceamento também é relevante. No exercício acima, o rebalanceamente é realizado em cada ponto do tempo. Mas para esse tipo de estratégia o ideal seria trabalhar com dados de maior latência e rabalancear a carteira com menor frequência (1x por mês, por exemplo). Essa mudança contribuiria para melhorar a estimação da matriz de covariância de maneira significativa, além de reduzir o custo computacional.
 
 Ainda tem o _turnover_[^5]: a estratégia de _momentum_ gira mais do que a estratégia de _value_. Para mercados de baixa dimensão (como aquele apresentado aqui) esse não parece ser um problema. Mas, se o "mercado" for expandido, é muito provável que essa métrica tenha que ser analisada com mais atenção por meio de simulações. 
 
