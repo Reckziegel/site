@@ -2,14 +2,13 @@
 title: What if...
 author: Bernardo Reckziegel
 date: '2022-06-25'
-slug: []
 categories:
-  - R
   - backtest
+  - R
 tags:
-  - entropy-pooling
   - cma
   - copula
+  - entropy-pooling
   - MCMC
 meta_img: images/image.png
 description: Description for the page
