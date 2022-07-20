@@ -48,9 +48,9 @@ data
 ## # ... with 580 more rows
 ```
 
-Esse dadaset apresenta os retornos líquidos de custos operacionais - `\(1,5\%\)` ao ano - tanto para a estratégia de _momentum_ entropy-pooling, quanto para a famosa `\(1/N\)`. 
+Esse dadaset apresenta os retornos líquidos de custos operacionais - `\(1,5\%\)` ao ano - tanto da estratégia de _momentum_ entropy-pooling, quanto da famosa `\(1/N\)`. 
 
-A performance cumulativa dos dois portfolios mais Ibovespa pode ser vista com o comando abaixo:
+A performance cumulativa dos dois portfolios mais o Ibovespa pode ser vista com o comando abaixo:
 
 
 ```r
@@ -99,7 +99,7 @@ data |>
 
 Novamente, Entropy-Pooling e `\(1/N\)` se saem melhores do que o Ibovespa. 
 
-Os portfolios com _tilt_ em _momentum_ são conhecidos por apresentarem [Tail Risk](https://www.nber.org/papers/w18169). Assim, calculo o VaR histórico para cada estratégia aos níveis de 95% e 99% de confiança:
+Infelizmente, os portfolios com _tilt_ em _momentum_ são conhecidos por apresentarem [Tail Risk](https://www.nber.org/papers/w18169). Assim, calculo o VaR histórico para cada estratégia aos níveis de 95% e 99% de confiança:
 
 
 ```r
@@ -122,7 +122,7 @@ data |>
 
 E, mais uma vez, entropy-pooling e `\(1/N\)` possuem estatisticas melhores do que o Ibovespa.
 
-É possível questionar o por quê de se investir tempo em research se a estratégia `\(1/N\)` performa quase tão bem quanto entropy-pooling e não requer otmimização nem pesquisa adicional. Acho que a resposta para esse ponto passa pelo fato de que nem todos os retornos são feitos iguais. 
+É legítimo se questionar o porquê de se investir tempo em research se a estratégia `\(1/N\)` performa quase tão bem quanto entropy-pooling e não requer otmimização, nem pesquisa adicional. Acho que a resposta para esse ponto passa pelo fato de que __nem todos os retornos são feitos iguais__. 
 
 Abaixo faço uma análise _ex-post_ dos fatores de risco de cada estratégia para toda a amostra:
 
