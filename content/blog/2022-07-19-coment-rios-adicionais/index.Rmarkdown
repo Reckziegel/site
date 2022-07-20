@@ -32,7 +32,7 @@ data
 
 Esse dadaset apresenta os retornos líquidos de custos operacionais - $1,5\%$ ao ano - tanto da estratégia de _momentum_ entropy-pooling, quanto da famosa $1/N$. 
 
-A performance cumulativa dos dois portfolios mais o Ibovespa pode ser vista com o comando abaixo:
+A performance cumulativa desses dois portfolios mais o Ibovespa pode ser vista com o comando abaixo:
 
 ```{r}
 data |> 
@@ -54,9 +54,9 @@ data |>
   theme(legend.position = "bottom")
 ```
 
-Tanto a estratégia de _momentum_, quanto $1/N$, "batem" o índice dentro do período selecionado. Como quase sempre, o portfolio $1/N$ é difícil de ser superado por uma larga margem.
+As estratégias "batem" o índice dentro do período selecionado. Como quase sempre, o portfolio $1/N$ é difícil de ser superado por uma larga margem.
 
-Nesse caso, sempre há a possibilidade de que o excesso de retorno esteja vinculado a um nível de volatilidade mais elevado. Dessa forma, calculo o retorno médio por unidade de risco, uma medida unificada performance:   
+Nesse caso, sempre há a possibilidade de que o excesso de retorno esteja vinculado a um nível de volatilidade mais elevado. Dessa forma, calculo o retorno médio por unidade de risco (uma medida unificada performance):   
 
 ```{r}
 data |> 
@@ -66,9 +66,11 @@ data |>
   arrange(desc(sharpe))
 ```
 
-Novamente, Entropy-Pooling e $1/N$ se saem melhores do que o Ibovespa. 
+Novamente, entropy-pooling e $1/N$ se saem melhores do que o Ibovespa. 
 
-Infelizmente, os portfolios com _tilt_ em _momentum_ são conhecidos por apresentarem [Tail Risk](https://www.nber.org/papers/w18169). Assim, calculo o VaR histórico para cada estratégia aos níveis de 95% e 99% de confiança:
+> Se houvesse o desejo de controlar mais de perto a volatilidade, a função `ffp::view_on_volatility()` poderia ser utilizada- veja o post [Opiniões nas Volatilidades](https://www.bernardo.codes/blog/2022-04-04-opini-es-nas-volatilidades/). Outra alternativa seria controlar a "Vol" por meio da calibragem do indicador de aversão à risco, $\lambda$, ou ainda, utilizando uma função de utilidade diferente da quadrática. 
+
+Infelizmente, muitos portfolios com _tilt_ em _momentum_ são conhecidos por apresentarem [Tail Risk](https://www.nber.org/papers/w18169). Assim, calculo também o VaR histórico para cada estratégia aos níveis de 95% e 99% de confiança:
 
 ```{r}
 data |> 
@@ -79,9 +81,9 @@ data |>
   arrange(desc(`VaR (0.05%)`))
 ```
 
-E, mais uma vez, entropy-pooling e $1/N$ possuem estatisticas melhores do que o Ibovespa.
+E, mais uma vez, entropy-pooling e $1/N$ possuem estatisticas melhores do que o Ibovespa. 
 
-É legítimo se questionar o porquê de se investir tempo em research se a estratégia $1/N$ performa quase tão bem quanto entropy-pooling e não requer otmimização, nem pesquisa adicional. Acho que a resposta para esse ponto passa pelo fato de que __nem todos os retornos são feitos iguais__. 
+É legítimo se questionar o porquê de investir tempo em research se a estratégia $1/N$ performa quase tão bem quanto entropy-pooling e não requer otimização, nem pesquisa adicional. Acho que a resposta para esse ponto passa pelo fato de que __nem todos os retornos são feitos iguais__. 
 
 Abaixo faço uma análise _ex-post_ dos fatores de risco de cada estratégia para toda a amostra:
 
