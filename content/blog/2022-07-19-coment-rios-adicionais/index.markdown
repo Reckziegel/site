@@ -75,7 +75,7 @@ data |>
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-1.png" width="672" />
 
-As estratégias "batem" o índice dentro do período selecionado. Como quase sempre, o portfolio `\(1/N\)` é difícil de ser superado por uma larga margem.
+As estratégias "batem" o índice dentro do período selecionado, mas, como quase sempre, o portfolio `\(1/N\)` é difícil de ser superado por uma larga margem.
 
 Nesse caso, sempre há a possibilidade de que o excesso de retorno esteja vinculado a um nível de volatilidade mais elevado. Dessa forma, calculo o retorno médio por unidade de risco (uma medida unificada performance):   
 
@@ -97,7 +97,7 @@ data |>
 ## 3 IBOV        0.0247
 ```
 
-Novamente, entropy-pooling e `\(1/N\)` se saem melhores do que o Ibovespa. 
+Novamente, entropy-pooling e `\(1/N\)` saem melhores do que o Ibovespa. 
 
 > Se houvesse o desejo de controlar mais de perto a volatilidade, a função `ffp::view_on_volatility()` poderia ser utilizada- veja o post [Opiniões nas Volatilidades](https://www.bernardo.codes/blog/2022-04-04-opini-es-nas-volatilidades/). Outra alternativa seria controlar a "Vol" por meio da calibragem do indicador de aversão à risco, `\(\lambda\)`, ou ainda, utilizando uma função de utilidade diferente da quadrática. 
 
